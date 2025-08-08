@@ -15,7 +15,7 @@ Esses grupos são formados por profissionais com experiência prática na produ�
 
 ### Elementos
 ***Cores:***
-
+![Paleta de cores](imagens/Stock-Field_Colors.png)
 ***Tipografia:***
 
 ### Justificativa
