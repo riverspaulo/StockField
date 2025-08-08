@@ -1,6 +1,6 @@
 # StockField
 ## Objetivo
-Gerenciador de estoque de produtos agrícolas.
+O projeto consiste em um sistema para organizar o estoque agrícola, permitindo o controle de entrada e saída de insumos, sementes, ferramentas e defensivos. Ele emitirá alertas quando os produtos estiverem vencendo ou com estoque baixo. O objetivo é oferecer um controle eficiente desses produtos.
 
 ## Público-alvo
 * Produtores rurais (pequenos, médios e grandes) que necessitam de controle eficiente do estoque de insumos.
