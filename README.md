@@ -1,4 +1,5 @@
 # StockField
+# Planejamento Inicial 
 ## Objetivo
 O projeto consiste em um sistema para organizar o estoque agrícola, permitindo o controle de entrada e saída de insumos, sementes, ferramentas e defensivos. Ele emitirá alertas quando os produtos estiverem vencendo ou com estoque baixo. O objetivo é oferecer um controle eficiente desses produtos.
 
@@ -9,6 +10,9 @@ O projeto consiste em um sistema para organizar o estoque agrícola, permitindo 
 * Gestores de fazendas e propriedades rurais que precisam acompanhar a movimentação de produtos em múltiplas unidades.
 * Distribuidores de insumos agrícolas que buscam otimizar a logística e o controle de validade.
 
+#### Caracterização do grupo
+
+
 ## Elementos
 ***Cores:***
 
@@ -16,3 +20,5 @@ O projeto consiste em um sistema para organizar o estoque agrícola, permitindo 
 
 ## Justificativa
 loren
+
+# Desenvolvimento de uma identidade visual
