@@ -33,6 +33,7 @@ O design é vetorial e minimalista, garantindo fácil aplicação em diferentes 
 
 ### Justificativa
 <p align="justify"> 
+  
 * A identidade visual do StockField combina um logotipo minimalista e paleta em tons de verde para reforçar sua ligação com o setor agrícola. O ícone traz um trator estilizado sobre linhas curvas que simulam lavouras cultivadas, simbolizando mecanização e trabalho no campo. As quatro tonalidades de verde escolhidas representam natureza, crescimento e sustentabilidade, criando harmonia e contraste, deixando o visual agradável e de fácil leitura, mesmo para quem vai utilizar o sistema por bastante tempo. O estilo vetorial garante versatilidade em diferentes formatos e mídias.
 
 
