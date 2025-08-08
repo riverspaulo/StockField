@@ -11,7 +11,7 @@ O projeto consiste em um sistema para organizar o estoque agrícola, permitindo 
 * Distribuidores de insumos agrícolas que buscam otimizar a logística e o controle de validade.
 
 #### Caracterização do grupo
-
+Esses grupos são formados por profissionais com experiência prática na produção e no manejo de insumos, mas com diferentes níveis de familiaridade com tecnologia. Possuem rotinas dinâmicas, muitas vezes em áreas rurais com acesso limitado à internet, e fazem uso crescente de dispositivos móveis no campo. Valorizam sistemas simples, intuitivos, ágeis e confiáveis, que facilitem o rastreamento de produtos, a tomada de decisões e a redução de perdas por má gestão de estoque.
 
 ### Elementos
 ***Cores:***
