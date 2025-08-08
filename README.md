@@ -6,7 +6,7 @@ O projeto consiste em um sistema para organizar o estoque agrícola, permitindo 
 
 
 ### Público-alvo
-<p align="justify">
+
 * Produtores rurais (pequenos, médios e grandes) que necessitam de controle eficiente do estoque de insumos.
 * Cooperativas agrícolas que centralizam e distribuem produtos para associados.
 * Empresas do setor agroindustrial que trabalham com armazenagem e distribuição de sementes, defensivos e ferramentas.
@@ -38,5 +38,6 @@ O design é vetorial e minimalista, garantindo fácil aplicação em diferentes 
 
 * Esses elementos não foram escolhidos apenas pela estética, mas porque comunicam, de forma direta, o objetivo do projeto, oferecer um controle de estoque eficiente e confiável, e se conectam com as necessidades e a realidade do nosso público (empresas e produtores), que buscam praticidade, clareza e identificação com o produto que utilizam.
 </div>
+
 ## Desenvolvimento de uma identidade visual
 <img width="450" height="450" alt="Image" src="https://github.com/riverspaulo/StockField/blob/main/Imagens/Stock-Field%20(1).png" />
