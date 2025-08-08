@@ -33,11 +33,11 @@ O design é vetorial e minimalista, garantindo fácil aplicação em diferentes 
 
 ### Justificativa
 <p align="justify">
-* Escolhemos uma paleta de cores em tons de verde e um logotipo que representam bem a proposta e o público-alvo do StockField. O verde foi escolhido porque remete diretamente ao campo, à agricultura e à natureza, transmitindo ideias como crescimento e sustentabilidade, que têm tudo a ver com o setor agrícola. Usamos diferentes tonalidades para criar harmonia e contraste, deixando o visual agradável e de fácil leitura, mesmo para quem vai utilizar o sistema por bastante tempo. O logotipo traz como ícone principal um trator estilizado visto de perfil, simbolizando a mecanização e o trabalho no campo. Esse trator está sobre linhas curvas que simulam lavouras cultivadas, reforçando de forma clara o vínculo do sistema com a produção agrícola e com o controle de produtos utilizados no meio rural. A tipografia usada para o nome “StockField” é composta por letras arredondadas e sem serifa, o que transmite um aspecto moderno, amigável e de fácil leitura, além de ter peso uniforme para manter equilíbrio visual com o ícone.
-
-* A paleta é formada por quatro tons de verde: #96BD3E (verde claro vibrante), #7B9B34 (verde médio equilibrado), #66802E (verde escuro que transmite confiança) e #D6DB9F (verde claro amarelado, suave e complementar). Essas cores, associadas à natureza, crescimento e sustentabilidade, reforçam o tema agrícola do projeto. Em algumas versões, o uso de gradiente traz dinamismo e profundidade ao design. O estilo visual segue uma linha vetorial e minimalista, o que garante fácil aplicação em diferentes tamanhos e formatos, desde materiais impressos até interfaces digitais.
+  
+* A identidade visual do StockField combina um logotipo minimalista e paleta em tons de verde para reforçar sua ligação com o setor agrícola. O ícone traz um trator estilizado sobre linhas curvas que simulam lavouras cultivadas, simbolizando mecanização e trabalho no campo. As quatro tonalidades de verde escolhidas representam natureza, crescimento e sustentabilidade, criando harmonia e contraste, deixando o visual agradável e de fácil leitura, mesmo para quem vai utilizar o sistema por bastante tempo. O estilo vetorial garante versatilidade em diferentes formatos e mídias.
 
 * Esses elementos não foram escolhidos apenas pela estética, mas porque comunicam, de forma direta, o objetivo do projeto, oferecer um controle de estoque eficiente e confiável, e se conectam com as necessidades e a realidade do nosso público (empresas e produtores), que buscam praticidade, clareza e identificação com o produto que utilizam.
+
 </p>
 
 ## Desenvolvimento de uma identidade visual
