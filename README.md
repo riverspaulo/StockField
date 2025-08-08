@@ -16,7 +16,7 @@ Esses grupos são formados por profissionais com experiência prática na produ�
 ### Elementos
 ***Cores:***
 
-<img width="500" height="500" alt="Image" src="https://github.com/riverspaulo/StockField/blob/main/Imagens/Stock-Field-Colors.png" />
+<img width="450" height="450" alt="Image" src="https://github.com/riverspaulo/StockField/blob/main/Imagens/Stock-Field-Colors.png" />
 
 ***Tipografia:***
 
