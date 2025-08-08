@@ -10,5 +10,5 @@ lore
 
 ***Tipografia:***
 
-## Justificação
+## Justificativa
 loren
