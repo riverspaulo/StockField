@@ -1,8 +1,11 @@
 # StockField
-## Visão Geral
+## Objetivo
 Gerenciador de estoque de produtos agrícolas.
 
-## Instalação
+## Público-alvo
+lore
+
+## Elementos
 ### Dockerfile
 ***Pré-requisitos:***
 * Docker
