@@ -6,7 +6,9 @@ Gerenciador de estoque de produtos agrícolas.
 lore
 
 ## Elementos
-***Cores***
+***Cores:***
+
+***Tipografia:***
 
 ## Justificação
 loren
