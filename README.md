@@ -19,6 +19,6 @@ Esses grupos são formados por profissionais com experiência prática na produ�
 ***Tipografia:***
 
 ### Justificativa
-loren
+l
 
 ## Desenvolvimento de uma identidade visual
