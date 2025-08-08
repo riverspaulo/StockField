@@ -16,7 +16,7 @@ Esses grupos são formados por profissionais com experiência prática na produ�
 ### Elementos
 ***Cores:***
 
-![Logotipo da empresa](https://github.com/riverspaulo/StockField/blob/main/Imagens/Stock-Field-Colors.png)
+<img width="500" height="500" alt="Image" src="https://github.com/riverspaulo/StockField/blob/main/Imagens/Stock-Field-Colors.png" />
 
 ***Tipografia:***
 
