@@ -1,24 +1,31 @@
 # StockField
 
 
-<p>
-<center>
-Instituto Federal de Educação, Ciência e Tecnologia do Rio Grande do Norte – Campus Caicó<br>
-Informática para internet – 1v<br>
-Projeto de Interface de Usuário<br>
-Pedro Iuri Soares de Souza<br>
+<div style="text-align: center; font-family: Arial, sans-serif;">
 
-Emily Medeiros Alves dos Santos<br>
-Karyne Ohara Freitas de Medeiros<br>
-Mateus Lucena Pereira<br>
-Mickaelle Karine Souza Silva<br>
-Riversson Paulo dos Santos<br>
+    <h2>INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA DO RIO GRANDE DO NORTE – CAMPUS CAICÓ</h2>
 
-Caicó – RN<br>
-2025
-</center>
-</p>
+    <p>INFORMÁTICA PARA INTERNET – 1V</p>
 
+    <p>PROJETO DE INTERFACE DE USUÁRIO</p>
+
+    <p>PEDRO IURI SOARES DE SOUZA</p>
+
+    <p>EMILY MEDEIROS ALVES DOS SANTOS</p>
+
+    <p>KARYNE OHARA FREITAS DE MEDEIROS</p>
+
+    <p>MATEUS LUCENA PEREIRA</p>
+
+    <p>MICKAELLE KARINE SOUZA SILVA</p>
+
+    <p>RIVERSSON PAULO DOS SANTOS</p>
+
+    <p>CAICÓ – RN</p>
+
+    <p>2025</p>
+
+</div>
 
 ## Planejamento Inicial 
 ### Objetivo
