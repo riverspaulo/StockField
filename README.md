@@ -1,7 +1,8 @@
 # StockField
 
-<center>
+
 <p>
+<center>
 Instituto Federal de Educação, Ciência e Tecnologia do Rio Grande do Norte – Campus Caicó<br>
 Informática para internet – 1v<br>
 Projeto de Interface de Usuário<br>
@@ -15,8 +16,9 @@ Riversson Paulo dos Santos<br>
 
 Caicó – RN<br>
 2025
-</p>
 </center>
+</p>
+
 
 ## Planejamento Inicial 
 ### Objetivo
