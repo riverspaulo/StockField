@@ -1,6 +1,6 @@
 # StockField
 
-<p>
+<p style="text-align: center;">
 Instituto Federal de Educação, Ciência e Tecnologia do Rio Grande do Norte – Campus Caicó<br>
 Informática para internet – 1v<br>
 Projeto de Interface de Usuário<br>
