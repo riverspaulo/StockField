@@ -2,6 +2,7 @@
 
 <center>
 INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA DO RIO GRANDE DO NORTE – CAMPUS CAICÓ
+</center>
 
 INFORMÁTICA PARA INTERNET – 1V
 
@@ -17,7 +18,7 @@ RIVERSSON PAULO DOS SANTOS
 CAICÓ – RN
 
 2025
-</center>
+
 ## Planejamento Inicial 
 ### Objetivo
 <p align="justify">
