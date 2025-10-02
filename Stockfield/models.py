@@ -3,7 +3,6 @@ from typing import List, Optional
 from datetime import date
 from enum import Enum
 
-
 class TipoUsuario(str, Enum):
     agricultor = "agricultor"
     admin = "admin"
@@ -21,7 +20,6 @@ class Usuario(BaseModel, table=True):
     senha:str
     tipo: TipoUsuario
 
-
 class Produto(BaseModel, table=True):
     id: Optional[int] = None
     nome: str
@@ -35,10 +33,8 @@ class Produto(BaseModel, table=True):
     localizacao: Optional[str] = None
     status: StatusProduto
 
-
 class Estoque(BaseModel, table=True):
     produtos: List[Produto] = []
-
 
 class Fornecedor(BaseModel, table=True):
     id: Optional[int] = None
