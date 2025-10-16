@@ -46,7 +46,7 @@ Um trator estilizado visto de perfil, representando a mecanização e o trabalho
 
 ***Cores:***
 
-<img width="450" height="450" alt="Image" src="https://github.com/riverspaulo/StockField/blob/main/Imagens/Stock-Field-Colors.png" />
+<img width="450" height="450" alt="Image" src="https://github.com/riverspaulo/StockField/blob/main/static/images/Stock-Field-Colors.png" />
 
 ***Tipografia:***
 O nome "StockField" aparece em letras arredondadas e sem serifa, o que dá um aspecto moderno, amigável e de fácil leitura. O peso das letras é uniforme, garantindo equilíbrio visual com o ícone.
