@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link rel="stylesheet" href="/static/css/inicial.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script src="https://unpkg.com/scrollreveal"></script>
+
+    <title>Página Inicial</title>
+
+</head>
+<body>
+    <header>
+        <nav id="navbar">
+            <div id="nav_logo">
+                  <img src="/static/images/logo_colorida.png" alt="Logo StockField">
+            </div>
+
+            <ul id="nav_list">
+                <li class="nav-item active">
+                    <a href="#home">Início</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#sobre">Sobre</a>
+                </li>
+            </ul>
+
+            <!-- GIF agora sem botão -->
+             <img src="/static/images/ezgif.com-animated-gif-maker.gif" alt="Logo animada" class="nav-gif">
+
+            <button id="mobile_btn">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </nav>
+
+        <div id="mobile_menu">
+            <ul id="mobile_nav_list">
+                <li class="nav-item">
+                    <a href="#home">Início</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#sobre">Sobre</a>
+                </li>
+            </ul>
+
+            <button class="btn-default">
+               <img src="/static/images/logo_colorida.png" alt="Logo StockField">
+            </button>
+        </div>
+    </header>
+
+    <main id="content">
+        <section id="home">
+            <div class="shape"></div>
+            <div id="cta">
+                <h1 class="title">
+                    O estoque em suas 
+                    <span>mãos</span>
+                </h1>
+
+                <p class="description">
+                    Controle, organize e acompanhe seus produtos agrícolas de forma simples e rápida.
+                </p>
+
+                <div id="cta_buttons">
+                    <a href="/login" class="btn-default">
+                        Login
+                    </a>
+
+                    <a href="/cadastro" id="phone_button">
+                        <button class="btn-default">
+                            <i class="fa fa-sign-in"></i> 
+                        </button>
+                        Cadastro
+                    </a>
+                </div>
+            </div>
+
+            <div id="banner">
+                 <img src="/static/images/image4.png" alt="">
+            </div>
+        </section>
+
+        <section id="sobre">
+            <h2 class="section-title" style="color:  #66802e;">Sobre</h2>
+            <h3 class="section-subtitle">Algumas funcionalidades</h3>
+
+            <div id="dishes">
+                <div class="dish">
+                    <div class="dish-heart">
+                        <i class="fa-solid fa-leaf"></i>
+                    </div>
+                    <img src="/static/images/grao1.png" class="dish-image" alt="">
+                    <h3 class="dish-title">Controle de estoque</h3>
+                    <span class="dish-description">Registra e organiza entradas e saídas de insumos, sementes, etc.</span>
+                    <div class="dish-price">
+                        <button class="btn-default">
+                            <i class="fa fa-check"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="dish">
+                    <div class="dish-heart"><i class="fa-solid fa-leaf"></i></div>
+                    <img src="/static/images/grao1.png" class="dish-image" alt="">
+                    <h3 class="dish-title">Alertas automáticos</h3>
+                    <span class="dish-description">Notifica o usuário sobre produtos com estoque baixo.</span>
+                    <div class="dish-price">
+                        <button class="btn-default">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="dish">
+                    <div class="dish-heart"><i class="fa-solid fa-leaf"></i></div>
+                    <img src="/static/images/grao1.png" class="dish-image" alt="">
+                    <h3 class="dish-title">Histórico de movimentações</h3>
+                    <span class="dish-description">Registra todas as entradas e saídas para rastrear o uso de produtos.</span>
+                    <div class="dish-price">
+                        <button class="btn-default">
+                            <i class="fa-solid fa-folder-open"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="dish">
+                    <div class="dish-heart"><i class="fa-solid fa-leaf"></i></div>
+                    <img src="/static/images/grao1.png" class="dish-image" alt="">
+                    <h3 class="dish-title">Relatórios de estoque</h3>
+                    <span class="dish-description">Gera visualizações e dados para auxiliar na tomada de decisões.</span>
+                    <div class="dish-price">
+                        <button class="btn-default">
+                            <i class="fa fa-file"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+         <img src="/static/images/wave.svg" alt="">
+        <div id="footer_items">
+            <span id="copyright">StockField &copy 2025</span>
+            <div class="social-media-buttons">
+                <a href="https://github.com/riverspaulo/StockField">
+                    <i class="fa-brands fa-github"></i>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/static/js/inicial.js"></script>
+</body>
+</html>

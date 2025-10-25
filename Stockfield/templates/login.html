@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/log_cad.css">
+    <title>Login</title>
+</head>
+
+<body>
+    <div class="container" id="container">
+        <div class="form-container sign-in">
+            <form action="{{ url_for('login') }}" method="post">
+                <h1 class="title-h1">Login</h1>
+                <br>
+                <span style="margin-bottom: 15px;">Insira os dados solicitados</span>
+                
+               {% if messages %}
+                    <div class="flash-messages">
+                        {% for msg in messages %}
+                            <div class="flash-message flash-{{ msg.category }}">
+                                 {{ msg.message }}
+                            </div>
+                        {% endfor %}
+                     </div>
+                {% endif %}
+
+                <input type="text" placeholder="CNPJ"  style="margin-bottom: 10px;">
+                <input type="password" placeholder="Senha">
+                <br>
+                <button style="margin-bottom: 10px;">Entrar</button>
+                
+                <a href="{{ url_for('index') }}" style="text-decoration: underline;">Voltar para tela inicial</a>
+            </form>
+        </div>
+        <div class="toggle-container">
+            <div class="toggle">
+                <div class="toggle-panel toggle-right">
+                    <div style="margin-top: 90px;">
+                        <h1>Olá, bem vindo!</h1>
+                        <p style="color:black;">StockField - Um estoque eficiente </p>
+                    </div> 
+                   <img class="image-index-list" src="/static/images/ezgif.com-animated-gif-maker.gif" alt="Imagem" style="margin-bottom:20px; width:550px; height: auto;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/script.js"></script>
+</body>
+
+</html>

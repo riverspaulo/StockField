@@ -4,7 +4,7 @@ from enum import Enum
 import sqlite3
 from pydantic import BaseModel
 
-DATABASE_URL = "stockfield.db"
+DATABASE_URL = "./stockfield.db"
 
 class TipoUsuario(str, Enum):
     agricultor = "agricultor"
