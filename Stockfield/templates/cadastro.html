@@ -34,16 +34,15 @@
                     <input type="text" id="cnpj" name="cnpj" placeholder="CNPJ" required>
                     <select id="tipo_usuario" name="tipo_usuario" required>
                         <option value="">Tipo de usuário</option>
-                        <option value="cliente">Cliente</option>
-                        <option value="fornecedor">Fornecedor</option>
-                        <option value="administrador">Administrador</option>
+                        <option value="agricultor">Agricultor</option>
+                        <option value="admin">Administrador</option>
                     </select>
 
                     <input type="password" id="senha" name="senha" placeholder="Senha" required>
                     <input type="password" id="confirmar_senha" name="confirmar_senha" placeholder="Confirmar senha" required>
                 </div>
                 <br>
-                <button type="submit">Entrar</button>
+                <button type="submit">Cadastrar</button>
                 <br>
                 <a href="{{ url_for('index') }}" style="text-decoration: underline;">Voltar para tela inicial</a>
             </form>

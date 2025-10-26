@@ -15,6 +15,10 @@ class StatusProduto(str, Enum):
     esgotado = "esgotado"
     vencido = "vencido"
 
+class TipoMovimento(str, Enum):
+    entrada = "entrada"
+    saida = "saída"
+
 class Usuario(BaseModel):
     uuid: Optional[str] = None
     cnpj: str
@@ -46,9 +50,9 @@ class Fornecedor(BaseModel):
     email: Optional[str] = None
 
 class Movimento(BaseModel):
-    uuid: Optional[int] = None
+    uuid: Optional[str] = None
     produto_uuid: str
-    tipo: Literal["entrada", "saída"]
+    tipo: TipoMovimento
     quantidade: int
     data: date
     fornecedor_uuid: str
@@ -101,5 +105,17 @@ def init_db():
             FOREIGN KEY (fornecedor_uuid) REFERENCES fornecedores (uuid)
         )""")
         
+        # Nova tabela para movimentos
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS movimentos (
+            uuid TEXT PRIMARY KEY,
+            produto_uuid TEXT NOT NULL,
+            tipo TEXT NOT NULL,
+            quantidade INTEGER NOT NULL,
+            data TEXT NOT NULL,
+            fornecedor_uuid TEXT NOT NULL,
+            FOREIGN KEY (produto_uuid) REFERENCES produtos (uuid),
+            FOREIGN KEY (fornecedor_uuid) REFERENCES fornecedores (uuid)
+        )""")
         
         conn.commit()

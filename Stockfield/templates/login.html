@@ -27,8 +27,9 @@
                      </div>
                 {% endif %}
 
-                <input type="text" placeholder="CNPJ"  style="margin-bottom: 10px;">
-                <input type="password" placeholder="Senha">
+                <!-- Correção: Adicionar name="cnpj" e name="senha" -->
+                <input type="text" name="cnpj" placeholder="CNPJ" style="margin-bottom: 10px;" required>
+                <input type="password" name="senha" placeholder="Senha" required>
                 <br>
                 <button style="margin-bottom: 10px;">Entrar</button>
                 
