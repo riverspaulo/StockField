@@ -141,15 +141,17 @@ def profile(request: Request):
 
 
 @app.get("/movimentos/", response_model=List[Movimento])
-def listar_movimentos(db: sqlite3.Connection = Depends(get_db)):
+def listar_movimentos(request: Request, db: sqlite3.Connection = Depends(get_db)):
     cursor = db.cursor()
+    usuario_uuid = request.session["user"]["uuid"]  # Obter o UUID do usuário logado
     cursor.execute("""
         SELECT m.*, p.nome as produto_nome, f.nome as fornecedor_nome 
         FROM movimentos m
         LEFT JOIN produtos p ON m.produto_uuid = p.uuid
         LEFT JOIN fornecedores f ON m.fornecedor_uuid = f.uuid
+        WHERE m.usuario_uuid = ?  
         ORDER BY m.data DESC
-    """)
+    """, (usuario_uuid,))
     movimentos_data = cursor.fetchall()
     
     movimentos = []
@@ -176,34 +178,39 @@ def obter_produto_por_uuid(uuid: str, db: sqlite3.Connection = Depends(get_db)):
     return Produto(**produto_dict)
 
 @app.post("/movimentos/entrada", response_model=Movimento)
-def registrar_entrada(movimento: Movimento, db: sqlite3.Connection = Depends(get_db)):
+def registrar_entrada(movimento: Movimento, request: Request, db: sqlite3.Connection = Depends(get_db)):
     cursor = db.cursor()
     
-    # Verificar se o produto existe
-    cursor.execute("SELECT * FROM produtos WHERE uuid = ?", (movimento.produto_uuid,))
+    # Obter o UUID do usuário logado
+    usuario_uuid = str(request.session["user"]["uuid"])
+    movimento.usuario_uuid = usuario_uuid
+    
+    # Verificar se o produto existe e pertence ao usuário
+    cursor.execute("SELECT * FROM produtos WHERE uuid = ? AND usuario_uuid = ?", (movimento.produto_uuid, movimento.usuario_uuid))
     produto = cursor.fetchone()
     if not produto:
-        raise HTTPException(status_code=404, detail="Produto não encontrado")
+        raise HTTPException(status_code=404, detail="Produto não encontrado ou não pertence ao usuário.")
     
     # Verificar se o fornecedor existe
     cursor.execute("SELECT * FROM fornecedores WHERE uuid = ?", (movimento.fornecedor_uuid,))
     fornecedor = cursor.fetchone()
     if not fornecedor:
-        raise HTTPException(status_code=404, detail="Fornecedor não encontrado")
+        raise HTTPException(status_code=404, detail="Fornecedor não encontrado.")
     
     # Registrar o movimento
     movimento.uuid = str(uuid.uuid4())
     movimento.tipo = TipoMovimento.entrada
     
     cursor.execute(
-        "INSERT INTO movimentos VALUES (?, ?, ?, ?, ?, ?)",
+        "INSERT INTO movimentos VALUES (?, ?, ?, ?, ?, ?, ?)",
         (
             movimento.uuid,
             movimento.produto_uuid,
             movimento.tipo.value,
             movimento.quantidade,
             movimento.data.isoformat(),
-            movimento.fornecedor_uuid
+            movimento.fornecedor_uuid,
+            movimento.usuario_uuid  
         )
     )
     
@@ -222,7 +229,7 @@ def registrar_entrada(movimento: Movimento, db: sqlite3.Connection = Depends(get
     return movimento
 
 @app.post("/movimentos/saida", response_model=Movimento)
-def registrar_saida(movimento: Movimento, db: sqlite3.Connection = Depends(get_db)):
+def registrar_saida(movimento: Movimento, request: Request, db: sqlite3.Connection = Depends(get_db)):
     cursor = db.cursor()
     
     # Verificar se o produto existe
@@ -244,16 +251,18 @@ def registrar_saida(movimento: Movimento, db: sqlite3.Connection = Depends(get_d
     # Registrar o movimento
     movimento.uuid = str(uuid.uuid4())
     movimento.tipo = TipoMovimento.saida
+    usuario_uuid = request.session["user"]["uuid"]
     
     cursor.execute(
-        "INSERT INTO movimentos VALUES (?, ?, ?, ?, ?, ?)",
+        "INSERT INTO movimentos VALUES (?, ?, ?, ?, ?, ?, ?)",
         (
             movimento.uuid,
             movimento.produto_uuid,
             movimento.tipo.value,
             movimento.quantidade,
             movimento.data.isoformat(),
-            movimento.fornecedor_uuid
+            movimento.fornecedor_uuid,
+            usuario_uuid 
         )
     )
     
@@ -285,11 +294,12 @@ def cadastrar_usuario(usuario: Usuario, db: sqlite3.Connection = Depends(get_db)
     return usuario
 
 @app.post("/produtos/", response_model=Produto)
-def cadastrar_produto(produto: Produto, db: sqlite3.Connection = Depends(get_db)):
+def cadastrar_produto(request: Request ,produto: Produto, db: sqlite3.Connection = Depends(get_db)):
     cursor = db.cursor()
     produto.uuid = str(uuid.uuid4())
+    usuario_uuid = request.session["user"]["uuid"]
     cursor.execute(
-        "INSERT INTO produtos VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO produtos VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         (
             produto.uuid,
             produto.nome,
@@ -301,7 +311,8 @@ def cadastrar_produto(produto: Produto, db: sqlite3.Connection = Depends(get_db)
             produto.lote,
             produto.fornecedor_uuid,
             produto.localizacao,
-            produto.status.value
+            produto.status.value,
+            usuario_uuid 
         )
     )
     db.commit()
@@ -319,9 +330,10 @@ def cadastrar_fornecedor(fornecedor: Fornecedor, db: sqlite3.Connection = Depend
     return fornecedor
 
 @app.get("/produtos/", response_model=List[Produto])
-def listar_produtos(db: sqlite3.Connection = Depends(get_db)):
+def listar_produtos(request: Request, db: sqlite3.Connection = Depends(get_db)):
     cursor = db.cursor()
-    cursor.execute("SELECT * FROM produtos")
+    usuario_uuid = request.session["user"]["uuid"] 
+    cursor.execute("SELECT * FROM produtos WHERE usuario_uuid = ?", (usuario_uuid,))
     produtos = []
     for row in cursor.fetchall():
         produto_dict = dict(row)

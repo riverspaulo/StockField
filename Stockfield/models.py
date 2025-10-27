@@ -39,6 +39,7 @@ class Produto(BaseModel):
     fornecedor_uuid: str
     localizacao: Optional[str] = None
     status: StatusProduto = StatusProduto.disponivel
+    usuario_uuid: str
 
 # class Estoque(BaseModel):
 #     produtos: List[Produto] = []
@@ -52,10 +53,11 @@ class Fornecedor(BaseModel):
 class Movimento(BaseModel):
     uuid: Optional[str] = None
     produto_uuid: str
-    tipo: TipoMovimento
+    tipo: Optional[TipoMovimento] = None
     quantidade: int
     data: date
     fornecedor_uuid: str
+    usuario_uuid: Optional[str] = None
 
 
 # Database
@@ -102,7 +104,9 @@ def init_db():
             fornecedor_uuid TEXT NOT NULL,
             localizacao TEXT NOT NULL,
             status TEXT NOT NULL,
-            FOREIGN KEY (fornecedor_uuid) REFERENCES fornecedores (uuid)
+            usuario_uuid TEXT NOT NULL,
+            FOREIGN KEY (fornecedor_uuid) REFERENCES fornecedores (uuid),
+            FOREIGN KEY (usuario_uuid) REFERENCES usuarios (uuid)
         )""")
         
         # Nova tabela para movimentos
@@ -114,8 +118,10 @@ def init_db():
             quantidade INTEGER NOT NULL,
             data TEXT NOT NULL,
             fornecedor_uuid TEXT NOT NULL,
+            usuario_uuid TEXT NOT NULL,
             FOREIGN KEY (produto_uuid) REFERENCES produtos (uuid),
-            FOREIGN KEY (fornecedor_uuid) REFERENCES fornecedores (uuid)
+            FOREIGN KEY (fornecedor_uuid) REFERENCES fornecedores (uuid),
+            FOREIGN KEY (usuario_uuid) REFERENCES usuarios (uuid)
         )""")
         
         conn.commit()
