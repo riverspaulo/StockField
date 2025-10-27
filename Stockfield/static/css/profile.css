@@ -135,7 +135,7 @@ body {
     flex-direction: column;
 }
 
-.calculator, .info-box {
+.calendario, .info-box {
     background-color: white;
     border-radius: 10px;
     height: 220px;
@@ -146,7 +146,7 @@ body {
     overflow: hidden; /* mantém dentro da caixa */
 }
 
-.calculator h3 {
+.calendario h3 {
     text-align: center;
     color: white;
     margin-bottom: 5px;
@@ -228,4 +228,5 @@ body {
 .calendar-days div:hover {
     background-color: #d2db94;
 }
+
 
