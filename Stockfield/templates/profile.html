@@ -1,417 +1,111 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <title>StockField</title>
     <link rel="stylesheet" href="/static/css/profile.css">
-    <title>Perfil - StockField</title>
-    <style>
-        .section-container {
-            margin: 20px 0;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background-color: #f9f9f9;
-        }
-        .section-title {
-            color: #66802e;
-            margin-bottom: 15px;
-        }
-        .movimentacao-form {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-        .form-group label {
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        .form-group input, .form-group select {
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        .btn-submit {
-            background-color: #66802e;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            grid-column: span 2;
-        }
-        .btn-submit:hover {
-            background-color: #556b27;
-        }
-        .movimentacoes-list {
-            margin-top: 20px;
-        }
-        .movimentacao-item {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            margin-bottom: 10px;
-            background-color: white;
-        }
-        .entrada {
-            border-left: 4px solid #28a745;
-        }
-        .saida {
-            border-left: 4px solid #dc3545;
-        }
-        .tab-container {
-            margin-top: 20px;
-        }
-        .tabs {
-            display: flex;
-            border-bottom: 1px solid #ddd;
-        }
-        .tab {
-            padding: 10px 20px;
-            cursor: pointer;
-            border: 1px solid transparent;
-            border-bottom: none;
-            margin-right: 5px;
-            background-color: #f1f1f1;
-        }
-        .tab.active {
-            background-color: white;
-            border-color: #ddd;
-            border-bottom: 1px solid white;
-        }
-        .tab-content {
-            display: none;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-top: none;
-        }
-        .tab-content.active {
-            display: block;
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <header>
-        <nav id="navbar">
-            <ul id="nav_list">
-                <li class="nav-item active">
-                    <a href="/profile">Perfil</a>
-                </li>
-                <li class="nav-item">
-                    <a href="/produtos">Produtos</a>
-                </li>
-                <li class="nav-item">
-                    <a href="/fornecedores">Fornecedores</a>
-                </li>
-            </ul>
-            <button id="logout_btn" onclick="logout()">
-                <i class="fa-solid fa-right-from-bracket"></i> Sair
-            </button>
-        </nav>
+    <header class="top-bar">
+        <div class="logo">
+            <img  id="stockfield-logo" src="../static/images/logo_colorida.png" alt="">
+        </div>
+        <div class="search-bar">
+            <input type="text" placeholder="Buscar...">
+            <button><i class="fa fa-search"></i></button>
+        </div>
+        <div class="user-icon">
+            <i class="fa-solid fa-user"></i>
+        </div>
     </header>
 
-    <main id="content">
-        <section id="profile">
-            <div class="profile-container">
-                <h1 class="title">Perfil do Usuário</h1>
-                
-                {% if messages %}
-                    <div class="flash-messages">
-                        {% for msg in messages %}
-                            <div class="flash-message flash-{{ msg.category }}">
-                                {{ msg.message }}
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% endif %}
+    <div class="container">
+        <aside class="sidebar">
+            <i class="fa-solid fa-gear"></i>
+            <i class="fa-solid fa-box"></i>
+            <i class="fa-solid fa-users"></i>
+        </aside>
 
-                <div class="profile-info">
-                    <div class="info-card">
-                        <h3>Informações Pessoais</h3>
-                        <div class="info-item">
-                            <strong>Nome:</strong>
-                            <span>{{ user.nome }}</span>
-                        </div>
-                        <div class="info-item">
-                            <strong>Email:</strong>
-                            <span>{{ user.email }}</span>
-                        </div>
-                        <div class="info-item">
-                            <strong>Tipo de Usuário:</strong>
-                            <span>{{ user.tipo }}</span>
+        <main class="main-content">
+            <div class="menu-buttons">
+                <button class="btn"><i class="fa-solid fa-truck"></i> Fornecedores</button>
+                <button class="btn"><i class="fa-solid fa-users"></i> Clientes</button>
+                <button class="btn"><i class="fa-solid fa-bullhorn"></i> Avisos</button>
+            </div>
+
+            <div class="content-area">
+                <div class="left-widgets">
+                    <div class="calculator">
+                        <h3>Calendário</h3>
+                        <div id="calendar">
+
                         </div>
                     </div>
+                    <div class="info-box"></div>
                 </div>
+                <div class="main-box">
 
-                <div class="profile-actions">
-                    <a href="/produtos" class="btn-action">
-                        <i class="fa-solid fa-boxes"></i>
-                        Gerenciar Produtos
-                    </a>
-                    <a href="/fornecedores" class="btn-action">
-                        <i class="fa-solid fa-truck"></i>
-                        Gerenciar Fornecedores
-                    </a>
-                </div>
-
-                <!-- Sistema de Abas para Movimentações -->
-                <div class="tab-container">
-                    <div class="tabs">
-                        <div class="tab active" onclick="openTab('listar-movimentacoes')">Listar Movimentações</div>
-                        <div class="tab" onclick="openTab('registrar-entrada')">Registrar Entrada</div>
-                        <div class="tab" onclick="openTab('registrar-saida')">Registrar Saída</div>
-                    </div>
-
-                    <!-- Aba: Listar Movimentações -->
-                    <div id="listar-movimentacoes" class="tab-content active">
-                        <h2 class="section-title">Lista de Movimentações</h2>
-                        <div id="movimentacoes-container">
-                            <!-- As movimentações serão carregadas via JavaScript -->
-                            <p>Carregando movimentações...</p>
-                        </div>
-                    </div>
-
-                    <!-- Aba: Registrar Entrada -->
-                    <div id="registrar-entrada" class="tab-content">
-                        <h2 class="section-title">Registrar Entrada de Produto</h2>
-                        <form id="form-entrada" class="movimentacao-form">
-                            <div class="form-group">
-                                <label for="entrada-produto">Produto:</label>
-                                <select id="entrada-produto" required>
-                                    <option value="">Selecione um produto</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="entrada-quantidade">Quantidade:</label>
-                                <input type="number" id="entrada-quantidade" min="1" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="entrada-fornecedor">Fornecedor:</label>
-                                <select id="entrada-fornecedor" required>
-                                    <option value="">Selecione um fornecedor</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="entrada-data">Data:</label>
-                                <input type="date" id="entrada-data" required>
-                            </div>
-                            <button type="submit" class="btn-submit">Registrar Entrada</button>
-                        </form>
-                    </div>
-
-                    <!-- Aba: Registrar Saída -->
-                    <div id="registrar-saida" class="tab-content">
-                        <h2 class="section-title">Registrar Saída de Produto</h2>
-                        <form id="form-saida" class="movimentacao-form">
-                            <div class="form-group">
-                                <label for="saida-produto">Produto:</label>
-                                <select id="saida-produto" required>
-                                    <option value="">Selecione um produto</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="saida-quantidade">Quantidade:</label>
-                                <input type="number" id="saida-quantidade" min="1" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="saida-fornecedor">Fornecedor:</label>
-                                <select id="saida-fornecedor" required>
-                                    <option value="">Selecione um fornecedor</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="saida-data">Data:</label>
-                                <input type="date" id="saida-data" required>
-                            </div>
-                            <button type="submit" class="btn-submit">Registrar Saída</button>
-                        </form>
-                    </div>
                 </div>
             </div>
-        </section>
-    </main>
-
-    <footer>
-        <div id="footer_items">
-            <span id="copyright">StockField &copy 2025</span>
-        </div>
-    </footer>
-
-    <script>
-        function logout() {
-            window.location.href = "/";
-        }
-
-        // Sistema de abas
-        function openTab(tabName) {
-            const tabs = document.querySelectorAll('.tab');
-            const tabContents = document.querySelectorAll('.tab-content');
-            
-            tabs.forEach(tab => tab.classList.remove('active'));
-            tabContents.forEach(content => content.classList.remove('active'));
-            
-            document.querySelector(`.tab[onclick="openTab('${tabName}')"]`).classList.add('active');
-            document.getElementById(tabName).classList.add('active');
-            
-            // Carregar dados quando abrir a aba de listagem
-            if (tabName === 'listar-movimentacoes') {
-                carregarMovimentacoes();
-            }
-        }
-
-        // Carregar produtos e fornecedores para os formulários
-        async function carregarDadosFormularios() {
-            try {
-                // Carregar produtos
-                const responseProdutos = await fetch('/produtos/');
-                const produtos = await responseProdutos.json();
-                
-                const selectEntradaProduto = document.getElementById('entrada-produto');
-                const selectSaidaProduto = document.getElementById('saida-produto');
-                
-                produtos.forEach(produto => {
-                    const option = document.createElement('option');
-                    option.value = produto.uuid;
-                    option.textContent = `${produto.nome} (Estoque: ${produto.quantidade})`;
-                    selectEntradaProduto.appendChild(option.cloneNode(true));
-                    selectSaidaProduto.appendChild(option);
-                });
-
-                // Carregar fornecedores
-                const responseFornecedores = await fetch('/fornecedores/');
-                const fornecedores = await responseFornecedores.json();
-                
-                const selectEntradaFornecedor = document.getElementById('entrada-fornecedor');
-                const selectSaidaFornecedor = document.getElementById('saida-fornecedor');
-                
-                fornecedores.forEach(fornecedor => {
-                    const option = document.createElement('option');
-                    option.value = fornecedor.uuid;
-                    option.textContent = fornecedor.nome;
-                    selectEntradaFornecedor.appendChild(option.cloneNode(true));
-                    selectSaidaFornecedor.appendChild(option);
-                });
-            } catch (error) {
-                console.error('Erro ao carregar dados:', error);
-            }
-        }
-
-        // Carregar movimentações
-        async function carregarMovimentacoes() {
-            try {
-                const response = await fetch('/movimentos/');
-                const movimentacoes = await response.json();
-                
-                const container = document.getElementById('movimentacoes-container');
-                container.innerHTML = '';
-                
-                if (movimentacoes.length === 0) {
-                    container.innerHTML = '<p>Nenhuma movimentação registrada.</p>';
-                    return;
-                }
-                
-                movimentacoes.forEach(mov => {
-                    const div = document.createElement('div');
-                    div.className = `movimentacao-item ${mov.tipo}`;
-                    div.innerHTML = `
-                        <strong>${mov.tipo === 'entrada' ? '📥 Entrada' : '📤 Saída'}</strong>
-                        <br>Produto: ${mov.produto_uuid}
-                        <br>Quantidade: ${mov.quantidade}
-                        <br>Data: ${new Date(mov.data).toLocaleDateString('pt-BR')}
-                        <br>Fornecedor: ${mov.fornecedor_uuid}
-                    `;
-                    container.appendChild(div);
-                });
-            } catch (error) {
-                console.error('Erro ao carregar movimentações:', error);
-                document.getElementById('movimentacoes-container').innerHTML = '<p>Erro ao carregar movimentações.</p>';
-            }
-        }
-
-        // Registrar entrada
-        document.getElementById('form-entrada').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const movimento = {
-                produto_uuid: document.getElementById('entrada-produto').value,
-                quantidade: parseInt(document.getElementById('entrada-quantidade').value),
-                data: document.getElementById('entrada-data').value,
-                fornecedor_uuid: document.getElementById('entrada-fornecedor').value,
-                tipo: 'entrada'
-            };
-            
-            try {
-                const response = await fetch('/movimentos/entrada', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(movimento)
-                });
-                
-                if (response.ok) {
-                    alert('Entrada registrada com sucesso!');
-                    document.getElementById('form-entrada').reset();
-                    carregarDadosFormularios(); // Recarregar para atualizar estoque
-                } else {
-                    const error = await response.json();
-                    alert(`Erro: ${error.detail}`);
-                }
-            } catch (error) {
-                alert('Erro ao registrar entrada.');
-            }
-        });
-
-        // Registrar saída
-        document.getElementById('form-saida').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const movimento = {
-                produto_uuid: document.getElementById('saida-produto').value,
-                quantidade: parseInt(document.getElementById('saida-quantidade').value),
-                data: document.getElementById('saida-data').value,
-                fornecedor_uuid: document.getElementById('saida-fornecedor').value,
-                tipo: 'saída'
-            };
-            
-            try {
-                const response = await fetch('/movimentos/saida', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(movimento)
-                });
-                
-                if (response.ok) {
-                    alert('Saída registrada com sucesso!');
-                    document.getElementById('form-saida').reset();
-                    carregarDadosFormularios(); // Recarregar para atualizar estoque
-                } else {
-                    const error = await response.json();
-                    alert(`Erro: ${error.detail}`);
-                }
-            } catch (error) {
-                alert('Erro ao registrar saída.');
-            }
-        });
-
-        // Inicializar quando a página carregar
-        document.addEventListener('DOMContentLoaded', () => {
-            carregarDadosFormularios();
-            carregarMovimentacoes();
-            
-            // Definir data atual como padrão
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('entrada-data').value = today;
-            document.getElementById('saida-data').value = today;
-        });
-    </script>
+        </main>
+    </div>
 </body>
+<script>
+    const calendar = document.getElementById("calendar");
+    const currentDate = new Date();
+
+    function renderCalendar(date) {
+        const year = date.getFullYear();
+        const month = date.getMonth();
+        const firstDay = new Date(year, month, 1).getDay();
+        const lastDate = new Date(year, month + 1, 0).getDate();
+        const months = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+                        "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+
+        let html = `
+            <div class="calendar-header">
+                <button onclick="prevMonth()">&#9664;</button>
+                <span>${months[month]} ${year}</span>
+                <button onclick="nextMonth()">&#9654;</button>
+            </div>
+            <div class="calendar-weekdays">
+                <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div>
+                <div>Qui</div><div>Sex</div><div>Sáb</div>
+            </div>
+            <div class="calendar-days">
+        `;
+
+        for (let i = 0; i < firstDay; i++) html += `<div></div>`;
+
+        for (let d = 1; d <= lastDate; d++) {
+            let isToday =
+                d === new Date().getDate() &&
+                month === new Date().getMonth() &&
+                year === new Date().getFullYear()
+                    ? "today"
+                    : "";
+            html += `<div class="${isToday}">${d}</div>`;
+        }
+
+        html += "</div>";
+        calendar.innerHTML = html;
+    }
+
+    function prevMonth() {
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        renderCalendar(currentDate);
+    }
+
+    function nextMonth() {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+        renderCalendar(currentDate);
+    }
+
+    renderCalendar(currentDate);
+</script>
+
+
 </html>
+
