@@ -370,3 +370,55 @@ def listar_fornecedores(db: sqlite3.Connection = Depends(get_db)):
     cursor = db.cursor()
     cursor.execute("SELECT * FROM fornecedores")
     return [Fornecedor(**dict(row)) for row in cursor.fetchall()]
+
+
+#novas rotas
+@app.get("/fornecedores", response_class=HTMLResponse)
+def pagina_fornecedores(request: Request):
+    # Verificar se o usuário está logado
+    if "user" not in request.session:
+        flash(request, "Você precisa fazer login para acessar esta página.", "error")
+        url = request.url_for("login")
+        return RedirectResponse(url=url, status_code=303)
+    
+    return templates.TemplateResponse("fornecedores.html", {
+        "request": request, 
+        "messages": get_flashed_messages(request),
+        "user": request.session["user"]
+    })
+
+@app.put("/fornecedores/{uuid}", response_model=Fornecedor)
+def atualizar_fornecedor(uuid: str, fornecedor: Fornecedor, db: sqlite3.Connection = Depends(get_db)):
+    cursor = db.cursor()
+    
+    # Verificar se o fornecedor existe
+    cursor.execute("SELECT * FROM fornecedores WHERE uuid = ?", (uuid,))
+    if not cursor.fetchone():
+        raise HTTPException(status_code=404, detail="Fornecedor não encontrado")
+    
+    cursor.execute(
+        "UPDATE fornecedores SET nome = ?, telefone = ?, email = ? WHERE uuid = ?",
+        (fornecedor.nome, fornecedor.telefone, fornecedor.email, uuid)
+    )
+    db.commit()
+    
+    fornecedor.uuid = uuid
+    return fornecedor
+
+@app.delete("/fornecedores/{uuid}", response_model=dict)
+def deletar_fornecedor(uuid: str, db: sqlite3.Connection = Depends(get_db)):
+    cursor = db.cursor()
+    
+    # Verificar se o fornecedor existe
+    cursor.execute("SELECT * FROM fornecedores WHERE uuid = ?", (uuid,))
+    if not cursor.fetchone():
+        raise HTTPException(status_code=404, detail="Fornecedor não encontrado")
+    
+    # Verificar se existem produtos vinculados a este fornecedor
+    cursor.execute("SELECT * FROM produtos WHERE fornecedor_uuid = ?", (uuid,))
+    if cursor.fetchone():
+        raise HTTPException(status_code=400, detail="Não é possível excluir fornecedor com produtos vinculados")
+    
+    cursor.execute("DELETE FROM fornecedores WHERE uuid = ?", (uuid,))
+    db.commit()
+    return {"message": "Fornecedor deletado com sucesso"}

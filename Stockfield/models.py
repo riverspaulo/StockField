@@ -41,9 +41,6 @@ class Produto(BaseModel):
     status: StatusProduto = StatusProduto.disponivel
     usuario_uuid: str
 
-# class Estoque(BaseModel):
-#     produtos: List[Produto] = []
-
 class Fornecedor(BaseModel):
     uuid: Optional[str] = None
     nome: str

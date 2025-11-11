@@ -234,6 +234,43 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Aba: Alertas -->
+            <div class="tab" onclick="openTab('alertas')">Alertas</div>
+
+            <!-- Aba: Relatórios -->
+            <div class="tab" onclick="openTab('relatorios')">Relatórios</div>
+
+            <!-- Aba: Alertas -->
+            <div id="alertas" class="tab-content">
+                <h2 class="section-title">Alertas do Sistema</h2>
+                <div id="alertas-container">
+                    <p>Carregando alertas...</p>
+                </div>
+            </div>
+
+            <!-- Aba: Relatórios -->
+            <div id="relatorios" class="tab-content">
+                <h2 class="section-title">Relatórios</h2>
+                <div class="relatorios-options">
+                    <div class="form-group">
+                        <label for="data-inicio">Data Início:</label>
+                        <input type="date" id="data-inicio">
+                    </div>
+                    <div class="form-group">
+                        <label for="data-fim">Data Fim:</label>
+                        <input type="date" id="data-fim">
+                    </div>
+                    <button class="btn-action" onclick="gerarRelatorioEstoque()">
+                        <i class="fa-solid fa-download"></i>
+                        Baixar Relatório de Estoque (CSV)
+                    </button>
+                    <button class="btn-action" onclick="gerarRelatorioMovimentacoes()">
+                        <i class="fa-solid fa-download"></i>
+                        Baixar Relatório de Movimentações (CSV)
+                    </button>
+                </div>
+            </div>
         </section>
     </main>
 

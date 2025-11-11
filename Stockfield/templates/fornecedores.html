@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -107,4 +107,668 @@
 
 
 </html>
+ -->
 
+ <!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fornecedores - StockField</title>
+    <link rel="stylesheet" href="/static/css/profile.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .container {
+            display: flex;
+            min-height: calc(100vh - 60px);
+        }
+
+        .sidebar {
+            width: 80px;
+            background: #2c3e50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+        }
+
+        .sidebar i {
+            color: #ecf0f1;
+            font-size: 24px;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .sidebar i:hover {
+            color: #3498db;
+        }
+
+        .sidebar i.active {
+            color: #3498db;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            background: #ecf0f1;
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .content-title {
+            color: #2c3e50;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.3s;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .fornecedores-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .fornecedor-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-left: 4px solid #3498db;
+        }
+
+        .fornecedor-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+        }
+
+        .fornecedor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .fornecedor-nome {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 0;
+        }
+
+        .fornecedor-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-action {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+
+        .btn-edit {
+            color: #f39c12;
+        }
+
+        .btn-delete {
+            color: #e74c3c;
+        }
+
+        .btn-action:hover {
+            background: #f8f9fa;
+        }
+
+        .fornecedor-info {
+            margin-bottom: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        .info-item i {
+            width: 16px;
+            color: #7f8c8d;
+        }
+
+        .fornecedor-stats {
+            display: flex;
+            gap: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #ecf0f1;
+        }
+
+        .stat {
+            text-align: center;
+            flex: 1;
+        }
+
+        .stat-number {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            color: #2c3e50;
+            margin: 0;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #bdc3c7;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 25px;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .btn-success:hover {
+            background: #219a52;
+        }
+
+        .search-container {
+            margin-bottom: 20px;
+        }
+
+        .search-box {
+            display: flex;
+            max-width: 400px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #bdc3c7;
+            border-right: none;
+            border-radius: 6px 0 0 6px;
+            font-size: 16px;
+        }
+
+        .search-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 0 6px 6px 0;
+            cursor: pointer;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #7f8c8d;
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            color: #bdc3c7;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+
+        .flash-message {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .flash-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .flash-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .flash-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <header class="top-bar">
+        <div class="logo">
+            <img id="stockfield-logo" src="/static/images/logo_colorida.png" alt="StockField">
+        </div>
+        <div class="user-info">
+            <span>Bem-vindo, {{ user.nome }}</span>
+            <div class="user-icon">
+                <i class="fa-solid fa-user"></i>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <i class="fa-solid fa-house" onclick="window.location.href='/profile'"></i>
+            <i class="fa-solid fa-box" onclick="window.location.href='/produtos'"></i>
+            <i class="fa-solid fa-truck active"></i>
+            <i class="fa-solid fa-chart-bar"></i>
+        </aside>
+
+        <main class="main-content">
+            <div class="content-header">
+                <h1 class="content-title">
+                    <i class="fa-solid fa-truck"></i>
+                    Fornecedores
+                </h1>
+                <button class="btn-primary" onclick="abrirModalCadastro()">
+                    <i class="fa-solid fa-plus"></i>
+                    Novo Fornecedor
+                </button>
+            </div>
+
+            {% if messages %}
+            <div class="flash-messages">
+                {% for msg in messages %}
+                    <div class="flash-message flash-{{ msg.category }}">
+                        {{ msg.message }}
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="search-container">
+                <div class="search-box">
+                    <input type="text" class="search-input" id="searchInput" placeholder="Buscar fornecedores...">
+                    <button class="search-btn" onclick="filtrarFornecedores()">
+                        <i class="fa-solid fa-search"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="fornecedores-container" class="fornecedores-grid">
+                <div class="loading">
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+                    <p>Carregando fornecedores...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal para Cadastro/Edição -->
+    <div id="fornecedorModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Novo Fornecedor</h2>
+                <span class="close" onclick="fecharModal()">&times;</span>
+            </div>
+            <form id="fornecedorForm">
+                <input type="hidden" id="fornecedorUuid">
+                <div class="form-group">
+                    <label for="nome">Nome do Fornecedor *</label>
+                    <input type="text" class="form-control" id="nome" required>
+                </div>
+                <div class="form-group">
+                    <label for="telefone">Telefone *</label>
+                    <input type="tel" class="form-control" id="telefone" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">E-mail *</label>
+                    <input type="email" class="form-control" id="email" required>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="fecharModal()">Cancelar</button>
+                    <button type="submit" class="btn-success" id="submitBtn">
+                        <i class="fa-solid fa-save"></i>
+                        Salvar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let fornecedores = [];
+        let fornecedorEditando = null;
+
+        // Carregar fornecedores
+        async function carregarFornecedores() {
+            try {
+                const response = await fetch('/fornecedores/');
+                fornecedores = await response.json();
+                renderizarFornecedores(fornecedores);
+            } catch (error) {
+                console.error('Erro ao carregar fornecedores:', error);
+                document.getElementById('fornecedores-container').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-exclamation-triangle"></i>
+                        <h3>Erro ao carregar fornecedores</h3>
+                        <p>Tente recarregar a página.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Renderizar fornecedores na grid
+        function renderizarFornecedores(listaFornecedores) {
+            const container = document.getElementById('fornecedores-container');
+            
+            if (listaFornecedores.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-truck"></i>
+                        <h3>Nenhum fornecedor cadastrado</h3>
+                        <p>Clique em "Novo Fornecedor" para começar.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = listaFornecedores.map(fornecedor => `
+                <div class="fornecedor-card">
+                    <div class="fornecedor-header">
+                        <h3 class="fornecedor-nome">${fornecedor.nome}</h3>
+                        <div class="fornecedor-actions">
+                            <button class="btn-action btn-edit" onclick="editarFornecedor('${fornecedor.uuid}')">
+                                <i class="fa-solid fa-edit"></i>
+                            </button>
+                            <button class="btn-action btn-delete" onclick="confirmarExclusao('${fornecedor.uuid}', '${fornecedor.nome}')">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="fornecedor-info">
+                        <div class="info-item">
+                            <i class="fa-solid fa-phone"></i>
+                            <span>${fornecedor.telefone}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fa-solid fa-envelope"></i>
+                            <span>${fornecedor.email || 'Não informado'}</span>
+                        </div>
+                    </div>
+                    <div class="fornecedor-stats">
+                        <div class="stat">
+                            <div class="stat-number">${fornecedor.produtos_count || 0}</div>
+                            <div class="stat-label">Produtos</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">${fornecedor.entradas_count || 0}</div>
+                            <div class="stat-label">Entradas</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Filtrar fornecedores
+        function filtrarFornecedores() {
+            const termo = document.getElementById('searchInput').value.toLowerCase();
+            const fornecedoresFiltrados = fornecedores.filter(fornecedor =>
+                fornecedor.nome.toLowerCase().includes(termo) ||
+                fornecedor.email?.toLowerCase().includes(termo) ||
+                fornecedor.telefone.includes(termo)
+            );
+            renderizarFornecedores(fornecedoresFiltrados);
+        }
+
+        // Modal functions
+        function abrirModalCadastro() {
+            fornecedorEditando = null;
+            document.getElementById('modalTitle').textContent = 'Novo Fornecedor';
+            document.getElementById('fornecedorForm').reset();
+            document.getElementById('fornecedorUuid').value = '';
+            document.getElementById('fornecedorModal').style.display = 'block';
+        }
+
+        function fecharModal() {
+            document.getElementById('fornecedorModal').style.display = 'none';
+            fornecedorEditando = null;
+        }
+
+        async function editarFornecedor(uuid) {
+            const fornecedor = fornecedores.find(f => f.uuid === uuid);
+            if (!fornecedor) return;
+
+            fornecedorEditando = fornecedor;
+            document.getElementById('modalTitle').textContent = 'Editar Fornecedor';
+            document.getElementById('fornecedorUuid').value = fornecedor.uuid;
+            document.getElementById('nome').value = fornecedor.nome;
+            document.getElementById('telefone').value = fornecedor.telefone;
+            document.getElementById('email').value = fornecedor.email || '';
+            document.getElementById('fornecedorModal').style.display = 'block';
+        }
+
+        // Submit do formulário
+        document.getElementById('fornecedorForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const fornecedorData = {
+                nome: document.getElementById('nome').value,
+                telefone: document.getElementById('telefone').value,
+                email: document.getElementById('email').value
+            };
+
+            try {
+                let response;
+                if (fornecedorEditando) {
+                    // Editar fornecedor existente
+                    response = await fetch(`/fornecedores/${fornecedorEditando.uuid}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(fornecedorData)
+                    });
+                } else {
+                    // Criar novo fornecedor
+                    response = await fetch('/fornecedores/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(fornecedorData)
+                    });
+                }
+
+                if (response.ok) {
+                    fecharModal();
+                    await carregarFornecedores();
+                    mostrarMensagem(
+                        fornecedorEditando ? 'Fornecedor atualizado com sucesso!' : 'Fornecedor cadastrado com sucesso!',
+                        'success'
+                    );
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.detail);
+                }
+            } catch (error) {
+                console.error('Erro ao salvar fornecedor:', error);
+                mostrarMensagem(`Erro: ${error.message}`, 'error');
+            }
+        });
+
+        // Confirmar exclusão
+        function confirmarExclusao(uuid, nome) {
+            if (confirm(`Tem certeza que deseja excluir o fornecedor "${nome}"?`)) {
+                excluirFornecedor(uuid);
+            }
+        }
+
+        // Excluir fornecedor
+        async function excluirFornecedor(uuid) {
+            try {
+                const response = await fetch(`/fornecedores/${uuid}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    await carregarFornecedores();
+                    mostrarMensagem('Fornecedor excluído com sucesso!', 'success');
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.detail);
+                }
+            } catch (error) {
+                console.error('Erro ao excluir fornecedor:', error);
+                mostrarMensagem(`Erro: ${error.message}`, 'error');
+            }
+        }
+
+        // Mostrar mensagem flash
+        function mostrarMensagem(mensagem, tipo) {
+            // Você pode implementar um sistema de notificação mais sofisticado aqui
+            alert(mensagem);
+        }
+
+        // Fechar modal ao clicar fora
+        window.onclick = function(event) {
+            const modal = document.getElementById('fornecedorModal');
+            if (event.target === modal) {
+                fecharModal();
+            }
+        }
+
+        // Busca em tempo real
+        document.getElementById('searchInput').addEventListener('input', filtrarFornecedores);
+
+        // Carregar fornecedores quando a página carregar
+        document.addEventListener('DOMContentLoaded', carregarFornecedores);
+    </script>
+</body>
+</html>
