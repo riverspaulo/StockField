@@ -422,3 +422,72 @@ def deletar_fornecedor(uuid: str, db: sqlite3.Connection = Depends(get_db)):
     cursor.execute("DELETE FROM fornecedores WHERE uuid = ?", (uuid,))
     db.commit()
     return {"message": "Fornecedor deletado com sucesso"}
+
+
+# Adicione estas rotas após as rotas de fornecedores
+
+# Rota para a página de produtos
+@app.get("/produtos", response_class=HTMLResponse)
+def pagina_produtos(request: Request):
+    # Verificar se o usuário está logado
+    if "user" not in request.session:
+        flash(request, "Você precisa fazer login para acessar esta página.", "error")
+        url = request.url_for("login")
+        return RedirectResponse(url=url, status_code=303)
+    
+    return templates.TemplateResponse("produtos.html", {
+        "request": request, 
+        "messages": get_flashed_messages(request),
+        "user": request.session["user"]
+    })
+
+# Rota para atualizar produto
+@app.put("/produtos/{uuid}", response_model=Produto)
+def atualizar_produto(uuid: str, produto: Produto, request: Request, db: sqlite3.Connection = Depends(get_db)):
+    cursor = db.cursor()
+    
+    # Verificar se o produto existe
+    cursor.execute("SELECT * FROM produtos WHERE uuid = ?", (uuid,))
+    produto_existente = cursor.fetchone()
+    if not produto_existente:
+        raise HTTPException(status_code=404, detail="Produto não encontrado")
+    
+    # Atualizar produto
+    cursor.execute(
+        """UPDATE produtos SET 
+            nome = ?, descricao = ?, categoria = ?, quantidade = ?, 
+            preco_unitario = ?, data_validade = ?, lote = ?, 
+            fornecedor_uuid = ?, localizacao = ?, status = ? 
+        WHERE uuid = ?""",
+        (
+            produto.nome,
+            produto.descricao,
+            produto.categoria,
+            produto.quantidade,
+            produto.preco_unitario,
+            produto.data_validade.isoformat() if produto.data_validade else None,
+            produto.lote,
+            produto.fornecedor_uuid,
+            produto.localizacao,
+            produto.status.value,
+            uuid
+        )
+    )
+    db.commit()
+    
+    produto.uuid = uuid
+    return produto
+
+# Rota para obter um produto específico por UUID (para edição)
+@app.get("/produtos/editar/{uuid}", response_model=Produto)
+def obter_produto_edicao(uuid: str, db: sqlite3.Connection = Depends(get_db)):
+    cursor = db.cursor()
+    cursor.execute("SELECT * FROM produtos WHERE uuid = ?", (uuid,))
+    produto = cursor.fetchone()
+    if not produto:
+        raise HTTPException(status_code=404, detail="Produto não encontrado")
+    
+    produto_dict = dict(produto)
+    if produto_dict["data_validade"]:
+        produto_dict["data_validade"] = date.fromisoformat(produto_dict["data_validade"])
+    return Produto(**produto_dict)

@@ -88,6 +88,8 @@ def init_db():
             email TEXT NOT NULL
         )""")
 
+        
+        # No models.py, na tabela produtos, altere:
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS produtos (
             uuid TEXT PRIMARY KEY,
@@ -95,16 +97,34 @@ def init_db():
             descricao TEXT NOT NULL,
             categoria TEXT NOT NULL,
             quantidade INTEGER NOT NULL,
-            preco FLOAT NOT NULL,
-            data_validade TEXT NOT NULL,
-            lote TEXT NOT NULL,
+            preco_unitario FLOAT,  -- Corrigido para preco_unitario
+            data_validade TEXT,
+            lote TEXT,
             fornecedor_uuid TEXT NOT NULL,
-            localizacao TEXT NOT NULL,
+            localizacao TEXT,
             status TEXT NOT NULL,
             usuario_uuid TEXT NOT NULL,
             FOREIGN KEY (fornecedor_uuid) REFERENCES fornecedores (uuid),
             FOREIGN KEY (usuario_uuid) REFERENCES usuarios (uuid)
         )""")
+
+        # cursor.execute("""
+        # CREATE TABLE IF NOT EXISTS produtos (
+        #     uuid TEXT PRIMARY KEY,
+        #     nome TEXT NOT NULL,
+        #     descricao TEXT NOT NULL,
+        #     categoria TEXT NOT NULL,
+        #     quantidade INTEGER NOT NULL,
+        #     preco FLOAT NOT NULL,
+        #     data_validade TEXT NOT NULL,
+        #     lote TEXT NOT NULL,
+        #     fornecedor_uuid TEXT NOT NULL,
+        #     localizacao TEXT NOT NULL,
+        #     status TEXT NOT NULL,
+        #     usuario_uuid TEXT NOT NULL,
+        #     FOREIGN KEY (fornecedor_uuid) REFERENCES fornecedores (uuid),
+        #     FOREIGN KEY (usuario_uuid) REFERENCES usuarios (uuid)
+        # )""")
         
         # Nova tabela para movimentos
         cursor.execute("""
@@ -122,3 +142,5 @@ def init_db():
         )""")
         
         conn.commit()
+
+

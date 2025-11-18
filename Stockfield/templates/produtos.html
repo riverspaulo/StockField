@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produtos - StockField</title>
+    <link rel="stylesheet" href="/static/css/profile.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .container {
+            display: flex;
+            min-height: calc(100vh - 60px);
+        }
+
+        .sidebar {
+            width: 80px;
+            background: #2c3e50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+        }
+
+        .sidebar i {
+            color: #ecf0f1;
+            font-size: 24px;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .sidebar i:hover {
+            color: #3498db;
+        }
+
+        .sidebar i.active {
+            color: #3498db;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            background: #ecf0f1;
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .content-title {
+            color: #2c3e50;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.3s;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .produtos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .produto-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-left: 4px solid #27ae60;
+        }
+
+        .produto-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+        }
+
+        .produto-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .produto-nome {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 0;
+        }
+
+        .produto-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-action {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+
+        .btn-edit {
+            color: #f39c12;
+        }
+
+        .btn-delete {
+            color: #e74c3c;
+        }
+
+        .btn-action:hover {
+            background: #f8f9fa;
+        }
+
+        .produto-info {
+            margin-bottom: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        .info-item i {
+            width: 16px;
+            color: #7f8c8d;
+        }
+
+        .produto-stats {
+            display: flex;
+            gap: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #ecf0f1;
+        }
+
+        .stat {
+            text-align: center;
+            flex: 1;
+        }
+
+        .stat-number {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-disponivel {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-esgotado {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-vencido {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 2% auto; /* Reduzi a margem superior para dar mais espaço */
+            padding: 0; /* Removemos o padding do content para aplicar no body */
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh; /* Altura máxima da modal */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0;
+            padding: 20px 30px;
+            border-bottom: 1px solid #ecf0f1;
+            flex-shrink: 0; /* Impede que o header diminua */
+        }
+
+        .modal-title {
+            font-size: 24px;
+            color: #2c3e50;
+            margin: 0;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .modal-body {
+            padding: 30px;
+            overflow-y: auto; /* Adiciona rolagem vertical */
+            flex-grow: 1; /* Ocupa o espaço restante */
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #bdc3c7;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .modal-footer {
+            padding: 20px 30px;
+            border-top: 1px solid #ecf0f1;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            flex-shrink: 0; /* Impede que o footer diminua */
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .btn-success:hover {
+            background: #219a52;
+        }
+
+        .search-container {
+            margin-bottom: 20px;
+        }
+
+        .search-box {
+            display: flex;
+            max-width: 400px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #bdc3c7;
+            border-right: none;
+            border-radius: 6px 0 0 6px;
+            font-size: 16px;
+        }
+
+        .search-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 0 6px 6px 0;
+            cursor: pointer;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #7f8c8d;
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            color: #bdc3c7;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+
+        .flash-message {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .flash-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .flash-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .flash-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        /* Personalização da barra de rolagem */
+        .modal-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-body::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+    </style>
+</head>
+<body>
+    <header class="top-bar">
+        <div class="logo">
+            <img id="stockfield-logo" src="/static/images/logo_colorida.png" alt="StockField">
+        </div>
+        <div class="user-info">
+            <span>Bem-vindo, {{ user.nome }}</span>
+            <div class="user-icon">
+                <i class="fa-solid fa-user"></i>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <i class="fa-solid fa-house" onclick="window.location.href='/profile'"></i>
+            <i class="fa-solid fa-box active"></i>
+            <i class="fa-solid fa-truck" onclick="window.location.href='/fornecedores'"></i>
+            <i class="fa-solid fa-chart-bar"></i>
+        </aside>
+
+        <main class="main-content">
+            <div class="content-header">
+                <h1 class="content-title">
+                    <i class="fa-solid fa-box"></i>
+                    Produtos
+                </h1>
+                <button class="btn-primary" onclick="abrirModalCadastro()">
+                    <i class="fa-solid fa-plus"></i>
+                    Novo Produto
+                </button>
+            </div>
+
+            {% if messages %}
+            <div class="flash-messages">
+                {% for msg in messages %}
+                    <div class="flash-message flash-{{ msg.category }}">
+                        {{ msg.message }}
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="search-container">
+                <div class="search-box">
+                    <input type="text" class="search-input" id="searchInput" placeholder="Buscar produtos...">
+                    <button class="search-btn" onclick="filtrarProdutos()">
+                        <i class="fa-solid fa-search"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="produtos-container" class="produtos-grid">
+                <div class="loading">
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+                    <p>Carregando produtos...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal para Cadastro/Edição -->
+    <div id="produtoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Novo Produto</h2>
+                <span class="close" onclick="fecharModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="produtoForm">
+                    <input type="hidden" id="produtoUuid">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nome">Nome do Produto *</label>
+                            <input type="text" class="form-control" id="nome" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="categoria">Categoria *</label>
+                            <input type="text" class="form-control" id="categoria" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="descricao">Descrição</label>
+                        <textarea class="form-control" id="descricao" rows="2"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="quantidade">Quantidade *</label>
+                            <input type="number" class="form-control" id="quantidade" value="0" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="preco">Preço Unitário</label>
+                            <input type="number" step="0.01" class="form-control" id="preco">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="dataValidade">Data Validade</label>
+                            <input type="date" class="form-control" id="dataValidade">
+                        </div>
+                        <div class="form-group">
+                            <label for="lote">Lote</label>
+                            <input type="text" class="form-control" id="lote">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fornecedorUuid">Fornecedor *</label>
+                            <select class="form-control" id="fornecedorUuid" required>
+                                <option value="">Selecione...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="status">Status *</label>
+                            <select class="form-control" id="status" required>
+                                <option value="disponível">Disponível</option>
+                                <option value="esgotado">Esgotado</option>
+                                <option value="vencido">Vencido</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="localizacao">Localização</label>
+                        <input type="text" class="form-control" id="localizacao">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="fecharModal()">Cancelar</button>
+                <button type="submit" class="btn-success" id="submitBtn" form="produtoForm">
+                    <i class="fa-solid fa-save"></i>
+                    Salvar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let produtos = [];
+        let produtoEditando = null;
+        let fornecedores = [];
+
+        // Carregar produtos
+        async function carregarProdutos() {
+            try {
+                const response = await fetch('/produtos/');
+                produtos = await response.json();
+                renderizarProdutos(produtos);
+            } catch (error) {
+                console.error('Erro ao carregar produtos:', error);
+                document.getElementById('produtos-container').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-exclamation-triangle"></i>
+                        <h3>Erro ao carregar produtos</h3>
+                        <p>Tente recarregar a página.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Carregar fornecedores
+        async function carregarFornecedores() {
+            try {
+                const response = await fetch('/fornecedores/');
+                fornecedores = await response.json();
+                const select = document.getElementById('fornecedorUuid');
+                
+                select.innerHTML = '<option value="">Selecione...</option>' +
+                    fornecedores.map(fornecedor => `
+                        <option value="${fornecedor.uuid}">${fornecedor.nome}</option>
+                    `).join('');
+            } catch (error) {
+                console.error('Erro ao carregar fornecedores:', error);
+            }
+        }
+
+        // Renderizar produtos na grid
+        function renderizarProdutos(listaProdutos) {
+            const container = document.getElementById('produtos-container');
+            
+            if (listaProdutos.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-box"></i>
+                        <h3>Nenhum produto cadastrado</h3>
+                        <p>Clique em "Novo Produto" para começar.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = listaProdutos.map(produto => `
+                <div class="produto-card">
+                    <div class="produto-header">
+                        <h3 class="produto-nome">${produto.nome}</h3>
+                        <div class="produto-actions">
+                            <button class="btn-action btn-edit" onclick="editarProduto('${produto.uuid}')">
+                                <i class="fa-solid fa-edit"></i>
+                            </button>
+                            <button class="btn-action btn-delete" onclick="confirmarExclusao('${produto.uuid}', '${produto.nome}')">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="produto-info">
+                        <div class="info-item">
+                            <i class="fa-solid fa-tag"></i>
+                            <span>${produto.categoria}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fa-solid fa-align-left"></i>
+                            <span>${produto.descricao || 'Sem descrição'}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fa-solid fa-location-dot"></i>
+                            <span>${produto.localizacao || 'Local não informado'}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fa-solid fa-calendar"></i>
+                            <span>Validade: ${produto.data_validade || 'Não informada'}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fa-solid fa-barcode"></i>
+                            <span>Lote: ${produto.lote || 'Não informado'}</span>
+                        </div>
+                    </div>
+                    <div class="produto-stats">
+                        <div class="stat">
+                            <div class="stat-number">${produto.quantidade}</div>
+                            <div class="stat-label">Quantidade</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">R$ ${produto.preco_unitario ? produto.preco_unitario.toFixed(2) : '0.00'}</div>
+                            <div class="stat-label">Preço Unit.</div>
+                        </div>
+                        <div class="stat">
+                            <div class="status-badge status-${produto.status}">${produto.status}</div>
+                            <div class="stat-label">Status</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Filtrar produtos
+        function filtrarProdutos() {
+            const termo = document.getElementById('searchInput').value.toLowerCase();
+            const produtosFiltrados = produtos.filter(produto =>
+                produto.nome.toLowerCase().includes(termo) ||
+                produto.categoria.toLowerCase().includes(termo) ||
+                produto.descricao?.toLowerCase().includes(termo) ||
+                produto.localizacao?.toLowerCase().includes(termo)
+            );
+            renderizarProdutos(produtosFiltrados);
+        }
+
+        // Modal functions
+        function abrirModalCadastro() {
+            produtoEditando = null;
+            document.getElementById('modalTitle').textContent = 'Novo Produto';
+            document.getElementById('produtoForm').reset();
+            document.getElementById('produtoUuid').value = '';
+            document.getElementById('produtoModal').style.display = 'block';
+        }
+
+        function fecharModal() {
+            document.getElementById('produtoModal').style.display = 'none';
+            produtoEditando = null;
+        }
+
+        async function editarProduto(uuid) {
+            try {
+                const response = await fetch(`/produtos/editar/${uuid}`);
+                const produto = await response.json();
+                
+                if (!produto) return;
+
+                produtoEditando = produto;
+                document.getElementById('modalTitle').textContent = 'Editar Produto';
+                document.getElementById('produtoUuid').value = produto.uuid;
+                document.getElementById('nome').value = produto.nome;
+                document.getElementById('descricao').value = produto.descricao || '';
+                document.getElementById('categoria').value = produto.categoria;
+                document.getElementById('quantidade').value = produto.quantidade;
+                document.getElementById('preco').value = produto.preco_unitario || '';
+                document.getElementById('dataValidade').value = produto.data_validade || '';
+                document.getElementById('lote').value = produto.lote || '';
+                document.getElementById('fornecedorUuid').value = produto.fornecedor_uuid;
+                document.getElementById('localizacao').value = produto.localizacao || '';
+                document.getElementById('status').value = produto.status;
+                
+                document.getElementById('produtoModal').style.display = 'block';
+            } catch (error) {
+                console.error('Erro ao carregar produto para edição:', error);
+                mostrarMensagem('Erro ao carregar dados do produto', 'error');
+            }
+        }
+
+        // Submit do formulário
+        document.getElementById('produtoForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const produtoData = {
+                nome: document.getElementById('nome').value,
+                descricao: document.getElementById('descricao').value,
+                categoria: document.getElementById('categoria').value,
+                quantidade: parseInt(document.getElementById('quantidade').value),
+                preco_unitario: document.getElementById('preco').value ? parseFloat(document.getElementById('preco').value) : null,
+                data_validade: document.getElementById('dataValidade').value || null,
+                lote: document.getElementById('lote').value,
+                fornecedor_uuid: document.getElementById('fornecedorUuid').value,
+                localizacao: document.getElementById('localizacao').value,
+                status: document.getElementById('status').value
+            };
+
+            try {
+                let response;
+                if (produtoEditando) {
+                    // Editar produto existente
+                    response = await fetch(`/produtos/${produtoEditando.uuid}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(produtoData)
+                    });
+                } else {
+                    // Criar novo produto
+                    response = await fetch('/produtos/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(produtoData)
+                    });
+                }
+
+                if (response.ok) {
+                    fecharModal();
+                    await carregarProdutos();
+                    mostrarMensagem(
+                        produtoEditando ? 'Produto atualizado com sucesso!' : 'Produto cadastrado com sucesso!',
+                        'success'
+                    );
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.detail);
+                }
+            } catch (error) {
+                console.error('Erro ao salvar produto:', error);
+                mostrarMensagem(`Erro: ${error.message}`, 'error');
+            }
+        });
+
+        // Confirmar exclusão
+        function confirmarExclusao(uuid, nome) {
+            if (confirm(`Tem certeza que deseja excluir o produto "${nome}"?`)) {
+                excluirProduto(uuid);
+            }
+        }
+
+        // Excluir produto
+        async function excluirProduto(uuid) {
+            try {
+                const response = await fetch(`/produtos/${uuid}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    await carregarProdutos();
+                    mostrarMensagem('Produto excluído com sucesso!', 'success');
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.detail);
+                }
+            } catch (error) {
+                console.error('Erro ao excluir produto:', error);
+                mostrarMensagem(`Erro: ${error.message}`, 'error');
+            }
+        }
+
+        // Mostrar mensagem flash
+        function mostrarMensagem(mensagem, tipo) {
+            // Você pode implementar um sistema de notificação mais sofisticado aqui
+            alert(mensagem);
+        }
+
+        // Fechar modal ao clicar fora
+        window.onclick = function(event) {
+            const modal = document.getElementById('produtoModal');
+            if (event.target === modal) {
+                fecharModal();
+            }
+        }
+
+        // Busca em tempo real
+        document.getElementById('searchInput').addEventListener('input', filtrarProdutos);
+
+        // Carregar dados quando a página carregar
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarProdutos();
+            carregarFornecedores();
+        });
+    </script>
+</body>
+</html>

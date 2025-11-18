@@ -1,115 +1,4 @@
-<!-- <!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StockField</title>
-    <link rel="stylesheet" href="/static/css/profile.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body>
-    <header class="top-bar">
-        <div class="logo">
-            <img  id="stockfield-logo" src="../static/images/logo_colorida.png" alt="">
-        </div>
-        <div class="search-bar">
-            <input type="text" placeholder="Buscar...">
-            <button><i class="fa fa-search"></i></button>
-        </div>
-        <div class="user-icon">
-            <i class="fa-solid fa-user"></i>
-        </div>
-    </header>
-
-    <div class="container">
-        <aside class="sidebar">
-            <i class="fa-solid fa-gear"></i>
-            <i class="fa-solid fa-box"></i>
-            <i class="fa-solid fa-users"></i>
-        </aside>
-
-        <main class="main-content">
-            <div class="menu-buttons">
-                <button class="btn"><i class="fa-solid fa-truck"></i> Fornecedores</button>
-                <button class="btn"><i class="fa-solid fa-bullhorn"></i> Avisos</button>
-            </div>
-
-            <div class="content-area">
-                <div class="left-widgets">
-                    <div class="calendario">
-                        <h3>Calendário</h3>
-                        <div id="calendar">
-
-                        </div>
-                    </div>
-                    <div class="info-box"></div>
-                </div>
-                <div class="main-box">
-
-                </div>
-            </div>
-        </main>
-    </div>
-</body>
-<script>
-    const calendar = document.getElementById("calendar");
-    const currentDate = new Date();
-
-    function renderCalendar(date) {
-        const year = date.getFullYear();
-        const month = date.getMonth();
-        const firstDay = new Date(year, month, 1).getDay();
-        const lastDate = new Date(year, month + 1, 0).getDate();
-        const months = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-                        "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-
-        let html = `
-            <div class="calendar-header">
-                <button onclick="prevMonth()">&#9664;</button>
-                <span>${months[month]} ${year}</span>
-                <button onclick="nextMonth()">&#9654;</button>
-            </div>
-            <div class="calendar-weekdays">
-                <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div>
-                <div>Qui</div><div>Sex</div><div>Sáb</div>
-            </div>
-            <div class="calendar-days">
-        `;
-
-        for (let i = 0; i < firstDay; i++) html += `<div></div>`;
-
-        for (let d = 1; d <= lastDate; d++) {
-            let isToday =
-                d === new Date().getDate() &&
-                month === new Date().getMonth() &&
-                year === new Date().getFullYear()
-                    ? "today"
-                    : "";
-            html += `<div class="${isToday}">${d}</div>`;
-        }
-
-        html += "</div>";
-        calendar.innerHTML = html;
-    }
-
-    function prevMonth() {
-        currentDate.setMonth(currentDate.getMonth() - 1);
-        renderCalendar(currentDate);
-    }
-
-    function nextMonth() {
-        currentDate.setMonth(currentDate.getMonth() + 1);
-        renderCalendar(currentDate);
-    }
-
-    renderCalendar(currentDate);
-</script>
-
-
-</html>
- -->
-
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -764,11 +653,64 @@
             }
         }
 
-        // Busca em tempo real
+     
         document.getElementById('searchInput').addEventListener('input', filtrarFornecedores);
-
-        // Carregar fornecedores quando a página carregar
         document.addEventListener('DOMContentLoaded', carregarFornecedores);
+        window.addEventListener('fornecedoresAtualizados', function() {
+        carregarFornecedores();
+
+        document.getElementById('fornecedorForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+            const fornecedorData = {
+                nome: document.getElementById('nome').value,
+                telefone: document.getElementById('telefone').value,
+                email: document.getElementById('email').value
+            };
+
+            try {
+                let response;
+                if (fornecedorEditando) {
+                    // Editar fornecedor existente
+                    response = await fetch(`/fornecedores/${fornecedorEditando.uuid}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(fornecedorData)
+                    });
+                } else {
+                    // Criar novo fornecedor
+                    response = await fetch('/fornecedores/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(fornecedorData)
+                    });
+                }
+
+                if (response.ok) {
+                    fecharModal();
+                    await carregarFornecedores();
+                    mostrarMensagem(
+                        fornecedorEditando ? 'Fornecedor atualizado com sucesso!' : 'Fornecedor cadastrado com sucesso!',
+                        'success'
+                    );
+                    
+                    // Disparar evento customizado para notificar outras páginas
+                    window.dispatchEvent(new CustomEvent('fornecedoresAtualizados'));
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.detail);
+                }
+            } catch (error) {
+                console.error('Erro ao salvar fornecedor:', error);
+                mostrarMensagem(`Erro: ${error.message}`, 'error');
+            }
+        });
+
+    });
     </script>
 </body>
 </html>
