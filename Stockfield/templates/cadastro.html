@@ -16,9 +16,10 @@
                 <h1 class="title-h1">Cadastro</h1>
                 <br>
                 <span>Insira os dados solicitados</span>
+                <br>
 
                 {% if messages %}
-                    <div class="flash-messages">
+                    <div class="flash-messages" style="font-family: sans-serif; font-size: 12px; color: #96bd3e;">
                         {% for msg in messages %}
                             <div class="flash-message flash-{{ msg.category }}">
                                  {{ msg.message }}

@@ -18,7 +18,7 @@
                 <span style="margin-bottom: 15px;">Insira os dados solicitados</span>
                 
                {% if messages %}
-                    <div class="flash-messages">
+                    <div class="flash-messages" style="font-family: sans-serif; font-size: 11px; color: #96bd3e;">
                         {% for msg in messages %}
                             <div class="flash-message flash-{{ msg.category }}">
                                  {{ msg.message }}
@@ -26,9 +26,8 @@
                         {% endfor %}
                      </div>
                 {% endif %}
-
-                <!-- Correção: Adicionar name="cnpj" e name="senha" -->
-                <input type="text" name="cnpj" placeholder="CNPJ" style="margin-bottom: 10px;" required>
+                <br>
+                <input type="text" name="cnpj" placeholder="CNPJ" style="margin-bottom: 10.5px;" required>
                 <input type="password" name="senha" placeholder="Senha" required>
                 <br>
                 <button style="margin-bottom: 10px;">Entrar</button>
