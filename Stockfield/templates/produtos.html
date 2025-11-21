@@ -564,7 +564,7 @@
         let produtoEditando = null;
         let fornecedores = [];
 
-        // Carregar produtos
+        
         async function carregarProdutos() {
             try {
                 const response = await fetch('/produtos/');
@@ -582,23 +582,42 @@
             }
         }
 
-        // Carregar fornecedores
         async function carregarFornecedores() {
             try {
+                console.log('Carregando fornecedores...');
                 const response = await fetch('/fornecedores/');
-                fornecedores = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Fornecedores carregados:', data);
+                
+                fornecedores = data;
                 const select = document.getElementById('fornecedorUuid');
                 
-                select.innerHTML = '<option value="">Selecione...</option>' +
-                    fornecedores.map(fornecedor => `
-                        <option value="${fornecedor.uuid}">${fornecedor.nome}</option>
-                    `).join('');
+                select.innerHTML = '<option value="">Selecione um fornecedor...</option>';
+                
+                fornecedores.forEach(fornecedor => {
+                    const option = document.createElement('option');
+                    option.value = fornecedor.uuid;
+                    option.textContent = fornecedor.nome;
+                    select.appendChild(option);
+                });
+                
+                return fornecedores;
             } catch (error) {
-                console.error('Erro ao carregar fornecedores:', error);
+                console.error('Erro detalhado ao carregar fornecedores:', error);
+                const select = document.getElementById('fornecedorUuid');
+                select.innerHTML = '<option value="">Erro ao carregar fornecedores</option>';
+                mostrarMensagem('Erro ao carregar lista de fornecedores', 'error');
+                throw error;
             }
         }
 
-        // Renderizar produtos na grid
+
+        
         function renderizarProdutos(listaProdutos) {
             const container = document.getElementById('produtos-container');
             
@@ -666,7 +685,7 @@
             `).join('');
         }
 
-        // Filtrar produtos
+        
         function filtrarProdutos() {
             const termo = document.getElementById('searchInput').value.toLowerCase();
             const produtosFiltrados = produtos.filter(produto =>
@@ -678,13 +697,20 @@
             renderizarProdutos(produtosFiltrados);
         }
 
-        // Modal functions
-        function abrirModalCadastro() {
+
+        async function abrirModalCadastro() {
             produtoEditando = null;
             document.getElementById('modalTitle').textContent = 'Novo Produto';
             document.getElementById('produtoForm').reset();
             document.getElementById('produtoUuid').value = '';
-            document.getElementById('produtoModal').style.display = 'block';
+            
+            try {
+                await carregarFornecedores();
+                document.getElementById('produtoModal').style.display = 'block';
+            } catch (error) {
+                console.error('Erro ao preparar modal:', error);
+                document.getElementById('produtoModal').style.display = 'block';
+            }
         }
 
         function fecharModal() {
@@ -692,9 +718,17 @@
             produtoEditando = null;
         }
 
+    
+
         async function editarProduto(uuid) {
             try {
+               
+                await carregarFornecedores();
                 const response = await fetch(`/produtos/editar/${uuid}`);
+                if (!response.ok) {
+                    throw new Error('Produto não encontrado');
+                }
+                
                 const produto = await response.json();
                 
                 if (!produto) return;
@@ -716,11 +750,17 @@
                 document.getElementById('produtoModal').style.display = 'block';
             } catch (error) {
                 console.error('Erro ao carregar produto para edição:', error);
-                mostrarMensagem('Erro ao carregar dados do produto', 'error');
+                mostrarMensagem('Erro ao carregar dados do produto: ' + error.message, 'error');
             }
         }
 
-        // Submit do formulário
+        function debugFornecedores() {
+            console.log('Fornecedores na memória:', fornecedores);
+            console.log('Select element:', document.getElementById('fornecedorUuid'));
+            console.log('Select options:', document.getElementById('fornecedorUuid').options);
+        }
+
+        
         document.getElementById('produtoForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -740,7 +780,6 @@
             try {
                 let response;
                 if (produtoEditando) {
-                    // Editar produto existente
                     response = await fetch(`/produtos/${produtoEditando.uuid}`, {
                         method: 'PUT',
                         headers: {
@@ -749,7 +788,7 @@
                         body: JSON.stringify(produtoData)
                     });
                 } else {
-                    // Criar novo produto
+
                     response = await fetch('/produtos/', {
                         method: 'POST',
                         headers: {
@@ -776,14 +815,14 @@
             }
         });
 
-        // Confirmar exclusão
+       
         function confirmarExclusao(uuid, nome) {
             if (confirm(`Tem certeza que deseja excluir o produto "${nome}"?`)) {
                 excluirProduto(uuid);
             }
         }
 
-        // Excluir produto
+
         async function excluirProduto(uuid) {
             try {
                 const response = await fetch(`/produtos/${uuid}`, {
@@ -803,13 +842,11 @@
             }
         }
 
-        // Mostrar mensagem flash
+     
         function mostrarMensagem(mensagem, tipo) {
-            // Você pode implementar um sistema de notificação mais sofisticado aqui
             alert(mensagem);
         }
 
-        // Fechar modal ao clicar fora
         window.onclick = function(event) {
             const modal = document.getElementById('produtoModal');
             if (event.target === modal) {
@@ -817,10 +854,9 @@
             }
         }
 
-        // Busca em tempo real
         document.getElementById('searchInput').addEventListener('input', filtrarProdutos);
 
-        // Carregar dados quando a página carregar
+    
         document.addEventListener('DOMContentLoaded', function() {
             carregarProdutos();
             carregarFornecedores();
