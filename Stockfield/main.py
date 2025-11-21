@@ -1,3 +1,6 @@
+#pip install fastapi uvicorn pydantic
+#uvicorn main:app
+
 from fastapi import FastAPI, Request, Form, Depends, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -29,8 +32,8 @@ def get_flashed_messages(request: Request):
     messages = request.session.pop("messages") if "messages" in request.session else []
     return messages
 
-# Rotas de templates
 
+#ROTAS
 @app.get("/", response_class=HTMLResponse)
 def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request, "messages": get_flashed_messages(request)})
@@ -55,7 +58,6 @@ def login_action(
         url = request.url_for("login")
         return RedirectResponse(url=url, status_code=303)
 
-    # Armazenar informações do usuário na sessão
     request.session["user"] = {
         "uuid": user["uuid"],
         "nome": user["nome"],
@@ -64,7 +66,6 @@ def login_action(
     }
     
     flash(request, f"Bem-vindo(a), {user['nome']}!", "success")
-    # Redirecionar para a página de perfil
     url = request.url_for("profile")
     return RedirectResponse(url=url, status_code=303)
 
@@ -89,22 +90,19 @@ def cadastro_action(
         return RedirectResponse(url=url, status_code=303)
 
     cursor = db.cursor()
-    
-    # Verificar se email já existe
     cursor.execute("SELECT * FROM usuarios WHERE email = ?", (email,))
     if cursor.fetchone():
         flash(request, "E-mail já cadastrado!", "error")
         url = request.url_for("cadastro")
         return RedirectResponse(url=url, status_code=303)
     
-    # Verificar se CNPJ já existe
     cursor.execute("SELECT * FROM usuarios WHERE cnpj = ?", (cnpj,))
     if cursor.fetchone():
         flash(request, "CNPJ já cadastrado!", "error")
         url = request.url_for("cadastro")
         return RedirectResponse(url=url, status_code=303)
 
-    # Verificar se o tipo de usuário é válido
+    
     tipos_validos = [tipo.value for tipo in TipoUsuario]
     if tipo_usuario not in tipos_validos:
         flash(request, "Tipo de usuário inválido!", "error")
@@ -118,14 +116,13 @@ def cadastro_action(
     )
     db.commit()
     flash(request, "Cadastro realizado com sucesso! Faça login para continuar.", "success")
-    # Redirecionar para a página de login após o cadastro
+
     url = request.url_for("login")
     return RedirectResponse(url=url, status_code=303)
 
-# Nova rota para a página de perfil
+
 @app.get("/profile", response_class=HTMLResponse)
 def profile(request: Request):
-    # Verificar se o usuário está logado
     if "user" not in request.session:
         flash(request, "Você precisa fazer login para acessar esta página.", "error")
         url = request.url_for("login")
@@ -137,13 +134,11 @@ def profile(request: Request):
         "user": request.session["user"]
     })
 
-# Rotas de Movimentações
-
-
+# ROTAS DE MOVIMENTAÇÕES
 @app.get("/movimentos/", response_model=List[Movimento])
 def listar_movimentos(request: Request, db: sqlite3.Connection = Depends(get_db)):
     cursor = db.cursor()
-    usuario_uuid = request.session["user"]["uuid"]  # Obter o UUID do usuário logado
+    usuario_uuid = request.session["user"]["uuid"]  
     cursor.execute("""
         SELECT m.*, p.nome as produto_nome, f.nome as fornecedor_nome 
         FROM movimentos m
@@ -157,14 +152,12 @@ def listar_movimentos(request: Request, db: sqlite3.Connection = Depends(get_db)
     movimentos = []
     for row in movimentos_data:
         movimento_dict = dict(row)
-        # Manter compatibilidade com o modelo Movimento
         movimento_dict["data"] = date.fromisoformat(movimento_dict["data"])
         movimento = Movimento(**{k: v for k, v in movimento_dict.items() if k in Movimento.__fields__})
         movimentos.append(movimento)
     
     return movimentos
 
-# Adicione também uma rota para obter informações detalhadas de um produto
 @app.get("/produtos/{uuid}", response_model=Produto)
 def obter_produto_por_uuid(uuid: str, db: sqlite3.Connection = Depends(get_db)):
     cursor = db.cursor()
@@ -180,24 +173,20 @@ def obter_produto_por_uuid(uuid: str, db: sqlite3.Connection = Depends(get_db)):
 @app.post("/movimentos/entrada", response_model=Movimento)
 def registrar_entrada(movimento: Movimento, request: Request, db: sqlite3.Connection = Depends(get_db)):
     cursor = db.cursor()
-    
-    # Obter o UUID do usuário logado
     usuario_uuid = str(request.session["user"]["uuid"])
     movimento.usuario_uuid = usuario_uuid
     
-    # Verificar se o produto existe e pertence ao usuário
+    
     cursor.execute("SELECT * FROM produtos WHERE uuid = ? AND usuario_uuid = ?", (movimento.produto_uuid, movimento.usuario_uuid))
     produto = cursor.fetchone()
     if not produto:
         raise HTTPException(status_code=404, detail="Produto não encontrado ou não pertence ao usuário.")
     
-    # Verificar se o fornecedor existe
     cursor.execute("SELECT * FROM fornecedores WHERE uuid = ?", (movimento.fornecedor_uuid,))
     fornecedor = cursor.fetchone()
     if not fornecedor:
         raise HTTPException(status_code=404, detail="Fornecedor não encontrado.")
     
-    # Registrar o movimento
     movimento.uuid = str(uuid.uuid4())
     movimento.tipo = TipoMovimento.entrada
     
@@ -213,11 +202,8 @@ def registrar_entrada(movimento: Movimento, request: Request, db: sqlite3.Connec
             movimento.usuario_uuid  
         )
     )
-    
-    # Atualizar o estoque do produto (somar quantidade)
     nova_quantidade = produto["quantidade"] + movimento.quantidade
     
-    # Atualizar status baseado na nova quantidade
     novo_status = "disponível" if nova_quantidade > 0 else "esgotado"
     
     cursor.execute(
@@ -231,24 +217,19 @@ def registrar_entrada(movimento: Movimento, request: Request, db: sqlite3.Connec
 @app.post("/movimentos/saida", response_model=Movimento)
 def registrar_saida(movimento: Movimento, request: Request, db: sqlite3.Connection = Depends(get_db)):
     cursor = db.cursor()
-    
-    # Verificar se o produto existe
     cursor.execute("SELECT * FROM produtos WHERE uuid = ?", (movimento.produto_uuid,))
     produto = cursor.fetchone()
     if not produto:
         raise HTTPException(status_code=404, detail="Produto não encontrado")
     
-    # Verificar se há estoque suficiente
     if produto["quantidade"] < movimento.quantidade:
         raise HTTPException(status_code=400, detail="Estoque insuficiente")
     
-    # Verificar se o fornecedor existe
     cursor.execute("SELECT * FROM fornecedores WHERE uuid = ?", (movimento.fornecedor_uuid,))
     fornecedor = cursor.fetchone()
     if not fornecedor:
         raise HTTPException(status_code=404, detail="Fornecedor não encontrado")
-    
-    # Registrar o movimento
+   
     movimento.uuid = str(uuid.uuid4())
     movimento.tipo = TipoMovimento.saida
     usuario_uuid = request.session["user"]["uuid"]
@@ -266,10 +247,8 @@ def registrar_saida(movimento: Movimento, request: Request, db: sqlite3.Connecti
         )
     )
     
-    # Atualizar o estoque do produto (subtrair quantidade)
+   
     nova_quantidade = produto["quantidade"] - movimento.quantidade
-    
-    # Atualizar status baseado na nova quantidade
     novo_status = "disponível" if nova_quantidade > 0 else "esgotado"
     
     cursor.execute(
@@ -280,8 +259,7 @@ def registrar_saida(movimento: Movimento, request: Request, db: sqlite3.Connecti
     db.commit()
     return movimento
 
-# Rotas de API
-
+# ROTAS DA API
 @app.post("/usuarios/", response_model=Usuario)
 def cadastrar_usuario(usuario: Usuario, db: sqlite3.Connection = Depends(get_db)):
     cursor = db.cursor()
@@ -369,13 +347,12 @@ def deletar_produto(uuid: str, db: sqlite3.Connection = Depends(get_db)):
 def listar_fornecedores(db: sqlite3.Connection = Depends(get_db)):
     cursor = db.cursor()
     cursor.execute("SELECT * FROM fornecedores")
-    return [Fornecedor(**dict(row)) for row in cursor.fetchall()]
+    fornecedores = [Fornecedor(**dict(row)) for row in cursor.fetchall()]
+    return fornecedores
 
 
-#novas rotas
 @app.get("/fornecedores", response_class=HTMLResponse)
 def pagina_fornecedores(request: Request):
-    # Verificar se o usuário está logado
     if "user" not in request.session:
         flash(request, "Você precisa fazer login para acessar esta página.", "error")
         url = request.url_for("login")
@@ -390,8 +367,6 @@ def pagina_fornecedores(request: Request):
 @app.put("/fornecedores/{uuid}", response_model=Fornecedor)
 def atualizar_fornecedor(uuid: str, fornecedor: Fornecedor, db: sqlite3.Connection = Depends(get_db)):
     cursor = db.cursor()
-    
-    # Verificar se o fornecedor existe
     cursor.execute("SELECT * FROM fornecedores WHERE uuid = ?", (uuid,))
     if not cursor.fetchone():
         raise HTTPException(status_code=404, detail="Fornecedor não encontrado")
@@ -408,13 +383,10 @@ def atualizar_fornecedor(uuid: str, fornecedor: Fornecedor, db: sqlite3.Connecti
 @app.delete("/fornecedores/{uuid}", response_model=dict)
 def deletar_fornecedor(uuid: str, db: sqlite3.Connection = Depends(get_db)):
     cursor = db.cursor()
-    
-    # Verificar se o fornecedor existe
     cursor.execute("SELECT * FROM fornecedores WHERE uuid = ?", (uuid,))
     if not cursor.fetchone():
         raise HTTPException(status_code=404, detail="Fornecedor não encontrado")
-    
-    # Verificar se existem produtos vinculados a este fornecedor
+   
     cursor.execute("SELECT * FROM produtos WHERE fornecedor_uuid = ?", (uuid,))
     if cursor.fetchone():
         raise HTTPException(status_code=400, detail="Não é possível excluir fornecedor com produtos vinculados")
@@ -424,12 +396,8 @@ def deletar_fornecedor(uuid: str, db: sqlite3.Connection = Depends(get_db)):
     return {"message": "Fornecedor deletado com sucesso"}
 
 
-# Adicione estas rotas após as rotas de fornecedores
-
-# Rota para a página de produtos
 @app.get("/produtos", response_class=HTMLResponse)
 def pagina_produtos(request: Request):
-    # Verificar se o usuário está logado
     if "user" not in request.session:
         flash(request, "Você precisa fazer login para acessar esta página.", "error")
         url = request.url_for("login")
@@ -441,18 +409,15 @@ def pagina_produtos(request: Request):
         "user": request.session["user"]
     })
 
-# Rota para atualizar produto
+
 @app.put("/produtos/{uuid}", response_model=Produto)
 def atualizar_produto(uuid: str, produto: Produto, request: Request, db: sqlite3.Connection = Depends(get_db)):
     cursor = db.cursor()
-    
-    # Verificar se o produto existe
     cursor.execute("SELECT * FROM produtos WHERE uuid = ?", (uuid,))
     produto_existente = cursor.fetchone()
     if not produto_existente:
         raise HTTPException(status_code=404, detail="Produto não encontrado")
     
-    # Atualizar produto
     cursor.execute(
         """UPDATE produtos SET 
             nome = ?, descricao = ?, categoria = ?, quantidade = ?, 
@@ -478,7 +443,7 @@ def atualizar_produto(uuid: str, produto: Produto, request: Request, db: sqlite3
     produto.uuid = uuid
     return produto
 
-# Rota para obter um produto específico por UUID (para edição)
+
 @app.get("/produtos/editar/{uuid}", response_model=Produto)
 def obter_produto_edicao(uuid: str, db: sqlite3.Connection = Depends(get_db)):
     cursor = db.cursor()
