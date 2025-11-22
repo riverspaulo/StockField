@@ -276,6 +276,7 @@ def cadastrar_produto(request: Request ,produto: Produto, db: sqlite3.Connection
     cursor = db.cursor()
     produto.uuid = str(uuid.uuid4())
     usuario_uuid = request.session["user"]["uuid"]
+    produto.usuario_uuid = usuario_uuid
     cursor.execute(
         "INSERT INTO produtos VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         (
@@ -290,7 +291,7 @@ def cadastrar_produto(request: Request ,produto: Produto, db: sqlite3.Connection
             produto.fornecedor_uuid,
             produto.localizacao,
             produto.status.value,
-            usuario_uuid 
+            usuario_uuid  
         )
     )
     db.commit()

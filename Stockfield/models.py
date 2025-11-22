@@ -1,7 +1,7 @@
 from typing import List, Optional, Literal
 from datetime import date
 from enum import Enum
-import sqlite3
+import sqlite3, uuid
 from pydantic import BaseModel
 
 DATABASE_URL = "./stockfield.db"
@@ -39,7 +39,7 @@ class Produto(BaseModel):
     fornecedor_uuid: str
     localizacao: Optional[str] = None
     status: StatusProduto = StatusProduto.disponivel
-    usuario_uuid: str
+    usuario_uuid: Optional[str] = None
 
 class Fornecedor(BaseModel):
     uuid: Optional[str] = None
@@ -79,6 +79,11 @@ def init_db():
             senha TEXT NOT NULL,
             tipo TEXT NOT NULL
         )""")
+
+        cursor.execute("""SELECT * FROM usuarios WHERE email="admin@admin" """)
+        if not cursor.fetchone():
+            adm_uuid = str(uuid.uuid4())
+            cursor.execute("""INSERT INTO usuarios VALUES (?, "123.456.789-00", "Admin", "admin@admin", "useradm", "admin")""",(adm_uuid,))
         
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS fornecedores (
