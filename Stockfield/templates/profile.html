@@ -7,92 +7,217 @@
     <link rel="stylesheet" href="/static/css/profile.css">
     <title>Perfil - StockField</title>
     <style>
-        .section-container {
-            margin: 20px 0;
+        .profile-container {
+            max-width: 1200px;
+            margin: 0 auto;
             padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background-color: #f9f9f9;
         }
-        .section-title {
-            color: #66802e;
-            margin-bottom: 15px;
+
+        .title {
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            text-align: center;
         }
-        .movimentacao-form {
+
+        .profile-info {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .info-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-left: 5px solid #3498db;
+        }
+
+        .info-card h3 {
+            color: #2c3e50;
             margin-bottom: 20px;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #f8f9fa;
+            padding-bottom: 10px;
         }
-        .form-group {
+
+        .info-item {
             display: flex;
-            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f8f9fa;
         }
-        .form-group label {
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        .form-group input, .form-group select {
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        .btn-submit {
-            background-color: #66802e;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            grid-column: span 2;
-        }
-        .btn-submit:hover {
-            background-color: #556b27;
-        }
-        .movimentacoes-list {
-            margin-top: 20px;
-        }
-        .movimentacao-item {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            margin-bottom: 10px;
-            background-color: white;
-        }
-        .entrada {
-            border-left: 4px solid #28a745;
-        }
-        .saida {
-            border-left: 4px solid #dc3545;
-        }
-        .tab-container {
-            margin-top: 20px;
-        }
-        .tabs {
-            display: flex;
-            border-bottom: 1px solid #ddd;
-        }
-        .tab {
-            padding: 10px 20px;
-            cursor: pointer;
-            border: 1px solid transparent;
+
+        .info-item:last-child {
             border-bottom: none;
-            margin-right: 5px;
-            background-color: #f1f1f1;
         }
-        .tab.active {
-            background-color: white;
-            border-color: #ddd;
-            border-bottom: 1px solid white;
+
+        .info-item strong {
+            color: #2c3e50;
+            font-weight: 600;
         }
-        .tab-content {
-            display: none;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-top: none;
+
+        .info-item span {
+            color: #7f8c8d;
+            font-weight: 500;
         }
-        .tab-content.active {
-            display: block;
+
+        .profile-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .btn-action {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            padding: 25px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .btn-action:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        .btn-action i {
+            font-size: 2rem;
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .flash-messages {
+            margin-bottom: 25px;
+        }
+
+        .flash-message {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: 500;
+            border: 2px solid;
+        }
+
+        .flash-success {
+            background: #d4edda;
+            color: #155724;
+            border-color: #c3e6cb;
+        }
+
+        .flash-error {
+            background: #f8d7da;
+            color: #721c24;
+            border-color: #f5c6cb;
+        }
+
+        .flash-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-color: #bee5eb;
+        }
+
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            border-top: 4px solid #3498db;
+        }
+
+        .stat-card i {
+            font-size: 2.5rem;
+            color: #3498db;
+            margin-bottom: 15px;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .quick-access {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-top: 30px;
+        }
+
+        .quick-access h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .quick-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .quick-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #2c3e50;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .quick-link:hover {
+            background: #3498db;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .quick-link i {
+            font-size: 1.2rem;
+        }
+
+        @media (max-width: 768px) {
+            .profile-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .profile-actions {
+                grid-template-columns: 1fr;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
         }
     </style>
 </head>
@@ -108,6 +233,9 @@
                 </li>
                 <li class="nav-item">
                     <a href="/fornecedores">Fornecedores</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/movimentacoes">Movimentações</a>
                 </li>
             </ul>
             <button id="logout_btn" onclick="logout()">
@@ -125,6 +253,7 @@
                     <div class="flash-messages">
                         {% for msg in messages %}
                             <div class="flash-message flash-{{ msg.category }}">
+                                <i class="fa-solid fa-{% if msg.category == 'success' %}check-circle{% elif msg.category == 'error' %}exclamation-circle{% else %}info-circle{% endif %}"></i>
                                 {{ msg.message }}
                             </div>
                         {% endfor %}
@@ -133,7 +262,7 @@
 
                 <div class="profile-info">
                     <div class="info-card">
-                        <h3>Informações Pessoais</h3>
+                        <h3><i class="fa-solid fa-user"></i> Informações Pessoais</h3>
                         <div class="info-item">
                             <strong>Nome:</strong>
                             <span>{{ user.nome }}</span>
@@ -147,128 +276,68 @@
                             <span>{{ user.tipo }}</span>
                         </div>
                     </div>
+
+                    <div class="info-card">
+                        <h3><i class="fa-solid fa-chart-line"></i> Estatísticas Rápidas</h3>
+                        <div class="dashboard-stats">
+                            <div class="stat-card">
+                                <i class="fa-solid fa-box"></i>
+                                <div class="stat-number" id="total-produtos">0</div>
+                                <div class="stat-label">Produtos</div>
+                            </div>
+                            <div class="stat-card">
+                                <i class="fa-solid fa-truck"></i>
+                                <div class="stat-number" id="total-fornecedores">0</div>
+                                <div class="stat-label">Fornecedores</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="profile-actions">
                     <a href="/produtos" class="btn-action">
                         <i class="fa-solid fa-boxes"></i>
-                        Gerenciar Produtos
+                        <div>
+                            <h3>Gerenciar Produtos</h3>
+                            <p>Adicione, edite ou remova produtos do estoque</p>
+                        </div>
                     </a>
                     <a href="/fornecedores" class="btn-action">
                         <i class="fa-solid fa-truck"></i>
-                        Gerenciar Fornecedores
+                        <div>
+                            <h3>Gerenciar Fornecedores</h3>
+                            <p>Administre seus fornecedores cadastrados</p>
+                        </div>
+                    </a>
+                    <a href="/movimentacoes" class="btn-action">
+                        <i class="fa-solid fa-exchange-alt"></i>
+                        <div>
+                            <h3>Movimentações</h3>
+                            <p>Registre entradas e saídas do estoque</p>
+                        </div>
                     </a>
                 </div>
 
-                <!-- Sistema de Abas para Movimentações -->
-                <div class="tab-container">
-                    <div class="tabs">
-                        <div class="tab active" onclick="openTab('listar-movimentacoes')">Listar Movimentações</div>
-                        <div class="tab" onclick="openTab('registrar-entrada')">Registrar Entrada</div>
-                        <div class="tab" onclick="openTab('registrar-saida')">Registrar Saída</div>
+                <div class="quick-access">
+                    <h3><i class="fa-solid fa-rocket"></i> Acesso Rápido</h3>
+                    <div class="quick-links">
+                        <a href="/produtos" class="quick-link">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>Novo Produto</span>
+                        </a>
+                        <a href="/fornecedores" class="quick-link">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>Novo Fornecedor</span>
+                        </a>
+                        <a href="/movimentacoes" class="quick-link">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>Nova Entrada</span>
+                        </a>
+                        <a href="/movimentacoes" class="quick-link">
+                            <i class="fa-solid fa-minus"></i>
+                            <span>Nova Saída</span>
+                        </a>
                     </div>
-
-                    <!-- Aba: Listar Movimentações -->
-                    <div id="listar-movimentacoes" class="tab-content active">
-                        <h2 class="section-title">Lista de Movimentações</h2>
-                        <div id="movimentacoes-container">
-                            <!-- As movimentações serão carregadas via JavaScript -->
-                            <p>Carregando movimentações...</p>
-                        </div>
-                    </div>
-
-                    <!-- Aba: Registrar Entrada -->
-                    <div id="registrar-entrada" class="tab-content">
-                        <h2 class="section-title">Registrar Entrada de Produto</h2>
-                        <form id="form-entrada" class="movimentacao-form">
-                            <div class="form-group">
-                                <label for="entrada-produto">Produto:</label>
-                                <select id="entrada-produto" required>
-                                    <option value="">Selecione um produto</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="entrada-quantidade">Quantidade:</label>
-                                <input type="number" id="entrada-quantidade" min="1" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="entrada-fornecedor">Fornecedor:</label>
-                                <select id="entrada-fornecedor" required>
-                                    <option value="">Selecione um fornecedor</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="entrada-data">Data:</label>
-                                <input type="date" id="entrada-data" required>
-                            </div>
-                            <button type="submit" class="btn-submit">Registrar Entrada</button>
-                        </form>
-                    </div>
-
-                    <!-- Aba: Registrar Saída -->
-                    <div id="registrar-saida" class="tab-content">
-                        <h2 class="section-title">Registrar Saída de Produto</h2>
-                        <form id="form-saida" class="movimentacao-form">
-                            <div class="form-group">
-                                <label for="saida-produto">Produto:</label>
-                                <select id="saida-produto" required>
-                                    <option value="">Selecione um produto</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="saida-quantidade">Quantidade:</label>
-                                <input type="number" id="saida-quantidade" min="1" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="saida-fornecedor">Fornecedor:</label>
-                                <select id="saida-fornecedor" required>
-                                    <option value="">Selecione um fornecedor</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="saida-data">Data:</label>
-                                <input type="date" id="saida-data" required>
-                            </div>
-                            <button type="submit" class="btn-submit">Registrar Saída</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Aba: Alertas -->
-            <div class="tab" onclick="openTab('alertas')">Alertas</div>
-
-            <!-- Aba: Relatórios -->
-            <div class="tab" onclick="openTab('relatorios')">Relatórios</div>
-
-            <!-- Aba: Alertas -->
-            <div id="alertas" class="tab-content">
-                <h2 class="section-title">Alertas do Sistema</h2>
-                <div id="alertas-container">
-                    <p>Carregando alertas...</p>
-                </div>
-            </div>
-
-            <!-- Aba: Relatórios -->
-            <div id="relatorios" class="tab-content">
-                <h2 class="section-title">Relatórios</h2>
-                <div class="relatorios-options">
-                    <div class="form-group">
-                        <label for="data-inicio">Data Início:</label>
-                        <input type="date" id="data-inicio">
-                    </div>
-                    <div class="form-group">
-                        <label for="data-fim">Data Fim:</label>
-                        <input type="date" id="data-fim">
-                    </div>
-                    <button class="btn-action" onclick="gerarRelatorioEstoque()">
-                        <i class="fa-solid fa-download"></i>
-                        Baixar Relatório de Estoque (CSV)
-                    </button>
-                    <button class="btn-action" onclick="gerarRelatorioMovimentacoes()">
-                        <i class="fa-solid fa-download"></i>
-                        Baixar Relatório de Movimentações (CSV)
-                    </button>
                 </div>
             </div>
         </section>
@@ -282,172 +351,29 @@
 
     <script>
         function logout() {
-            window.location.href = "/";
-        }
-
-        // Sistema de abas
-        function openTab(tabName) {
-            const tabs = document.querySelectorAll('.tab');
-            const tabContents = document.querySelectorAll('.tab-content');
-            
-            tabs.forEach(tab => tab.classList.remove('active'));
-            tabContents.forEach(content => content.classList.remove('active'));
-            
-            document.querySelector(`.tab[onclick="openTab('${tabName}')"]`).classList.add('active');
-            document.getElementById(tabName).classList.add('active');
-            
-            // Carregar dados quando abrir a aba de listagem
-            if (tabName === 'listar-movimentacoes') {
-                carregarMovimentacoes();
+            if (confirm('Tem certeza que deseja sair?')) {
+                window.location.href = "/";
             }
         }
 
-        // Carregar produtos e fornecedores para os formulários
-        async function carregarDadosFormularios() {
+        async function carregarEstatisticas() {
             try {
-                // Carregar produtos
                 const responseProdutos = await fetch('/produtos/');
                 const produtos = await responseProdutos.json();
-                
-                const selectEntradaProduto = document.getElementById('entrada-produto');
-                const selectSaidaProduto = document.getElementById('saida-produto');
-                
-                produtos.forEach(produto => {
-                    const option = document.createElement('option');
-                    option.value = produto.uuid;
-                    option.textContent = `${produto.nome} (Estoque: ${produto.quantidade})`;
-                    selectEntradaProduto.appendChild(option.cloneNode(true));
-                    selectSaidaProduto.appendChild(option);
-                });
+                document.getElementById('total-produtos').textContent = produtos.length;
 
-                // Carregar fornecedores
+
                 const responseFornecedores = await fetch('/fornecedores/');
                 const fornecedores = await responseFornecedores.json();
-                
-                const selectEntradaFornecedor = document.getElementById('entrada-fornecedor');
-                const selectSaidaFornecedor = document.getElementById('saida-fornecedor');
-                
-                fornecedores.forEach(fornecedor => {
-                    const option = document.createElement('option');
-                    option.value = fornecedor.uuid;
-                    option.textContent = fornecedor.nome;
-                    selectEntradaFornecedor.appendChild(option.cloneNode(true));
-                    selectSaidaFornecedor.appendChild(option);
-                });
+                document.getElementById('total-fornecedores').textContent = fornecedores.length;
+
             } catch (error) {
-                console.error('Erro ao carregar dados:', error);
+                console.error('Erro ao carregar estatísticas:', error);
             }
         }
 
-        // Carregar movimentações
-        async function carregarMovimentacoes() {
-            try {
-                const response = await fetch('/movimentos/');
-                const movimentacoes = await response.json();
-                
-                const container = document.getElementById('movimentacoes-container');
-                container.innerHTML = '';
-                
-                if (movimentacoes.length === 0) {
-                    container.innerHTML = '<p>Nenhuma movimentação registrada.</p>';
-                    return;
-                }
-                
-                movimentacoes.forEach(mov => {
-                    const div = document.createElement('div');
-                    div.className = `movimentacao-item ${mov.tipo}`;
-                    div.innerHTML = `
-                        <strong>${mov.tipo === 'entrada' ? '📥 Entrada' : '📤 Saída'}</strong>
-                        <br>Produto: ${mov.produto_uuid}
-                        <br>Quantidade: ${mov.quantidade}
-                        <br>Data: ${new Date(mov.data).toLocaleDateString('pt-BR')}
-                        <br>Fornecedor: ${mov.fornecedor_uuid}
-                    `;
-                    container.appendChild(div);
-                });
-            } catch (error) {
-                console.error('Erro ao carregar movimentações:', error);
-                document.getElementById('movimentacoes-container').innerHTML = '<p>Erro ao carregar movimentações.</p>';
-            }
-        }
-
-        // Registrar entrada
-        document.getElementById('form-entrada').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const movimento = {
-                produto_uuid: document.getElementById('entrada-produto').value,
-                quantidade: parseInt(document.getElementById('entrada-quantidade').value),
-                data: document.getElementById('entrada-data').value,
-                fornecedor_uuid: document.getElementById('entrada-fornecedor').value,
-                tipo: 'entrada'
-            };
-            
-            try {
-                const response = await fetch('/movimentos/entrada', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(movimento)
-                });
-                
-                if (response.ok) {
-                    alert('Entrada registrada com sucesso!');
-                    document.getElementById('form-entrada').reset();
-                    carregarDadosFormularios(); // Recarregar para atualizar estoque
-                } else {
-                    const error = await response.json();
-                    alert(`Erro: ${error.detail}`);
-                }
-            } catch (error) {
-                alert('Erro ao registrar entrada.');
-            }
-        });
-
-        // Registrar saída
-        document.getElementById('form-saida').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const movimento = {
-                produto_uuid: document.getElementById('saida-produto').value,
-                quantidade: parseInt(document.getElementById('saida-quantidade').value),
-                data: document.getElementById('saida-data').value,
-                fornecedor_uuid: document.getElementById('saida-fornecedor').value,
-                tipo: 'saída'
-            };
-            
-            try {
-                const response = await fetch('/movimentos/saida', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(movimento)
-                });
-                
-                if (response.ok) {
-                    alert('Saída registrada com sucesso!');
-                    document.getElementById('form-saida').reset();
-                    carregarDadosFormularios(); // Recarregar para atualizar estoque
-                } else {
-                    const error = await response.json();
-                    alert(`Erro: ${error.detail}`);
-                }
-            } catch (error) {
-                alert('Erro ao registrar saída.');
-            }
-        });
-
-        // Inicializar quando a página carregar
         document.addEventListener('DOMContentLoaded', () => {
-            carregarDadosFormularios();
-            carregarMovimentacoes();
-            
-            // Definir data atual como padrão
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('entrada-data').value = today;
-            document.getElementById('saida-data').value = today;
+            carregarEstatisticas();
         });
     </script>
 </body>

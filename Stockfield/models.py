@@ -57,9 +57,9 @@ class Movimento(BaseModel):
     usuario_uuid: Optional[str] = None
 
 
-# Database
+# Database - CORREÇÃO AQUI
 def get_db():
-    conn = sqlite3.connect(DATABASE_URL)
+    conn = sqlite3.connect(DATABASE_URL, check_same_thread=False)
     conn.row_factory = sqlite3.Row
     try:
         yield conn
@@ -93,8 +93,6 @@ def init_db():
             email TEXT NOT NULL
         )""")
 
-        
-        # No models.py, na tabela produtos, altere:
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS produtos (
             uuid TEXT PRIMARY KEY,
@@ -102,7 +100,7 @@ def init_db():
             descricao TEXT NOT NULL,
             categoria TEXT NOT NULL,
             quantidade INTEGER NOT NULL,
-            preco_unitario FLOAT,  -- Corrigido para preco_unitario
+            preco_unitario FLOAT,
             data_validade TEXT,
             lote TEXT,
             fornecedor_uuid TEXT NOT NULL,
@@ -112,26 +110,7 @@ def init_db():
             FOREIGN KEY (fornecedor_uuid) REFERENCES fornecedores (uuid),
             FOREIGN KEY (usuario_uuid) REFERENCES usuarios (uuid)
         )""")
-
-        # cursor.execute("""
-        # CREATE TABLE IF NOT EXISTS produtos (
-        #     uuid TEXT PRIMARY KEY,
-        #     nome TEXT NOT NULL,
-        #     descricao TEXT NOT NULL,
-        #     categoria TEXT NOT NULL,
-        #     quantidade INTEGER NOT NULL,
-        #     preco FLOAT NOT NULL,
-        #     data_validade TEXT NOT NULL,
-        #     lote TEXT NOT NULL,
-        #     fornecedor_uuid TEXT NOT NULL,
-        #     localizacao TEXT NOT NULL,
-        #     status TEXT NOT NULL,
-        #     usuario_uuid TEXT NOT NULL,
-        #     FOREIGN KEY (fornecedor_uuid) REFERENCES fornecedores (uuid),
-        #     FOREIGN KEY (usuario_uuid) REFERENCES usuarios (uuid)
-        # )""")
         
-        # Nova tabela para movimentos
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS movimentos (
             uuid TEXT PRIMARY KEY,
@@ -147,5 +126,3 @@ def init_db():
         )""")
         
         conn.commit()
-
-

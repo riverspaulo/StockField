@@ -135,6 +135,19 @@ def profile(request: Request):
     })
 
 # ROTAS DE MOVIMENTAÇÕES
+@app.get("/movimentacoes", response_class=HTMLResponse)
+def pagina_movimentacoes(request: Request):
+    if "user" not in request.session:
+        flash(request, "Você precisa fazer login para acessar esta página.", "error")
+        url = request.url_for("login")
+        return RedirectResponse(url=url, status_code=303)
+    
+    return templates.TemplateResponse("movimentacoes.html", {
+        "request": request, 
+        "messages": get_flashed_messages(request),
+        "user": request.session["user"]
+    })
+
 @app.get("/movimentos/", response_model=List[Movimento])
 def listar_movimentos(request: Request, db: sqlite3.Connection = Depends(get_db)):
     cursor = db.cursor()
@@ -217,10 +230,13 @@ def registrar_entrada(movimento: Movimento, request: Request, db: sqlite3.Connec
 @app.post("/movimentos/saida", response_model=Movimento)
 def registrar_saida(movimento: Movimento, request: Request, db: sqlite3.Connection = Depends(get_db)):
     cursor = db.cursor()
-    cursor.execute("SELECT * FROM produtos WHERE uuid = ?", (movimento.produto_uuid,))
+    usuario_uuid = str(request.session["user"]["uuid"])
+    
+    # Verificar se o produto pertence ao usuário
+    cursor.execute("SELECT * FROM produtos WHERE uuid = ? AND usuario_uuid = ?", (movimento.produto_uuid, usuario_uuid))
     produto = cursor.fetchone()
     if not produto:
-        raise HTTPException(status_code=404, detail="Produto não encontrado")
+        raise HTTPException(status_code=404, detail="Produto não encontrado ou não pertence ao usuário.")
     
     if produto["quantidade"] < movimento.quantidade:
         raise HTTPException(status_code=400, detail="Estoque insuficiente")
@@ -232,7 +248,7 @@ def registrar_saida(movimento: Movimento, request: Request, db: sqlite3.Connecti
    
     movimento.uuid = str(uuid.uuid4())
     movimento.tipo = TipoMovimento.saida
-    usuario_uuid = request.session["user"]["uuid"]
+    movimento.usuario_uuid = usuario_uuid
     
     cursor.execute(
         "INSERT INTO movimentos VALUES (?, ?, ?, ?, ?, ?, ?)",
@@ -243,11 +259,10 @@ def registrar_saida(movimento: Movimento, request: Request, db: sqlite3.Connecti
             movimento.quantidade,
             movimento.data.isoformat(),
             movimento.fornecedor_uuid,
-            usuario_uuid 
+            movimento.usuario_uuid 
         )
     )
     
-   
     nova_quantidade = produto["quantidade"] - movimento.quantidade
     novo_status = "disponível" if nova_quantidade > 0 else "esgotado"
     
@@ -259,7 +274,7 @@ def registrar_saida(movimento: Movimento, request: Request, db: sqlite3.Connecti
     db.commit()
     return movimento
 
-# ROTAS DA API
+# ROTAS DA API - CORREÇÃO DAS ROTAS CRÍTICAS
 @app.post("/usuarios/", response_model=Usuario)
 def cadastrar_usuario(usuario: Usuario, db: sqlite3.Connection = Depends(get_db)):
     cursor = db.cursor()
