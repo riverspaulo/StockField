@@ -206,6 +206,137 @@
             font-size: 1.2rem;
         }
 
+        /* Estilos para alertas no perfil */
+        .alertas-section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            border-left: 5px solid #e74c3c;
+        }
+
+        .alertas-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .alertas-title {
+            color: #e74c3c;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .alertas-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .alerta-card {
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid;
+            background: #fff9f9;
+        }
+
+        .alerta-card.vencido {
+            border-color: #e74c3c;
+            background: linear-gradient(135deg, #fff9f9 0%, #ffeaea 100%);
+        }
+
+        .alerta-card.a-vencer {
+            border-color: #f39c12;
+            background: linear-gradient(135deg, #fffbf0 0%, #fff5e6 100%);
+        }
+
+        .alerta-produto {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .alerta-dias {
+            font-size: 0.9rem;
+            padding: 3px 8px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-top: 5px;
+            font-weight: bold;
+        }
+
+        .dias-vencido {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .dias-urgente {
+            background: #f39c12;
+            color: white;
+        }
+
+        .dias-atencao {
+            background: #f1c40f;
+            color: #333;
+        }
+
+        .btn-ver-alertas {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .btn-ver-alertas:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .sem-alertas {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        /* Badge de alerta no menu */
+        .nav-item.alerta {
+            position: relative;
+        }
+
+        .alerta-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
         @media (max-width: 768px) {
             .profile-info {
                 grid-template-columns: 1fr;
@@ -228,8 +359,12 @@
                 <li class="nav-item active">
                     <a href="/profile">Perfil</a>
                 </li>
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                     <a href="/produtos">Produtos</a>
+                </li> -->
+                <li class="nav-item alerta">
+                    <a href="/produtos">Produtos</a>
+                    <span id="menuAlertaBadge" class="alerta-badge" style="display: none;">0</span>
                 </li>
                 <li class="nav-item">
                     <a href="/fornecedores">Fornecedores</a>
@@ -237,6 +372,7 @@
                 <li class="nav-item">
                     <a href="/movimentacoes">Movimentações</a>
                 </li>
+                
             </ul>
             <button id="logout_btn" onclick="logout()">
                 <i class="fa-solid fa-right-from-bracket"></i> Sair
@@ -261,6 +397,26 @@
                 {% endif %}
 
                 <div class="profile-info">
+
+                    
+                    <!-- Adicione esta seção após o profile-info -->
+                    <div id="alertasSection" class="alertas-section" style="display: none;">
+                        <div class="alertas-header">
+                            <h3 class="alertas-title">
+                                <i class="fa-solid fa-bell"></i>
+                                Alertas de Vencimento
+                            </h3>
+                            <button class="btn-ver-alertas" onclick="window.location.href='/produtos'">
+                                <i class="fa-solid fa-box"></i>
+                                Ver Produtos
+                            </button>
+                        </div>
+                        <div class="alertas-content" id="alertasList">
+                            <!-- Alertas serão carregados aqui -->
+                        </div>
+                    </div>
+
+
                     <div class="info-card">
                         <h3><i class="fa-solid fa-user"></i> Informações Pessoais</h3>
                         <div class="info-item">
@@ -337,6 +493,8 @@
                             <i class="fa-solid fa-minus"></i>
                             <span>Nova Saída</span>
                         </a>
+
+                        
                     </div>
                 </div>
             </div>
@@ -371,6 +529,119 @@
                 console.error('Erro ao carregar estatísticas:', error);
             }
         }
+
+        async function carregarAlertasPerfil() {
+        try {
+            const response = await fetch('/api/alertas/resumo');
+            const data = await response.json();
+            
+            const alertasSection = document.getElementById('alertasSection');
+            const alertasList = document.getElementById('alertasList');
+            const menuBadge = document.getElementById('menuAlertaBadge');
+            
+            if (data.total_alertas > 0) {
+                // Mostrar seção de alertas
+                alertasSection.style.display = 'block';
+                
+                // Atualizar badge no menu
+                menuBadge.textContent = data.total_alertas;
+                menuBadge.style.display = 'flex';
+                
+                // Carregar detalhes dos alertas
+                const alertasDetalhes = await fetch('/api/alertas/vencimento');
+                const detalhesData = await alertasDetalhes.json();
+                
+                if (detalhesData.alertas.length > 0) {
+                    alertasList.innerHTML = detalhesData.alertas.slice(0, 4).map(alerta => `
+                        <div class="alerta-card ${alerta.severidade}">
+                            <div class="alerta-produto">
+                                <i class="fa-solid fa-box"></i> ${alerta.nome}
+                            </div>
+                            <div>
+                                <small>Validade: ${alerta.data_validade}</small>
+                            </div>
+                            <div>
+                                <span class="alerta-dias ${alerta.dias_restantes < 0 ? 'dias-vencido' : (alerta.dias_restantes <= 3 ? 'dias-urgente' : 'dias-atencao')}">
+                                    ${alerta.dias_restantes < 0 ? 'VENCIDO' : `${alerta.dias_restantes} dias restantes`}
+                                </span>
+                            </div>
+                            <div style="margin-top: 10px;">
+                                <button class="btn-action" onclick="window.location.href='/produtos'">
+                                    <i class="fa-solid fa-eye"></i> Ver
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+                    
+                    if (detalhesData.alertas.length > 4) {
+                        alertasList.innerHTML += `
+                            <div class="sem-alertas">
+                                <p>+ ${detalhesData.alertas.length - 4} outros alertas</p>
+                                <button class="btn-ver-alertas" onclick="window.location.href='/produtos'">
+                                    Ver Todos
+                                </button>
+                            </div>
+                        `;
+                    }
+                }
+                
+                // Adicionar mensagem flash se houver alertas
+                if (!localStorage.getItem('alertas_vistos')) {
+                    const flashContainer = document.querySelector('.flash-messages');
+                    if (flashContainer) {
+                        const alertaFlash = document.createElement('div');
+                        alertaFlash.className = 'flash-message flash-error';
+                        alertaFlash.innerHTML = `
+                            <i class="fa-solid fa-exclamation-triangle"></i>
+                            ATENÇÃO: Você tem ${data.total_alertas} produto(s) com alerta de vencimento!
+                            <button onclick="window.location.href='/produtos'" style="margin-left: 10px; background: white; color: #721c24; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                                Ver Detalhes
+                            </button>
+                        `;
+                        flashContainer.appendChild(alertaFlash);
+                    }
+                }
+                
+            } else {
+                alertasSection.style.display = 'none';
+                menuBadge.style.display = 'none';
+                localStorage.setItem('alertas_vistos', 'true');
+            }
+            
+            // Atualizar estatísticas
+            document.getElementById('total-produtos').textContent = await getTotalProdutos();
+            
+        } catch (error) {
+            console.error('Erro ao carregar alertas:', error);
+        }
+    }
+
+    async function getTotalProdutos() {
+        try {
+            const response = await fetch('/produtos/');
+            const produtos = await response.json();
+            return produtos.length;
+        } catch (error) {
+            return '0';
+        }
+    }
+
+    // Modifique o DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', () => {
+        carregarEstatisticas();
+        carregarAlertasPerfil();
+        
+        // Verificar alertas a cada 10 minutos
+        setInterval(carregarAlertasPerfil, 10 * 60 * 1000);
+    });
+
+    // Adicionar função para marcar alertas como vistos
+    function marcarAlertasVistos() {
+        localStorage.setItem('alertas_vistos', 'true');
+        document.querySelectorAll('.flash-error').forEach(el => {
+            el.style.display = 'none';
+        });
+    }
 
         document.addEventListener('DOMContentLoaded', () => {
             carregarEstatisticas();

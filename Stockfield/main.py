@@ -12,15 +12,15 @@ import uuid
 import sqlite3
 import os
 
-from models import Produto, Usuario, Fornecedor, Movimento, init_db, get_db, TipoUsuario, TipoMovimento
+from models import Produto, Usuario, Fornecedor, Movimento, init_db, get_db, TipoUsuario, TipoMovimento, StatusProduto
 
 app = FastAPI()
-
 app.add_middleware(SessionMiddleware, secret_key="chave_super_secreta")
 init_db()
-
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
+
+ALERTA_DIAS = 7  # Dias para considerar produto "a vencer"
 
 
 def flash(request: Request, message: str, category: str = "info"):
@@ -33,6 +33,14 @@ def get_flashed_messages(request: Request):
     return messages
 
 
+@app.middleware("http")
+async def verificar_alertas_middleware(request: Request, call_next):
+    response = await call_next(request)
+    if request.url.path == "/login" and request.method == "POST":
+        pass
+    
+    return response
+
 #ROTAS
 @app.get("/", response_class=HTMLResponse)
 def index(request: Request):
@@ -41,6 +49,7 @@ def index(request: Request):
 @app.get("/login", response_class=HTMLResponse)
 def login(request: Request):
     return templates.TemplateResponse("login.html", {"request": request, "messages": get_flashed_messages(request)})
+
 
 @app.post("/login")
 def login_action(
@@ -64,6 +73,30 @@ def login_action(
         "email": user["email"],
         "tipo": user["tipo"]
     }
+    
+    # ============ VERIFICAÇÃO AUTOMÁTICA DE ALERTAS AO LOGIN ============
+    from models import verificar_produtos_a_vencer, obter_resumo_alertas
+    
+    resultado = verificar_produtos_a_vencer(db, ALERTA_DIAS)
+    resumo = obter_resumo_alertas(db, user["uuid"])
+    
+    if resumo["total_alertas"] > 0:
+        request.session["alertas_vencimento"] = {
+            "vencidos": resumo["vencidos"],
+            "a_vencer": resumo["a_vencer"],
+            "total": resumo["total_alertas"],
+            "ultima_verificacao": date.today().isoformat()
+        }
+        
+        mensagem_alerta = f"⚠️ Atenção! Você tem {resumo['total_alertas']} produto(s) "
+        if resumo["vencidos"] > 0 and resumo["a_vencer"] > 0:
+            mensagem_alerta += f"({resumo['vencidos']} vencido(s) e {resumo['a_vencer']} próximo(s) do vencimento)"
+        elif resumo["vencidos"] > 0:
+            mensagem_alerta += f"({resumo['vencidos']} vencido(s))"
+        else:
+            mensagem_alerta += f"({resumo['a_vencer']} próximo(s) do vencimento)"
+        
+        flash(request, mensagem_alerta, "warning")
     
     flash(request, f"Bem-vindo(a), {user['nome']}!", "success")
     url = request.url_for("profile")
@@ -133,6 +166,90 @@ def profile(request: Request):
         "messages": get_flashed_messages(request),
         "user": request.session["user"]
     })
+
+
+@app.get("/api/alertas/vencimento")
+def obter_alertas_vencimento_api(
+    request: Request,
+    db: sqlite3.Connection = Depends(get_db)
+):
+    """API para obter alertas de vencimento"""
+    if "user" not in request.session:
+        raise HTTPException(status_code=401, detail="Não autorizado")
+    
+    from models import obter_alertas_vencimento, verificar_produtos_a_vencer
+    
+    verificar_produtos_a_vencer(db, ALERTA_DIAS)
+    
+    usuario_uuid = request.session["user"]["uuid"]
+    alertas = obter_alertas_vencimento(db, usuario_uuid, ALERTA_DIAS)
+    
+    return {
+        "alertas": alertas,
+        "total": len(alertas),
+        "dias_alerta": ALERTA_DIAS,
+        "data_consulta": date.today().isoformat()
+    }
+
+@app.get("/api/alertas/resumo")
+def obter_resumo_alertas_api(
+    request: Request,
+    db: sqlite3.Connection = Depends(get_db)
+):
+    """API para obter resumo de alertas"""
+    if "user" not in request.session:
+        raise HTTPException(status_code=401, detail="Não autorizado")
+    
+    from models import obter_resumo_alertas
+    
+    usuario_uuid = request.session["user"]["uuid"]
+    resumo = obter_resumo_alertas(db, usuario_uuid)
+    
+    return resumo
+
+@app.post("/api/produtos/{uuid}/verificar-validade")
+def verificar_validade_produto(
+    uuid: str,
+    request: Request,
+    db: sqlite3.Connection = Depends(get_db)
+):
+    """Verifica validade de um produto específico"""
+    if "user" not in request.session:
+        raise HTTPException(status_code=401, detail="Não autorizado")
+    
+    cursor = db.cursor()
+    cursor.execute("SELECT * FROM produtos WHERE uuid = ?", (uuid,))
+    produto = cursor.fetchone()
+    
+    if not produto:
+        raise HTTPException(status_code=404, detail="Produto não encontrado")
+    
+    produto_dict = dict(produto)
+    
+    if not produto_dict["data_validade"]:
+        return {
+            "status": "sem_validade",
+            "mensagem": "Produto não possui data de validade"
+        }
+    
+    data_validade = date.fromisoformat(produto_dict["data_validade"])
+    hoje = date.today()
+    dias_restantes = (data_validade - hoje).days
+    
+    status = "ok"
+    if dias_restantes < 0:
+        status = "vencido"
+    elif dias_restantes <= ALERTA_DIAS:
+        status = "a_vencer"
+    
+    return {
+        "produto": produto_dict["nome"],
+        "data_validade": data_validade.isoformat(),
+        "dias_restantes": dias_restantes,
+        "status": status,
+        "status_atual": produto_dict["status"],
+        "recomendacao": "Consumir imediatamente" if dias_restantes <= 3 else "Atenção ao prazo"
+    }
 
 # ROTAS DE MOVIMENTAÇÕES
 @app.get("/movimentacoes", response_class=HTMLResponse)
@@ -231,8 +348,6 @@ def registrar_entrada(movimento: Movimento, request: Request, db: sqlite3.Connec
 def registrar_saida(movimento: Movimento, request: Request, db: sqlite3.Connection = Depends(get_db)):
     cursor = db.cursor()
     usuario_uuid = str(request.session["user"]["uuid"])
-    
-    # Verificar se o produto pertence ao usuário
     cursor.execute("SELECT * FROM produtos WHERE uuid = ? AND usuario_uuid = ?", (movimento.produto_uuid, usuario_uuid))
     produto = cursor.fetchone()
     if not produto:
@@ -286,12 +401,23 @@ def cadastrar_usuario(usuario: Usuario, db: sqlite3.Connection = Depends(get_db)
     db.commit()
     return usuario
 
+
 @app.post("/produtos/", response_model=Produto)
 def cadastrar_produto(request: Request ,produto: Produto, db: sqlite3.Connection = Depends(get_db)):
     cursor = db.cursor()
     produto.uuid = str(uuid.uuid4())
     usuario_uuid = request.session["user"]["uuid"]
     produto.usuario_uuid = usuario_uuid
+    
+    if produto.data_validade:
+        hoje = date.today()
+        dias_restantes = (produto.data_validade - hoje).days
+        
+        if dias_restantes < 0:
+            produto.status = StatusProduto.vencido
+        elif dias_restantes <= ALERTA_DIAS:
+            produto.status = StatusProduto.a_vencer
+    
     cursor.execute(
         "INSERT INTO produtos VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         (
@@ -433,6 +559,17 @@ def atualizar_produto(uuid: str, produto: Produto, request: Request, db: sqlite3
     produto_existente = cursor.fetchone()
     if not produto_existente:
         raise HTTPException(status_code=404, detail="Produto não encontrado")
+  
+    if produto.data_validade:
+        hoje = date.today()
+        dias_restantes = (produto.data_validade - hoje).days
+        
+        if dias_restantes < 0:
+            produto.status = StatusProduto.vencido
+        elif dias_restantes <= ALERTA_DIAS:
+            produto.status = StatusProduto.a_vencer
+        else:
+            produto.status = StatusProduto.disponivel
     
     cursor.execute(
         """UPDATE produtos SET 
@@ -459,6 +596,27 @@ def atualizar_produto(uuid: str, produto: Produto, request: Request, db: sqlite3
     produto.uuid = uuid
     return produto
 
+
+@app.post("/api/alertas/verificar")
+def forcar_verificacao_alertas(
+    request: Request,
+    db: sqlite3.Connection = Depends(get_db)
+):
+    """Força verificação de alertas de vencimento"""
+    if "user" not in request.session:
+        raise HTTPException(status_code=401, detail="Não autorizado")
+    
+    from models import verificar_produtos_a_vencer, obter_resumo_alertas
+    
+    resultado = verificar_produtos_a_vencer(db, ALERTA_DIAS)
+    usuario_uuid = request.session["user"]["uuid"]
+    resumo = obter_resumo_alertas(db, usuario_uuid)
+    
+    return {
+        "verificacao": resultado,
+        "resumo_usuario": resumo,
+        "mensagem": f"Verificação concluída. {resumo['total_alertas']} alerta(s) encontrado(s)."
+    }
 
 @app.get("/produtos/editar/{uuid}", response_model=Produto)
 def obter_produto_edicao(uuid: str, db: sqlite3.Connection = Depends(get_db)):

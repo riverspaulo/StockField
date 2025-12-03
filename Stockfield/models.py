@@ -1,5 +1,5 @@
 from typing import List, Optional, Literal
-from datetime import date
+from datetime import date, datetime, timedelta
 from enum import Enum
 import sqlite3, uuid
 from pydantic import BaseModel
@@ -14,7 +14,7 @@ class StatusProduto(str, Enum):
     disponivel = "disponível"
     esgotado = "esgotado"
     vencido = "vencido"
-
+    a_vencer = "a_vencer"  
 class TipoMovimento(str, Enum):
     entrada = "entrada"
     saida = "saída"
@@ -40,6 +40,7 @@ class Produto(BaseModel):
     localizacao: Optional[str] = None
     status: StatusProduto = StatusProduto.disponivel
     usuario_uuid: Optional[str] = None
+    dias_para_vencer: Optional[int] = None  
 
 class Fornecedor(BaseModel):
     uuid: Optional[str] = None
@@ -126,3 +127,179 @@ def init_db():
         )""")
         
         conn.commit()
+
+
+def verificar_produtos_a_vencer(db: sqlite3.Connection, dias_alerta: int = 7):
+    """
+    Verifica produtos que estão próximos do vencimento (hoje + X dias)
+    Retorna lista de produtos com status atualizado
+    """
+    cursor = db.cursor()
+    hoje = date.today()
+    data_limite = hoje + timedelta(days=dias_alerta)
+    
+    cursor.execute("""
+        SELECT * FROM produtos 
+        WHERE data_validade IS NOT NULL 
+        AND data_validade != ''
+    """)
+    
+    produtos = cursor.fetchall()
+    produtos_atualizados = []
+    alertas = []
+    
+    for produto in produtos:
+        produto_dict = dict(produto)
+        data_validade_str = produto_dict["data_validade"]
+        
+        if data_validade_str:
+            try:
+                data_validade = date.fromisoformat(data_validade_str)
+                dias_restantes = (data_validade - hoje).days
+                
+                novo_status = produto_dict["status"]
+                if dias_restantes < 0:
+                    # Produto vencido
+                    novo_status = StatusProduto.vencido.value
+                    alertas.append({
+                        "produto": produto_dict["nome"],
+                        "uuid": produto_dict["uuid"],
+                        "data_validade": data_validade,
+                        "status": "vencido",
+                        "dias_restantes": dias_restantes,
+                        "severidade": "alta"
+                    })
+                elif dias_restantes <= dias_alerta:
+                    # Produto a vencer
+                    novo_status = StatusProduto.a_vencer.value
+                    alertas.append({
+                        "produto": produto_dict["nome"],
+                        "uuid": produto_dict["uuid"],
+                        "data_validade": data_validade,
+                        "status": "a_vencer",
+                        "dias_restantes": dias_restantes,
+                        "severidade": "media" if dias_restantes > 3 else "alta"
+                    })
+                else:
+                    # Produto ainda tem tempo
+                    if produto_dict["status"] in [StatusProduto.a_vencer.value, StatusProduto.vencido.value]:
+                        novo_status = StatusProduto.disponivel.value
+                
+                if novo_status != produto_dict["status"]:
+                    cursor.execute(
+                        "UPDATE produtos SET status = ? WHERE uuid = ?",
+                        (novo_status, produto_dict["uuid"])
+                    )
+                    produtos_atualizados.append({
+                        "uuid": produto_dict["uuid"],
+                        "nome": produto_dict["nome"],
+                        "status_anterior": produto_dict["status"],
+                        "status_novo": novo_status,
+                        "dias_restantes": dias_restantes
+                    })
+                    
+            except ValueError:
+                continue
+    
+    if produtos_atualizados:
+        db.commit()
+    
+    return {
+        "alertas": alertas,
+        "atualizados": produtos_atualizados,
+        "total_alertas": len(alertas),
+        "data_verificacao": hoje.isoformat()
+    }
+
+def obter_alertas_vencimento(db: sqlite3.Connection, usuario_uuid: str = None, dias_alerta: int = 7):
+    """
+    Obtém alertas de vencimento para um usuário específico
+    """
+    cursor = db.cursor()
+    hoje = date.today()
+    
+    query = """
+        SELECT uuid, nome, data_validade, status, quantidade, lote 
+        FROM produtos 
+        WHERE data_validade IS NOT NULL 
+        AND data_validade != ''
+        AND (status = ? OR status = ?)
+    """
+    params = [StatusProduto.a_vencer.value, StatusProduto.vencido.value]
+    
+    if usuario_uuid:
+        query += " AND usuario_uuid = ?"
+        params.append(usuario_uuid)
+    
+    query += " ORDER BY data_validade ASC"
+    
+    cursor.execute(query, params)
+    produtos = cursor.fetchall()
+    
+    alertas = []
+    for produto in produtos:
+        produto_dict = dict(produto)
+        data_validade = date.fromisoformat(produto_dict["data_validade"])
+        dias_restantes = (data_validade - hoje).days
+        
+        alertas.append({
+            **produto_dict,
+            "dias_restantes": dias_restantes,
+            "severidade": "vencido" if dias_restantes < 0 else "a_vencer"
+        })
+    
+    return alertas
+
+def obter_resumo_alertas(db: sqlite3.Connection, usuario_uuid: str):
+    """
+    Retorna resumo de alertas para o painel do usuário
+    """
+    cursor = db.cursor()
+    hoje = date.today()
+
+    cursor.execute("""
+        SELECT COUNT(*) as count 
+        FROM produtos 
+        WHERE usuario_uuid = ? 
+        AND status = ?
+    """, (usuario_uuid, StatusProduto.vencido.value))
+    vencidos = cursor.fetchone()["count"]
+    
+    # Produtos a vencer (próximos 7 dias)
+    cursor.execute("""
+        SELECT COUNT(*) as count 
+        FROM produtos 
+        WHERE usuario_uuid = ? 
+        AND status = ?
+    """, (usuario_uuid, StatusProduto.a_vencer.value))
+    a_vencer = cursor.fetchone()["count"]
+    
+
+    cursor.execute("""
+        SELECT nome, data_validade 
+        FROM produtos 
+        WHERE usuario_uuid = ? 
+        AND data_validade IS NOT NULL 
+        AND data_validade != ''
+        AND status != ?
+        ORDER BY data_validade ASC 
+        LIMIT 1
+    """, (usuario_uuid, StatusProduto.vencido.value))
+    proximo = cursor.fetchone()
+    
+    proximo_info = None
+    if proximo:
+        data_validade = date.fromisoformat(proximo["data_validade"])
+        dias = (data_validade - hoje).days
+        proximo_info = {
+            "nome": proximo["nome"],
+            "data_validade": data_validade.isoformat(),
+            "dias_restantes": dias
+        }
+    
+    return {
+        "vencidos": vencidos,
+        "a_vencer": a_vencer,
+        "proximo_vencimento": proximo_info,
+        "total_alertas": vencidos + a_vencer
+    }

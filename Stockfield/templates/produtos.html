@@ -402,6 +402,124 @@
             border: 1px solid #bee5eb;
         }
 
+            /* Estilos para produtos com alertas */
+        .produto-card.vencido {
+            border-left: 4px solid #e74c3c;
+            background: linear-gradient(135deg, #ffffff 0%, #fff5f5 100%);
+        }
+
+        .produto-card.a-vencer {
+            border-left: 4px solid #f39c12;
+            background: linear-gradient(135deg, #ffffff 0%, #fffbf0 100%);
+        }
+
+        .status-vencido {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-a_vencer {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .alerta-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .produto-header {
+            position: relative;
+        }
+
+        .dias-restantes {
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: 8px;
+            font-weight: bold;
+        }
+
+        .dias-negativo {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .dias-baixo {
+            background: #f39c12;
+            color: white;
+        }
+
+        .dias-normal {
+            background: #27ae60;
+            color: white;
+        }
+
+        /* Barra de alertas no topo */
+        .alertas-bar {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+        }
+
+        .alertas-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .alerta-count {
+            background: white;
+            color: #e74c3c;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .btn-ver-alertas {
+            background: white;
+            color: #e74c3c;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s;
+        }
+
+        .btn-ver-alertas:hover {
+            background: #f8f9fa;
+            transform: translateY(-2px);
+        }
+
         /* Personalização da barra de rolagem */
         .modal-body::-webkit-scrollbar {
             width: 8px;
@@ -465,6 +583,19 @@
             </div>
             {% endif %}
 
+            <!--adicionada-->
+            <div id="alertasContainer" class="alertas-bar" style="display: none;">
+                <div class="alertas-info">
+                    <i class="fa-solid fa-exclamation-triangle"></i>
+                    <span id="alertasTexto">Você tem <span id="alertasCount">0</span> produto(s) com alerta de vencimento</span>
+                    <span class="alerta-count" id="alertasDetalhes">0 vencidos • 0 a vencer</span>
+                </div>
+                <button class="btn-ver-alertas" onclick="filtrarAlertas()">
+                    <i class="fa-solid fa-filter"></i>
+                    Ver Alertas
+                </button>
+            </div>
+
             <div class="search-container">
                 <div class="search-box">
                     <input type="text" class="search-input" id="searchInput" placeholder="Buscar produtos...">
@@ -482,6 +613,32 @@
             </div>
         </main>
     </div>
+
+    <!-- Adicione este modal para detalhes dos alertas -->
+    <div id="alertasModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <i class="fa-solid fa-bell"></i>
+                    Alertas de Vencimento
+                </h2>
+                <span class="close" onclick="fecharModalAlertas()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="alertasLista" class="alertas-lista">
+                    <!-- Lista de alertas será preenchida aqui -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="fecharModalAlertas()">Fechar</button>
+                <button type="button" class="btn-success" onclick="forcarVerificacao()">
+                    <i class="fa-solid fa-sync"></i>
+                    Verificar Novamente
+                </button>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Modal para Cadastro/Edição -->
     <div id="produtoModal" class="modal">
@@ -563,6 +720,278 @@
         let produtos = [];
         let produtoEditando = null;
         let fornecedores = [];
+        let alertasAtivos = [];
+        let mostrarApenasAlertas = false;
+
+        async function carregarAlertas() {
+            try {
+                const response = await fetch('/api/alertas/vencimento');
+                const data = await response.json();
+                alertasAtivos = data.alertas;
+                
+                // Atualizar barra de alertas
+                atualizarBarraAlertas(data);
+                
+                return data;
+            } catch (error) {
+                console.error('Erro ao carregar alertas:', error);
+                return { alertas: [], total: 0 };
+            }
+        }
+
+        function atualizarBarraAlertas(data) {
+            const container = document.getElementById('alertasContainer');
+            const texto = document.getElementById('alertasTexto');
+            const count = document.getElementById('alertasCount');
+            const detalhes = document.getElementById('alertasDetalhes');
+            
+            if (data.total > 0) {
+                container.style.display = 'flex';
+                count.textContent = data.total;
+                
+                // Contar por tipo
+                const vencidos = data.alertas.filter(a => a.severidade === 'vencido').length;
+                const aVencer = data.alertas.filter(a => a.severidade === 'a_vencer').length;
+                
+                detalhes.textContent = `${vencidos} vencido(s) • ${aVencer} a vencer`;
+                
+                // Diferentes mensagens baseadas na severidade
+                if (vencidos > 0) {
+                    texto.innerHTML = `<i class="fa-solid fa-skull-crossbones"></i> ATENÇÃO! Você tem ${data.total} produto(s) com alerta de vencimento`;
+                    container.style.background = 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
+                } else {
+                    texto.innerHTML = `<i class="fa-solid fa-exclamation-triangle"></i> Atenção! Você tem ${data.total} produto(s) próximo(s) do vencimento`;
+                    container.style.background = 'linear-gradient(135deg, #f39c12 0%, #d35400 100%)';
+                }
+            } else {
+                container.style.display = 'none';
+            }
+        }
+
+        function renderizarProdutos(listaProdutos) {
+            const container = document.getElementById('produtos-container');
+            
+            if (listaProdutos.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-box"></i>
+                        <h3>Nenhum produto cadastrado</h3>
+                        <p>Clique em "Novo Produto" para começar.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = listaProdutos.map(produto => {
+                // Verificar se produto tem alerta
+                const alerta = alertasAtivos.find(a => a.uuid === produto.uuid);
+                let cardClass = 'produto-card';
+                let diasBadge = '';
+                
+                if (alerta) {
+                    cardClass += alerta.severidade === 'vencido' ? ' vencido' : ' a-vencer';
+                    
+                    if (produto.data_validade) {
+                        const dias = alerta.dias_restantes;
+                        const diasClass = dias < 0 ? 'dias-negativo' : (dias <= 3 ? 'dias-baixo' : 'dias-normal');
+                        diasBadge = `<span class="dias-restantes ${diasClass}">${dias < 0 ? 'Vencido' : `${dias} dias`}</span>`;
+                    }
+                }
+
+                return `
+                    <div class="${cardClass}">
+                        <div class="produto-header">
+                            <h3 class="produto-nome">
+                                ${produto.nome}
+                                ${diasBadge}
+                            </h3>
+                            ${alerta ? '<span class="alerta-badge"><i class="fa-solid fa-exclamation"></i></span>' : ''}
+                            <div class="produto-actions">
+                                <button class="btn-action btn-edit" onclick="editarProduto('${produto.uuid}')">
+                                    <i class="fa-solid fa-edit"></i>
+                                </button>
+                                <button class="btn-action btn-delete" onclick="confirmarExclusao('${produto.uuid}', '${produto.nome}')">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="produto-info">
+                            <div class="info-item">
+                                <i class="fa-solid fa-tag"></i>
+                                <span>${produto.categoria}</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fa-solid fa-align-left"></i>
+                                <span>${produto.descricao || 'Sem descrição'}</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fa-solid fa-location-dot"></i>
+                                <span>${produto.localizacao || 'Local não informado'}</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fa-solid fa-calendar"></i>
+                                <span>Validade: ${produto.data_validade || 'Não informada'}</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fa-solid fa-barcode"></i>
+                                <span>Lote: ${produto.lote || 'Não informado'}</span>
+                            </div>
+                        </div>
+                        <div class="produto-stats">
+                            <div class="stat">
+                                <div class="stat-number">${produto.quantidade}</div>
+                                <div class="stat-label">Quantidade</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-number">R$ ${produto.preco_unitario ? produto.preco_unitario.toFixed(2) : '0.00'}</div>
+                                <div class="stat-label">Preço Unit.</div>
+                            </div>
+                            <div class="stat">
+                                <div class="status-badge status-${produto.status.replace(' ', '_')}">${produto.status}</div>
+                                <div class="stat-label">Status</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filtrarAlertas() {
+            mostrarApenasAlertas = !mostrarApenasAlertas;
+            
+            if (mostrarApenasAlertas && alertasAtivos.length > 0) {
+                // Filtrar apenas produtos com alerta
+                const uuidsComAlerta = alertasAtivos.map(a => a.uuid);
+                const produtosFiltrados = produtos.filter(p => uuidsComAlerta.includes(p.uuid));
+                renderizarProdutos(produtosFiltrados);
+                
+                // Atualizar botão
+                document.querySelector('.btn-ver-alertas').innerHTML = `
+                    <i class="fa-solid fa-times"></i>
+                    Mostrar Todos
+                `;
+            } else {
+                // Mostrar todos os produtos
+                renderizarProdutos(produtos);
+                mostrarApenasAlertas = false;
+                
+                // Atualizar botão
+                document.querySelector('.btn-ver-alertas').innerHTML = `
+                    <i class="fa-solid fa-filter"></i>
+                    Ver Alertas
+                `;
+            }
+        }
+
+        function abrirModalAlertas() {
+            const modal = document.getElementById('alertasModal');
+            const lista = document.getElementById('alertasLista');
+            
+            if (alertasAtivos.length === 0) {
+                lista.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-check-circle"></i>
+                        <h3>Nenhum alerta ativo</h3>
+                        <p>Todos os produtos estão com a validade em dia!</p>
+                    </div>
+                `;
+            } else {
+                lista.innerHTML = alertasAtivos.map(alerta => `
+                    <div class="alerta-item ${alerta.severidade}">
+                        <div class="alerta-header">
+                            <h4>${alerta.nome}</h4>
+                            <span class="alerta-severidade ${alerta.severidade}">
+                                ${alerta.severidade === 'vencido' ? 'VENCIDO' : 'A VENCER'}
+                            </span>
+                        </div>
+                        <div class="alerta-info">
+                            <p><i class="fa-solid fa-calendar"></i> Validade: ${alerta.data_validade}</p>
+                            <p><i class="fa-solid fa-clock"></i> Dias restantes: <strong>${alerta.dias_restantes}</strong> dias</p>
+                            <p><i class="fa-solid fa-box"></i> Quantidade: ${alerta.quantidade}</p>
+                            <p><i class="fa-solid fa-barcode"></i> Lote: ${alerta.lote || 'Não informado'}</p>
+                        </div>
+                        <div class="alerta-actions">
+                            <button class="btn-action" onclick="editarProduto('${alerta.uuid}')">
+                                <i class="fa-solid fa-edit"></i> Editar
+                            </button>
+                            <button class="btn-action" onclick="verDetalhesProduto('${alerta.uuid}')">
+                                <i class="fa-solid fa-eye"></i> Detalhes
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            modal.style.display = 'block';
+        }
+
+        function fecharModalAlertas() {
+            document.getElementById('alertasModal').style.display = 'none';
+        }
+
+        async function forcarVerificacao() {
+            try {
+                const response = await fetch('/api/alertas/verificar', {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                
+                // Recarregar alertas e produtos
+                await Promise.all([
+                    carregarAlertas(),
+                    carregarProdutos()
+                ]);
+                
+                alert(`Verificação concluída!\n${data.mensagem}`);
+                
+            } catch (error) {
+                console.error('Erro na verificação:', error);
+                alert('Erro ao verificar alertas');
+            }
+        }
+
+        function verDetalhesProduto(uuid) {
+            // Implementar visualização detalhada do produto
+            alert('Função de detalhes do produto será implementada');
+        }
+
+        // Atualize a função carregarProdutos para também carregar alertas
+        async function carregarProdutos() {
+            try {
+                const [produtosResponse, alertasResponse] = await Promise.all([
+                    fetch('/produtos/'),
+                    fetch('/api/alertas/vencimento')
+                ]);
+                
+                produtos = await produtosResponse.json();
+                const alertasData = await alertasResponse.json();
+                alertasAtivos = alertasData.alertas;
+                
+                atualizarBarraAlertas(alertasData);
+                renderizarProdutos(produtos);
+            } catch (error) {
+                console.error('Erro ao carregar produtos:', error);
+                document.getElementById('produtos-container').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-exclamation-triangle"></i>
+                        <h3>Erro ao carregar produtos</h3>
+                        <p>Tente recarregar a página.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Adicione ao DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarProdutos();
+            carregarFornecedores();
+            
+            // Verificar alertas a cada 5 minutos
+            setInterval(async () => {
+                await carregarAlertas();
+            }, 5 * 60 * 1000);
+        });
 
         
         async function carregarProdutos() {
