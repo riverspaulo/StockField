@@ -27,12 +27,28 @@ class Usuario(BaseModel):
     senha: str
     tipo: TipoUsuario
 
+# class Produto(BaseModel):
+#     uuid: Optional[str] = None
+#     nome: str
+#     descricao: Optional[str] = None
+#     categoria: str
+#     quantidade: int = 0
+#     preco_unitario: Optional[float] = None
+#     data_validade: Optional[date] = None
+#     lote: Optional[str] = None
+#     fornecedor_uuid: str
+#     localizacao: Optional[str] = None
+#     status: StatusProduto = StatusProduto.disponivel
+#     usuario_uuid: Optional[str] = None
+#     dias_para_vencer: Optional[int] = None  
+
 class Produto(BaseModel):
     uuid: Optional[str] = None
     nome: str
     descricao: Optional[str] = None
     categoria: str
     quantidade: int = 0
+    estoque_minimo: int = 0  # NOVO CAMPO
     preco_unitario: Optional[float] = None
     data_validade: Optional[date] = None
     lote: Optional[str] = None
@@ -40,7 +56,7 @@ class Produto(BaseModel):
     localizacao: Optional[str] = None
     status: StatusProduto = StatusProduto.disponivel
     usuario_uuid: Optional[str] = None
-    dias_para_vencer: Optional[int] = None  
+    dias_para_vencer: Optional[int] = None
 
 class Fornecedor(BaseModel):
     uuid: Optional[str] = None
@@ -94,6 +110,24 @@ def init_db():
             email TEXT NOT NULL
         )""")
 
+        # cursor.execute("""
+        # CREATE TABLE IF NOT EXISTS produtos (
+        #     uuid TEXT PRIMARY KEY,
+        #     nome TEXT NOT NULL,
+        #     descricao TEXT NOT NULL,
+        #     categoria TEXT NOT NULL,
+        #     quantidade INTEGER NOT NULL,
+        #     preco_unitario FLOAT,
+        #     data_validade TEXT,
+        #     lote TEXT,
+        #     fornecedor_uuid TEXT NOT NULL,
+        #     localizacao TEXT,
+        #     status TEXT NOT NULL,
+        #     usuario_uuid TEXT NOT NULL,
+        #     FOREIGN KEY (fornecedor_uuid) REFERENCES fornecedores (uuid),
+        #     FOREIGN KEY (usuario_uuid) REFERENCES usuarios (uuid)
+        # )""")
+
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS produtos (
             uuid TEXT PRIMARY KEY,
@@ -101,6 +135,7 @@ def init_db():
             descricao TEXT NOT NULL,
             categoria TEXT NOT NULL,
             quantidade INTEGER NOT NULL,
+            estoque_minimo INTEGER NOT NULL DEFAULT 0,  -- NOVO CAMPO
             preco_unitario FLOAT,
             data_validade TEXT,
             lote TEXT,
@@ -302,4 +337,109 @@ def obter_resumo_alertas(db: sqlite3.Connection, usuario_uuid: str):
         "a_vencer": a_vencer,
         "proximo_vencimento": proximo_info,
         "total_alertas": vencidos + a_vencer
+    }
+
+#FUNÇÕES NOVASSSSSSSSSSS
+def verificar_estoque_baixo(db: sqlite3.Connection, usuario_uuid: str = None):
+    """
+    Verifica produtos com estoque abaixo do mínimo definido
+    """
+    cursor = db.cursor()
+    
+    query = """
+        SELECT p.*, f.nome as fornecedor_nome 
+        FROM produtos p
+        LEFT JOIN fornecedores f ON p.fornecedor_uuid = f.uuid
+        WHERE p.estoque_minimo > 0 
+        AND p.quantidade <= p.estoque_minimo
+        AND p.status != 'vencido'
+    """
+    params = []
+    
+    if usuario_uuid:
+        query += " AND p.usuario_uuid = ?"
+        params.append(usuario_uuid)
+    
+    query += " ORDER BY p.quantidade ASC"
+    
+    cursor.execute(query, params)
+    produtos = cursor.fetchall()
+    
+    alertas = []
+    for produto in produtos:
+        produto_dict = dict(produto)
+        alertas.append({
+            **produto_dict,
+            "estoque_atual": produto_dict["quantidade"],
+            "estoque_minimo": produto_dict["estoque_minimo"],
+            "diferenca": produto_dict["estoque_minimo"] - produto_dict["quantidade"],
+            "severidade": "critico" if produto_dict["quantidade"] == 0 else "baixo"
+        })
+    
+    return alertas
+
+def obter_resumo_estoque(db: sqlite3.Connection, usuario_uuid: str):
+    """
+    Retorna resumo de estoque para o painel do usuário
+    """
+    cursor = db.cursor()
+    
+    # Produtos com estoque crítico (abaixo do mínimo)
+    cursor.execute("""
+        SELECT COUNT(*) as count 
+        FROM produtos 
+        WHERE usuario_uuid = ? 
+        AND estoque_minimo > 0 
+        AND quantidade <= estoque_minimo
+        AND status != 'vencido'
+    """, (usuario_uuid,))
+    estoque_baixo = cursor.fetchone()["count"]
+    
+    # Produtos esgotados (quantidade = 0)
+    cursor.execute("""
+        SELECT COUNT(*) as count 
+        FROM produtos 
+        WHERE usuario_uuid = ? 
+        AND quantidade = 0
+        AND status != 'vencido'
+    """, (usuario_uuid,))
+    estoque_esgotado = cursor.fetchone()["count"]
+    
+    # Produto com estoque mais baixo
+    cursor.execute("""
+        SELECT nome, quantidade, estoque_minimo 
+        FROM produtos 
+        WHERE usuario_uuid = ? 
+        AND estoque_minimo > 0 
+        AND quantidade <= estoque_minimo
+        AND status != 'vencido'
+        ORDER BY quantidade ASC 
+        LIMIT 1
+    """, (usuario_uuid,))
+    mais_critico = cursor.fetchone()
+    
+    mais_critico_info = None
+    if mais_critico:
+        mais_critico_info = {
+            "nome": mais_critico["nome"],
+            "quantidade": mais_critico["quantidade"],
+            "estoque_minimo": mais_critico["estoque_minimo"],
+            "necessario": mais_critico["estoque_minimo"] - mais_critico["quantidade"]
+        }
+    
+    # Total de produtos monitorados (com estoque mínimo definido)
+    cursor.execute("""
+        SELECT COUNT(*) as count 
+        FROM produtos 
+        WHERE usuario_uuid = ? 
+        AND estoque_minimo > 0
+    """, (usuario_uuid,))
+    total_monitorados = cursor.fetchone()["count"]
+    
+    return {
+        "estoque_baixo": estoque_baixo,
+        "estoque_esgotado": estoque_esgotado,
+        "total_monitorados": total_monitorados,
+        "produto_mais_critico": mais_critico_info,
+        "total_alertas": estoque_baixo
     }

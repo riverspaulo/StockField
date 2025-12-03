@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estoque Crítico - StockField</title>
+    <link rel="stylesheet" href="/static/css/profile.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .container {
+            display: flex;
+            min-height: calc(100vh - 60px);
+        }
+
+        .sidebar {
+            width: 80px;
+            background: #2c3e50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+        }
+
+        .sidebar i {
+            color: #ecf0f1;
+            font-size: 24px;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .sidebar i:hover {
+            color: #3498db;
+        }
+
+        .sidebar i.active {
+            color: #3498db;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            background: #ecf0f1;
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .content-title {
+            color: #2c3e50;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .stat-critico {
+            color: #e74c3c;
+            border-top: 4px solid #e74c3c;
+        }
+
+        .stat-baixo {
+            color: #f39c12;
+            border-top: 4px solid #f39c12;
+        }
+
+        .stat-monitorados {
+            color: #3498db;
+            border-top: 4px solid #3498db;
+        }
+
+        .alertas-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .alerta-item {
+            padding: 15px;
+            border-bottom: 1px solid #ecf0f1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .alerta-item:last-child {
+            border-bottom: none;
+        }
+
+        .alerta-info {
+            flex: 1;
+        }
+
+        .alerta-nome {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .alerta-detalhes {
+            display: flex;
+            gap: 20px;
+            color: #7f8c8d;
+        }
+
+        .alerta-severidade {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .severidade-critico {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .severidade-baixo {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .alerta-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-action {
+            padding: 8px 15px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-entrada {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-editar {
+            background: #3498db;
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #7f8c8d;
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            color: #bdc3c7;
+        }
+    </style>
+</head>
+<body>
+    <header class="top-bar">
+        <div class="logo">
+            <img id="stockfield-logo" src="/static/images/logo_colorida.png" alt="StockField">
+        </div>
+        <div class="user-info">
+            <span>Bem-vindo, {{ user.nome }}</span>
+            <div class="user-icon">
+                <i class="fa-solid fa-user"></i>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <i class="fa-solid fa-house" onclick="window.location.href='/profile'"></i>
+            <i class="fa-solid fa-box" onclick="window.location.href='/produtos'"></i>
+            <i class="fa-solid fa-truck" onclick="window.location.href='/fornecedores'"></i>
+            <i class="fa-solid fa-exclamation-triangle active"></i>
+            <i class="fa-solid fa-chart-bar"></i>
+        </aside>
+
+        <main class="main-content">
+            <div class="content-header">
+                <h1 class="content-title">
+                    <i class="fa-solid fa-exclamation-triangle"></i>
+                    Estoque Crítico
+                </h1>
+                <button class="btn-primary" onclick="atualizarRelatorio()">
+                    <i class="fa-solid fa-sync"></i>
+                    Atualizar
+                </button>
+            </div>
+
+            <div id="statsContainer" class="stats-container">
+                <!-- Estatísticas serão preenchidas aqui -->
+            </div>
+
+            <div class="alertas-container">
+                <h2 style="margin-bottom: 20px; color: #2c3e50;">
+                    <i class="fa-solid fa-list"></i>
+                    Produtos com Estoque Baixo
+                </h2>
+                <div id="alertasLista">
+                    <div class="loading">
+                        <i class="fa-solid fa-spinner fa-spin"></i>
+                        <p>Carregando alertas...</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        async function carregarRelatorio() {
+            try {
+                // Carregar resumo e alertas
+                const [resumoResponse, alertasResponse] = await Promise.all([
+                    fetch('/api/estoque/resumo'),
+                    fetch('/api/alertas/estoque')
+                ]);
+                
+                const resumo = await resumoResponse.json();
+                const alertas = await alertasResponse.json();
+                
+                atualizarEstatisticas(resumo);
+                atualizarListaAlertas(alertas.alertas);
+                
+            } catch (error) {
+                console.error('Erro ao carregar relatório:', error);
+                document.getElementById('alertasLista').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-exclamation-triangle"></i>
+                        <h3>Erro ao carregar dados</h3>
+                        <p>Tente recarregar a página.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function atualizarEstatisticas(resumo) {
+            const container = document.getElementById('statsContainer');
+            
+            container.innerHTML = `
+                <div class="stat-card stat-critico">
+                    <div class="stat-number">${resumo.estoque_esgotado}</div>
+                    <div class="stat-label">Produtos Esgotados</div>
+                    <p style="font-size: 12px; color: #95a5a6; margin-top: 10px;">
+                        Produtos com quantidade zero
+                    </p>
+                </div>
+                <div class="stat-card stat-baixo">
+                    <div class="stat-number">${resumo.estoque_baixo}</div>
+                    <div class="stat-label">Estoque Abaixo do Mínimo</div>
+                    <p style="font-size: 12px; color: #95a5a6; margin-top: 10px;">
+                        Inclui produtos esgotados
+                    </p>
+                </div>
+                <div class="stat-card stat-monitorados">
+                    <div class="stat-number">${resumo.total_monitorados}</div>
+                    <div class="stat-label">Produtos Monitorados</div>
+                    <p style="font-size: 12px; color: #95a5a6; margin-top: 10px;">
+                        Com estoque mínimo definido
+                    </p>
+                </div>
+            `;
+            
+            // Adicionar produto mais crítico se existir
+            if (resumo.produto_mais_critico) {
+                container.innerHTML += `
+                    <div class="stat-card" style="border-top: 4px solid #9b59b6;">
+                        <div class="stat-number" style="color: #9b59b6;">
+                            ${resumo.produto_mais_critico.necessario}
+                        </div>
+                        <div class="stat-label">Unidades Necessárias</div>
+                        <p style="font-size: 14px; color: #2c3e50; margin-top: 10px;">
+                            ${resumo.produto_mais_critico.nome}<br>
+                            <small>Atual: ${resumo.produto_mais_critico.quantidade} | Mínimo: ${resumo.produto_mais_critico.estoque_minimo}</small>
+                        </p>
+                    </div>
+                `;
+            }
+        }
+
+        function atualizarListaAlertas(alertas) {
+            const container = document.getElementById('alertasLista');
+            
+            if (alertas.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-check-circle"></i>
+                        <h3>Nenhum alerta de estoque</h3>
+                        <p>Todos os produtos estão com estoque adequado!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = alertas.map(alerta => `
+                <div class="alerta-item">
+                    <div class="alerta-info">
+                        <div class="alerta-nome">${alerta.nome}</div>
+                        <div class="alerta-detalhes">
+                            <span><i class="fa-solid fa-box"></i> Estoque: ${alerta.estoque_atual}</span>
+                            <span><i class="fa-solid fa-arrow-down"></i> Mínimo: ${alerta.estoque_minimo}</span>
+                            <span><i class="fa-solid fa-calculator"></i> Necessário: ${alerta.diferenca}</span>
+                            <span><i class="fa-solid fa-tag"></i> ${alerta.categoria}</span>
+                        </div>
+                    </div>
+                    <div class="alerta-severidade severidade-${alerta.severidade}">
+                        ${alerta.severidade === 'critico' ? 'CRÍTICO' : 'BAIXO'}
+                    </div>
+                    <div class="alerta-actions">
+                        <button class="btn-action btn-entrada" onclick="registrarEntrada('${alerta.uuid}')">
+                            <i class="fa-solid fa-plus"></i> Entrada
+                        </button>
+                        <button class="btn-action btn-editar" onclick="editarProduto('${alerta.uuid}')">
+                            <i class="fa-solid fa-edit"></i> Editar
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function registrarEntrada(uuid) {
+            // Redirecionar para página de movimentações com o produto pré-selecionado
+            window.location.href = `/movimentacoes?produto=${uuid}&tipo=entrada`;
+        }
+
+        function editarProduto(uuid) {
+            window.location.href = `/produtos?editar=${uuid}`;
+        }
+
+        function atualizarRelatorio() {
+            carregarRelatorio();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarRelatorio();
+        });
+    </script>
+</body>
+</html>

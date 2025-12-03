@@ -22,7 +22,6 @@ templates = Jinja2Templates(directory="templates")
 
 ALERTA_DIAS = 7  # Dias para considerar produto "a vencer"
 
-
 def flash(request: Request, message: str, category: str = "info"):
     if "messages" not in request.session:
         request.session["messages"] = []
@@ -73,6 +72,24 @@ def login_action(
         "email": user["email"],
         "tipo": user["tipo"]
     }
+
+    # VERIFICAÇÃO DE ALERTAS DE ESTOQUE BAIXO
+    from models import obter_resumo_estoque
+    resumo_estoque = obter_resumo_estoque(db, user["uuid"])
+    
+    if resumo_estoque["total_alertas"] > 0:
+        request.session["alertas_estoque"] = {
+            "estoque_baixo": resumo_estoque["estoque_baixo"],
+            "estoque_esgotado": resumo_estoque["estoque_esgotado"],
+            "total": resumo_estoque["total_alertas"],
+            "ultima_verificacao": date.today().isoformat()
+        }
+        
+        mensagem_estoque = f"📦 Atenção! Você tem {resumo_estoque['total_alertas']} produto(s) com estoque baixo "
+        if resumo_estoque["estoque_esgotado"] > 0:
+            mensagem_estoque += f"({resumo_estoque['estoque_esgotado']} esgotado(s))"
+        
+        flash(request, mensagem_estoque, "warning")
     
     # ============ VERIFICAÇÃO AUTOMÁTICA DE ALERTAS AO LOGIN ============
     from models import verificar_produtos_a_vencer, obter_resumo_alertas
@@ -300,6 +317,8 @@ def obter_produto_por_uuid(uuid: str, db: sqlite3.Connection = Depends(get_db)):
         produto_dict["data_validade"] = date.fromisoformat(produto_dict["data_validade"])
     return Produto(**produto_dict)
 
+
+#MAIS UMA MATEUSSSSSSSSSS
 @app.post("/movimentos/entrada", response_model=Movimento)
 def registrar_entrada(movimento: Movimento, request: Request, db: sqlite3.Connection = Depends(get_db)):
     cursor = db.cursor()
@@ -340,10 +359,22 @@ def registrar_entrada(movimento: Movimento, request: Request, db: sqlite3.Connec
         "UPDATE produtos SET quantidade = ?, status = ? WHERE uuid = ?",
         (nova_quantidade, novo_status, movimento.produto_uuid)
     )
+
+    from models import verificar_estoque_baixo
+    usuario_uuid = request.session["user"]["uuid"]
+    alertas_estoque = verificar_estoque_baixo(db, usuario_uuid)
+    
+    if alertas_estoque:
+        request.session["alertas_estoque"] = {
+            "total": len(alertas_estoque),
+            "data_verificacao": date.today().isoformat()
+        }
     
     db.commit()
     return movimento
 
+
+#MATEUSSSSSSSSSSSSSSSSSSSS
 @app.post("/movimentos/saida", response_model=Movimento)
 def registrar_saida(movimento: Movimento, request: Request, db: sqlite3.Connection = Depends(get_db)):
     cursor = db.cursor()
@@ -385,6 +416,18 @@ def registrar_saida(movimento: Movimento, request: Request, db: sqlite3.Connecti
         "UPDATE produtos SET quantidade = ?, status = ? WHERE uuid = ?",
         (nova_quantidade, novo_status, movimento.produto_uuid)
     )
+
+    from models import verificar_estoque_baixo
+    usuario_uuid = request.session["user"]["uuid"]
+    alertas_estoque = verificar_estoque_baixo(db, usuario_uuid)
+    
+    # Opcional: você pode armazenar os alertas na sessão
+    if alertas_estoque:
+        request.session["alertas_estoque"] = {
+            "total": len(alertas_estoque),
+            "data_verificacao": date.today().isoformat()
+        }
+    
     
     db.commit()
     return movimento
@@ -402,8 +445,45 @@ def cadastrar_usuario(usuario: Usuario, db: sqlite3.Connection = Depends(get_db)
     return usuario
 
 
+# @app.post("/produtos/", response_model=Produto)
+# def cadastrar_produto(request: Request ,produto: Produto, db: sqlite3.Connection = Depends(get_db)):
+#     cursor = db.cursor()
+#     produto.uuid = str(uuid.uuid4())
+#     usuario_uuid = request.session["user"]["uuid"]
+#     produto.usuario_uuid = usuario_uuid
+    
+#     if produto.data_validade:
+#         hoje = date.today()
+#         dias_restantes = (produto.data_validade - hoje).days
+        
+#         if dias_restantes < 0:
+#             produto.status = StatusProduto.vencido
+#         elif dias_restantes <= ALERTA_DIAS:
+#             produto.status = StatusProduto.a_vencer
+    
+#     cursor.execute(
+#         "INSERT INTO produtos VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+#         (
+#             produto.uuid,
+#             produto.nome,
+#             produto.descricao,
+#             produto.categoria,
+#             produto.quantidade,
+#             produto.preco_unitario,
+#             produto.data_validade.isoformat() if produto.data_validade else None,
+#             produto.lote,
+#             produto.fornecedor_uuid,
+#             produto.localizacao,
+#             produto.status.value,
+#             usuario_uuid  
+#         )
+#     )
+#     db.commit()
+#     return produto
+
+#MEXI NESSA TAMBÉM MATEUSSSSSSSSSSSSSSSSS
 @app.post("/produtos/", response_model=Produto)
-def cadastrar_produto(request: Request ,produto: Produto, db: sqlite3.Connection = Depends(get_db)):
+def cadastrar_produto(request: Request, produto: Produto, db: sqlite3.Connection = Depends(get_db)):
     cursor = db.cursor()
     produto.uuid = str(uuid.uuid4())
     usuario_uuid = request.session["user"]["uuid"]
@@ -419,20 +499,21 @@ def cadastrar_produto(request: Request ,produto: Produto, db: sqlite3.Connection
             produto.status = StatusProduto.a_vencer
     
     cursor.execute(
-        "INSERT INTO produtos VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO produtos VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         (
             produto.uuid,
             produto.nome,
             produto.descricao,
             produto.categoria,
             produto.quantidade,
+            produto.estoque_minimo,  # NOVO CAMPO
             produto.preco_unitario,
             produto.data_validade.isoformat() if produto.data_validade else None,
             produto.lote,
             produto.fornecedor_uuid,
             produto.localizacao,
             produto.status.value,
-            usuario_uuid  
+            usuario_uuid
         )
     )
     db.commit()
@@ -552,6 +633,51 @@ def pagina_produtos(request: Request):
     })
 
 
+# @app.put("/produtos/{uuid}", response_model=Produto)
+# def atualizar_produto(uuid: str, produto: Produto, request: Request, db: sqlite3.Connection = Depends(get_db)):
+#     cursor = db.cursor()
+#     cursor.execute("SELECT * FROM produtos WHERE uuid = ?", (uuid,))
+#     produto_existente = cursor.fetchone()
+#     if not produto_existente:
+#         raise HTTPException(status_code=404, detail="Produto não encontrado")
+  
+#     if produto.data_validade:
+#         hoje = date.today()
+#         dias_restantes = (produto.data_validade - hoje).days
+        
+#         if dias_restantes < 0:
+#             produto.status = StatusProduto.vencido
+#         elif dias_restantes <= ALERTA_DIAS:
+#             produto.status = StatusProduto.a_vencer
+#         else:
+#             produto.status = StatusProduto.disponivel
+    
+#     cursor.execute(
+#         """UPDATE produtos SET 
+#             nome = ?, descricao = ?, categoria = ?, quantidade = ?, 
+#             preco_unitario = ?, data_validade = ?, lote = ?, 
+#             fornecedor_uuid = ?, localizacao = ?, status = ? 
+#         WHERE uuid = ?""",
+#         (
+#             produto.nome,
+#             produto.descricao,
+#             produto.categoria,
+#             produto.quantidade,
+#             produto.preco_unitario,
+#             produto.data_validade.isoformat() if produto.data_validade else None,
+#             produto.lote,
+#             produto.fornecedor_uuid,
+#             produto.localizacao,
+#             produto.status.value,
+#             uuid
+#         )
+#     )
+#     db.commit()
+    
+#     produto.uuid = uuid
+#     return produto
+
+#MEXI NESSA AQUIII MATEUSSSSSSSSSSSSSSSSSSSSSSSS
 @app.put("/produtos/{uuid}", response_model=Produto)
 def atualizar_produto(uuid: str, produto: Produto, request: Request, db: sqlite3.Connection = Depends(get_db)):
     cursor = db.cursor()
@@ -559,7 +685,7 @@ def atualizar_produto(uuid: str, produto: Produto, request: Request, db: sqlite3
     produto_existente = cursor.fetchone()
     if not produto_existente:
         raise HTTPException(status_code=404, detail="Produto não encontrado")
-  
+    
     if produto.data_validade:
         hoje = date.today()
         dias_restantes = (produto.data_validade - hoje).days
@@ -574,7 +700,7 @@ def atualizar_produto(uuid: str, produto: Produto, request: Request, db: sqlite3
     cursor.execute(
         """UPDATE produtos SET 
             nome = ?, descricao = ?, categoria = ?, quantidade = ?, 
-            preco_unitario = ?, data_validade = ?, lote = ?, 
+            estoque_minimo = ?, preco_unitario = ?, data_validade = ?, lote = ?, 
             fornecedor_uuid = ?, localizacao = ?, status = ? 
         WHERE uuid = ?""",
         (
@@ -582,6 +708,7 @@ def atualizar_produto(uuid: str, produto: Produto, request: Request, db: sqlite3
             produto.descricao,
             produto.categoria,
             produto.quantidade,
+            produto.estoque_minimo,  # NOVO CAMPO
             produto.preco_unitario,
             produto.data_validade.isoformat() if produto.data_validade else None,
             produto.lote,
@@ -595,7 +722,6 @@ def atualizar_produto(uuid: str, produto: Produto, request: Request, db: sqlite3
     
     produto.uuid = uuid
     return produto
-
 
 @app.post("/api/alertas/verificar")
 def forcar_verificacao_alertas(
@@ -630,3 +756,56 @@ def obter_produto_edicao(uuid: str, db: sqlite3.Connection = Depends(get_db)):
     if produto_dict["data_validade"]:
         produto_dict["data_validade"] = date.fromisoformat(produto_dict["data_validade"])
     return Produto(**produto_dict)
+
+
+# ROTA PARA ALERTAS DE ESTOQUE BAIXO - NOVAS ROTAS MATEUSSSSSSSSSS
+@app.get("/api/alertas/estoque")
+def obter_alertas_estoque_api(
+    request: Request,
+    db: sqlite3.Connection = Depends(get_db)
+):
+    """API para obter alertas de estoque baixo"""
+    if "user" not in request.session:
+        raise HTTPException(status_code=401, detail="Não autorizado")
+    
+    from models import verificar_estoque_baixo
+    
+    usuario_uuid = request.session["user"]["uuid"]
+    alertas = verificar_estoque_baixo(db, usuario_uuid)
+    
+    return {
+        "alertas": alertas,
+        "total": len(alertas),
+        "data_consulta": date.today().isoformat()
+    }
+
+# ROTA PARA RESUMO DE ESTOQUE
+@app.get("/api/estoque/resumo")
+def obter_resumo_estoque_api(
+    request: Request,
+    db: sqlite3.Connection = Depends(get_db)
+):
+    """API para obter resumo de estoque"""
+    if "user" not in request.session:
+        raise HTTPException(status_code=401, detail="Não autorizado")
+    
+    from models import obter_resumo_estoque
+    
+    usuario_uuid = request.session["user"]["uuid"]
+    resumo = obter_resumo_estoque(db, usuario_uuid)
+    
+    return resumo
+
+# PÁGINA DE ESTOQUE CRÍTICO
+@app.get("/estoque-critico", response_class=HTMLResponse)
+def pagina_estoque_critico(request: Request):
+    if "user" not in request.session:
+        flash(request, "Você precisa fazer login para acessar esta página.", "error")
+        url = request.url_for("login")
+        return RedirectResponse(url=url, status_code=303)
+    
+    return templates.TemplateResponse("estoque_critico.html", {
+        "request": request, 
+        "messages": get_flashed_messages(request),
+        "user": request.session["user"]
+    })

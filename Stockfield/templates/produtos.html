@@ -74,6 +74,40 @@
             background: #2980b9;
         }
 
+        /* Adicione estes estilos ao seu CSS existente */
+
+        .modal-body-scroll {
+            overflow-y: auto;
+            max-height: 70vh;
+            padding: 20px;
+        }
+
+        /* Estilização da barra de rolagem para o modal */
+        .modal-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-body::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+            margin: 4px 0;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        /* Para Firefox */
+        .modal-body {
+            scrollbar-width: thin;
+            scrollbar-color: #c1c1c1 #f1f1f1;
+        }
+
         .produtos-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -467,6 +501,26 @@
             color: white;
         }
 
+        .produto-card.estoque-baixo {
+            border-left: 4px solid #f39c12;
+            background: linear-gradient(135deg, #ffffff 0%, #fffbf0 100%);
+        }
+
+        .estoque-baixo-badge {
+            background: #f39c12;
+            color: white;
+        }
+
+        .estoque-critico {
+            background: #e74c3c;
+            color: white;
+        }
+
+        /* Barra de alertas de estoque */
+        .alertas-bar.estoque {
+            background: linear-gradient(135deg, #f39c12 0%, #d35400 100%);
+        }
+
         /* Barra de alertas no topo */
         .alertas-bar {
             background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
@@ -624,6 +678,18 @@
                 </h2>
                 <span class="close" onclick="fecharModalAlertas()">&times;</span>
             </div>
+            <!-- Barra de alertas de estoque baixo -->
+            <div id="estoqueContainer" class="alertas-bar" style="display: none; background: linear-gradient(135deg, #f39c12 0%, #d35400 100%);">
+                <div class="alertas-info">
+                    <i class="fa-solid fa-boxes"></i>
+                    <span id="estoqueTexto">Você tem <span id="estoqueCount">0</span> produto(s) com estoque baixo</span>
+                    <span class="alerta-count" id="estoqueDetalhes" style="color: #f39c12;">0 críticos • 0 baixos</span>
+                </div>
+                <button class="btn-ver-alertas" onclick="filtrarEstoqueBaixo()" style="color: #f39c12;">
+                    <i class="fa-solid fa-filter"></i>
+                    Ver Estoque Crítico
+                </button>
+            </div>
             <div class="modal-body">
                 <div id="alertasLista" class="alertas-lista">
                     <!-- Lista de alertas será preenchida aqui -->
@@ -655,20 +721,32 @@
                             <label for="nome">Nome do Produto *</label>
                             <input type="text" class="form-control" id="nome" required>
                         </div>
+
                         <div class="form-group">
                             <label for="categoria">Categoria *</label>
                             <input type="text" class="form-control" id="categoria" required>
                         </div>
                     </div>
+
                     <div class="form-group">
                         <label for="descricao">Descrição</label>
                         <textarea class="form-control" id="descricao" rows="2"></textarea>
                     </div>
+
                     <div class="form-row">
                         <div class="form-group">
                             <label for="quantidade">Quantidade *</label>
                             <input type="number" class="form-control" id="quantidade" value="0" min="0" required>
+                        </div> 
+
+                        ISSO É NOVO MATEUSSSSS
+                        <div class="form-group">
+                                <label for="estoqueMinimo">Estoque Mínimo</label>
+                                <input type="number" class="form-control" id="estoqueMinimo" value="0" min="0">
+                                <small style="color: #7f8c8d;">Defina 0 para não monitorar</small>
+                            </div>
                         </div>
+
                         <div class="form-group">
                             <label for="preco">Preço Unitário</label>
                             <input type="number" step="0.01" class="form-control" id="preco">
@@ -716,20 +794,102 @@
         </div>
     </div>
 
+   
+
     <script>
         let produtos = [];
         let produtoEditando = null;
         let fornecedores = [];
         let alertasAtivos = [];
         let mostrarApenasAlertas = false;
+        let alertasEstoque = [];
+        let mostrarApenasEstoqueBaixo = false;
+
+        async function carregarAlertasEstoque() {
+            try {
+                const response = await fetch('/api/alertas/estoque');
+                const data = await response.json();
+                alertasEstoque = data.alertas;
+                
+                // Atualizar barra de alertas de estoque
+                atualizarBarraEstoque(data);
+                
+                return data;
+            } catch (error) {
+                console.error('Erro ao carregar alertas de estoque:', error);
+                return { alertas: [], total: 0 };
+            }
+        }
+
+        function atualizarBarraEstoque(data) {
+            const container = document.getElementById('estoqueContainer');
+            const texto = document.getElementById('estoqueTexto');
+            const count = document.getElementById('estoqueCount');
+            const detalhes = document.getElementById('estoqueDetalhes');
+            
+            if (data.total > 0) {
+                container.style.display = 'flex';
+                count.textContent = data.total;
+                
+                // Contar por severidade
+                const criticos = data.alertas.filter(a => a.severidade === 'critico').length;
+                const baixos = data.alertas.filter(a => a.severidade === 'baixo').length;
+                
+                detalhes.textContent = `${criticos} crítico(s) • ${baixos} baixo(s)`;
+                
+                // Diferentes mensagens baseadas na severidade
+                if (criticos > 0) {
+                    texto.innerHTML = `<i class="fa-solid fa-exclamation-triangle"></i> ATENÇÃO! Você tem ${criticos} produto(s) ESGOTADOS`;
+                    container.style.background = 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
+                } else {
+                    texto.innerHTML = `<i class="fa-solid fa-exclamation-circle"></i> Atenção! Você tem ${data.total} produto(s) com estoque baixo`;
+                    container.style.background = 'linear-gradient(135deg, #f39c12 0%, #d35400 100%)';
+                }
+            } else {
+                container.style.display = 'none';
+            }
+        }
+
+        function filtrarEstoqueBaixo() {
+            mostrarApenasEstoqueBaixo = !mostrarApenasEstoqueBaixo;
+            
+            if (mostrarApenasEstoqueBaixo && alertasEstoque.length > 0) {
+                const uuidsComEstoqueBaixo = alertasEstoque.map(a => a.uuid);
+                const produtosFiltrados = produtos.filter(p => uuidsComEstoqueBaixo.includes(p.uuid));
+                renderizarProdutos(produtosFiltrados);
+                
+                document.querySelector('[onclick="filtrarEstoqueBaixo()"]').innerHTML = `
+                    <i class="fa-solid fa-times"></i>
+                    Mostrar Todos
+                `;
+            } else {
+              
+                renderizarProdutos(produtos);
+                mostrarApenasEstoqueBaixo = false;
+                document.querySelector('[onclick="filtrarEstoqueBaixo()"]').innerHTML = `
+                    <i class="fa-solid fa-filter"></i>
+                    Ver Estoque Crítico
+                `;
+            }
+        }
+
+        // Atualize o DOMContentLoaded para carregar alertas de estoque
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarProdutos();
+            carregarFornecedores();
+            carregarAlertasEstoque();  // NOVA LINHA
+        
+            setInterval(async () => {
+                await carregarAlertas();
+                await carregarAlertasEstoque();  // NOVA LINHA
+            }, 5 * 60 * 1000);
+        });
 
         async function carregarAlertas() {
             try {
                 const response = await fetch('/api/alertas/vencimento');
                 const data = await response.json();
                 alertasAtivos = data.alertas;
-                
-                // Atualizar barra de alertas
                 atualizarBarraAlertas(data);
                 
                 return data;
@@ -749,13 +909,11 @@
                 container.style.display = 'flex';
                 count.textContent = data.total;
                 
-                // Contar por tipo
                 const vencidos = data.alertas.filter(a => a.severidade === 'vencido').length;
                 const aVencer = data.alertas.filter(a => a.severidade === 'a_vencer').length;
                 
                 detalhes.textContent = `${vencidos} vencido(s) • ${aVencer} a vencer`;
-                
-                // Diferentes mensagens baseadas na severidade
+            
                 if (vencidos > 0) {
                     texto.innerHTML = `<i class="fa-solid fa-skull-crossbones"></i> ATENÇÃO! Você tem ${data.total} produto(s) com alerta de vencimento`;
                     container.style.background = 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
@@ -787,6 +945,19 @@
                 const alerta = alertasAtivos.find(a => a.uuid === produto.uuid);
                 let cardClass = 'produto-card';
                 let diasBadge = '';
+
+                const alertaEstoque = alertasEstoque.find(a => a.uuid === produto.uuid);
+                let estoqueBadge = '';
+                
+                if (alertaEstoque) {
+                    cardClass += ' estoque-baixo';
+                    
+                    if (produto.estoque_minimo > 0) {
+                        const nivel = produto.quantidade === 0 ? 'ESGOTADO' : `${produto.quantidade}/${produto.estoque_minimo}`;
+                        const estoqueClass = produto.quantidade === 0 ? 'estoque-critico' : 'estoque-baixo-badge';
+                        estoqueBadge = `<span class="dias-restantes ${estoqueClass}">${nivel}</span>`;
+                    }
+                }
                 
                 if (alerta) {
                     cardClass += alerta.severidade === 'vencido' ? ' vencido' : ' a-vencer';
@@ -1148,7 +1319,6 @@
         }
 
     
-
         async function editarProduto(uuid) {
             try {
                
@@ -1175,6 +1345,8 @@
                 document.getElementById('fornecedorUuid').value = produto.fornecedor_uuid;
                 document.getElementById('localizacao').value = produto.localizacao || '';
                 document.getElementById('status').value = produto.status;
+                document.getElementById('estoqueMinimo').value = produto.estoque_minimo || 0; 
+                // ESSA LINHA DE BAIXO É NOVA
                 
                 document.getElementById('produtoModal').style.display = 'block';
             } catch (error) {
@@ -1195,6 +1367,7 @@
             
             const produtoData = {
                 nome: document.getElementById('nome').value,
+                estoque_minimo: parseInt(document.getElementById('estoqueMinimo').value), //ISSO É NOVO
                 descricao: document.getElementById('descricao').value,
                 categoria: document.getElementById('categoria').value,
                 quantidade: parseInt(document.getElementById('quantidade').value),
