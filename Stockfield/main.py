@@ -92,7 +92,7 @@ def login_action(
         
         flash(request, mensagem_estoque, "warning")
     
-    # ============ VERIFICAÇÃO AUTOMÁTICA DE ALERTAS AO LOGIN ============
+
     from models import verificar_produtos_a_vencer, obter_resumo_alertas
     
     resultado = verificar_produtos_a_vencer(db, ALERTA_DIAS)
@@ -118,8 +118,7 @@ def login_action(
     
     flash(request, f"Bem-vindo(a), {user['nome']}!", "success")
     
-    # ============ VERIFICAÇÃO DE TIPO DE USUÁRIO ============
-    # Se for administrador, redireciona para página específica
+  
     if user["tipo"] == "admin":
         url = request.url_for("profile_admin")
     else:
@@ -455,13 +454,11 @@ def registrar_saida(movimento: Movimento, request: Request, db: sqlite3.Connecti
     usuario_uuid = request.session["user"]["uuid"]
     alertas_estoque = verificar_estoque_baixo(db, usuario_uuid)
     
-    # Opcional: você pode armazenar os alertas na sessão
     if alertas_estoque:
         request.session["alertas_estoque"] = {
             "total": len(alertas_estoque),
             "data_verificacao": date.today().isoformat()
         }
-    
     
     db.commit()
     return movimento
@@ -525,6 +522,26 @@ def cadastrar_produto(request: Request, produto: Produto, db: sqlite3.Connection
     )
     db.commit()
     return produto
+
+
+@app.get("/produtos_admin", response_class=HTMLResponse)
+def pagina_produtos_admin(request: Request):
+    if "user" not in request.session:
+        flash(request, "Você precisa fazer login para acessar esta página.", "error")
+        url = request.url_for("login")
+        return RedirectResponse(url=url, status_code=303)
+    
+    user = request.session.get("user", {})
+    if user.get("tipo") != "admin":
+        flash(request, "Acesso restrito a administradores.", "error")
+        url = request.url_for("profile")
+        return RedirectResponse(url=url, status_code=303)
+    
+    return templates.TemplateResponse("produtos_admin.html", {
+        "request": request, 
+        "messages": get_flashed_messages(request),
+        "user": user
+    })
 
 @app.post("/fornecedores/", response_model=Fornecedor)
 def cadastrar_fornecedor(fornecedor: Fornecedor, db: sqlite3.Connection = Depends(get_db)):
@@ -1060,7 +1077,6 @@ def logout(request: Request):
     url = request.url_for("login")
     return RedirectResponse(url=url, status_code=303)
 
-# No main.py, adicione estas novas rotas:
 
 @app.get("/api/admin/usuarios")
 def listar_todos_usuarios(
@@ -1177,17 +1193,14 @@ def criar_usuario_admin(
     
     cursor = db.cursor()
     
-    # Verifica se email já existe
     cursor.execute("SELECT * FROM usuarios WHERE email = ?", (usuario.email,))
     if cursor.fetchone():
         raise HTTPException(status_code=400, detail="E-mail já cadastrado")
     
-    # Verifica se CNPJ já existe
     cursor.execute("SELECT * FROM usuarios WHERE cnpj = ?", (usuario.cnpj,))
     if cursor.fetchone():
         raise HTTPException(status_code=400, detail="CNPJ já cadastrado")
     
-    # Cria o usuário
     usuario.uuid = str(uuid.uuid4())
     cursor.execute(
         "INSERT INTO usuarios VALUES (?, ?, ?, ?, ?, ?)",
@@ -1202,8 +1215,7 @@ def criar_usuario_admin(
     )
     
     db.commit()
-    
-    # Retorna sem a senha
+
     return {
         "uuid": usuario.uuid,
         "cnpj": usuario.cnpj,
@@ -1228,28 +1240,23 @@ def atualizar_usuario_admin(
         raise HTTPException(status_code=403, detail="Acesso restrito a administradores")
     
     cursor = db.cursor()
-    
-    # Verifica se o usuário existe
     cursor.execute("SELECT * FROM usuarios WHERE uuid = ?", (uuid,))
     usuario_existente = cursor.fetchone()
     if not usuario_existente:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
     
-    # Verifica se o novo email já existe (se foi alterado)
     if usuario_data.get("email") != usuario_existente["email"]:
         cursor.execute("SELECT * FROM usuarios WHERE email = ? AND uuid != ?", 
                       (usuario_data["email"], uuid))
         if cursor.fetchone():
             raise HTTPException(status_code=400, detail="E-mail já cadastrado")
-    
-    # Verifica se o novo CNPJ já existe (se foi alterado)
+
     if usuario_data.get("cnpj") != usuario_existente["cnpj"]:
         cursor.execute("SELECT * FROM usuarios WHERE cnpj = ? AND uuid != ?", 
                       (usuario_data["cnpj"], uuid))
         if cursor.fetchone():
             raise HTTPException(status_code=400, detail="CNPJ já cadastrado")
     
-    # Atualiza o usuário
     update_fields = []
     update_values = []
     
@@ -1279,7 +1286,7 @@ def atualizar_usuario_admin(
         cursor.execute(query, update_values)
         db.commit()
     
-    # Retorna o usuário atualizado
+   
     cursor.execute("SELECT uuid, cnpj, nome, email, tipo FROM usuarios WHERE uuid = ?", (uuid,))
     usuario_atualizado = cursor.fetchone()
     
@@ -1299,19 +1306,16 @@ def deletar_usuario_admin(
     if user.get("tipo") != "admin":
         raise HTTPException(status_code=403, detail="Acesso restrito a administradores")
     
-    # Não permite que o administrador exclua a si mesmo
     if user.get("uuid") == uuid:
         raise HTTPException(status_code=400, detail="Não é possível excluir sua própria conta")
     
     cursor = db.cursor()
-    
-    # Verifica se o usuário existe
     cursor.execute("SELECT * FROM usuarios WHERE uuid = ?", (uuid,))
     usuario = cursor.fetchone()
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
     
-    # Verifica se o usuário tem produtos cadastrados
+
     cursor.execute("SELECT COUNT(*) as total FROM produtos WHERE usuario_uuid = ?", (uuid,))
     total_produtos = cursor.fetchone()["total"]
     
@@ -1321,13 +1325,12 @@ def deletar_usuario_admin(
             detail="Não é possível excluir usuário com produtos cadastrados"
         )
     
-    # Exclui o usuário
     cursor.execute("DELETE FROM usuarios WHERE uuid = ?", (uuid,))
     db.commit()
     
     return {"message": "Usuário excluído com sucesso"}
 
-# Rota de logout
+
 @app.get("/logout")
 def logout(request: Request):
     request.session.clear()
@@ -1353,3 +1356,123 @@ def listar_todos_fornecedores_admin(
     fornecedores = cursor.fetchall()
     
     return [dict(fornecedor) for fornecedor in fornecedores]
+
+@app.get("/api/admin/produtos")
+def listar_todos_produtos_admin(
+    request: Request,
+    db: sqlite3.Connection = Depends(get_db)
+):
+    """Lista todos os produtos do sistema (apenas para administradores)"""
+    if "user" not in request.session:
+        raise HTTPException(status_code=401, detail="Não autorizado")
+    
+    user = request.session["user"]
+    if user.get("tipo") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso restrito a administradores")
+    
+    cursor = db.cursor()
+    cursor.execute("""
+        SELECT p.*, u.nome as usuario_nome, f.nome as fornecedor_nome 
+        FROM produtos p
+        LEFT JOIN usuarios u ON p.usuario_uuid = u.uuid
+        LEFT JOIN fornecedores f ON p.fornecedor_uuid = f.uuid
+        ORDER BY p.nome
+    """)
+    produtos = cursor.fetchall()
+    
+    produtos_formatados = []
+    for produto in produtos:
+        produto_dict = dict(produto)
+        if produto_dict["data_validade"]:
+            produto_dict["data_validade"] = date.fromisoformat(produto_dict["data_validade"])
+        produtos_formatados.append(produto_dict)
+    
+    return produtos_formatados
+
+@app.get("/api/admin/produtos/estatisticas")
+def obter_estatisticas_produtos_admin(
+    request: Request,
+    db: sqlite3.Connection = Depends(get_db)
+):
+    """Obtém estatísticas de produtos (apenas para administradores)"""
+    if "user" not in request.session:
+        raise HTTPException(status_code=401, detail="Não autorizado")
+    
+    user = request.session["user"]
+    if user.get("tipo") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso restrito a administradores")
+    
+    cursor = db.cursor()
+    
+    # Total de produtos
+    cursor.execute("SELECT COUNT(*) as total FROM produtos")
+    total_produtos = cursor.fetchone()["total"]
+    
+    # Produtos vencidos
+    cursor.execute("SELECT COUNT(*) as total FROM produtos WHERE status = 'vencido'")
+    produtos_vencidos = cursor.fetchone()["total"]
+    
+    # Produtos a vencer
+    cursor.execute("SELECT COUNT(*) as total FROM produtos WHERE status = 'a_vencer'")
+    produtos_a_vencer = cursor.fetchone()["total"]
+    
+    # Produtos esgotados
+    cursor.execute("SELECT COUNT(*) as total FROM produtos WHERE status = 'esgotado'")
+    produtos_esgotados = cursor.fetchone()["total"]
+    
+    # Tipos de produtos
+    cursor.execute("SELECT tipo_produto, COUNT(*) as total FROM produtos GROUP BY tipo_produto")
+    tipos_produtos = cursor.fetchall()
+    
+    # Usuários com mais produtos
+    cursor.execute("""
+        SELECT u.nome, COUNT(p.uuid) as total_produtos
+        FROM produtos p
+        LEFT JOIN usuarios u ON p.usuario_uuid = u.uuid
+        GROUP BY p.usuario_uuid
+        ORDER BY total_produtos DESC
+        LIMIT 5
+    """)
+    top_usuarios = cursor.fetchall()
+    
+    return {
+        "total_produtos": total_produtos,
+        "produtos_vencidos": produtos_vencidos,
+        "produtos_a_vencer": produtos_a_vencer,
+        "produtos_esgotados": produtos_esgotados,
+        "tipos_produtos": [dict(tipo) for tipo in tipos_produtos],
+        "top_usuarios": [dict(usuario) for usuario in top_usuarios]
+    }
+
+@app.get("/api/admin/produtos/{uuid}")
+def obter_produto_admin(
+    uuid: str,
+    request: Request,
+    db: sqlite3.Connection = Depends(get_db)
+):
+    """Obtém um produto específico com informações de usuário e fornecedor (apenas para administradores)"""
+    if "user" not in request.session:
+        raise HTTPException(status_code=401, detail="Não autorizado")
+    
+    user = request.session["user"]
+    if user.get("tipo") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso restrito a administradores")
+    
+    cursor = db.cursor()
+    cursor.execute("""
+        SELECT p.*, u.nome as usuario_nome, f.nome as fornecedor_nome 
+        FROM produtos p
+        LEFT JOIN usuarios u ON p.usuario_uuid = u.uuid
+        LEFT JOIN fornecedores f ON p.fornecedor_uuid = f.uuid
+        WHERE p.uuid = ?
+    """, (uuid,))
+    produto = cursor.fetchone()
+    
+    if not produto:
+        raise HTTPException(status_code=404, detail="Produto não encontrado")
+    
+    produto_dict = dict(produto)
+    if produto_dict["data_validade"]:
+        produto_dict["data_validade"] = date.fromisoformat(produto_dict["data_validade"])
+    
+    return produto_dict
