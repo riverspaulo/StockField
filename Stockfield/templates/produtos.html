@@ -689,6 +689,7 @@
                 </button>
             </div>
 
+
             <div class="search-container">
                 <div class="search-box">
                     <input type="text" class="search-input" id="searchInput" placeholder="Buscar produtos...">
@@ -729,6 +730,8 @@
                     Ver Estoque Crítico
                 </button>
             </div>
+
+
             <div class="modal-body">
                 <div id="alertasLista" class="alertas-lista">
                     <!-- Lista de alertas será preenchida aqui -->
@@ -883,6 +886,13 @@
     </div>
 
     <script>
+
+        console.log('Script produtos.js carregado');
+        console.log('Elemento alertasContainer:', document.getElementById('alertasContainer'));
+        console.log('Elemento alertasTexto:', document.getElementById('alertasTexto'));
+        console.log('Elemento alertasCount:', document.getElementById('alertasCount'));
+        console.log('Elemento alertasDetalhes:', document.getElementById('alertasDetalhes'));
+
         let produtos = [];
         let produtoEditando = null;
         let fornecedores = [];
@@ -890,6 +900,61 @@
         let mostrarApenasAlertas = false;
         let alertasEstoque = [];
         let mostrarApenasEstoqueBaixo = false;
+
+
+        function garantirElementosAlertas() {
+            let container = document.getElementById('alertasContainer');
+            
+            // Se não existir, cria o container
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'alertasContainer';
+                container.className = 'alertas-bar';
+                container.style.display = 'none';
+                
+                const alertasInfo = document.createElement('div');
+                alertasInfo.className = 'alertas-info';
+                
+                const icon = document.createElement('i');
+                icon.className = 'fa-solid fa-exclamation-triangle';
+                
+                const texto = document.createElement('span');
+                texto.id = 'alertasTexto';
+                texto.innerHTML = 'Você tem <span id="alertasCount">0</span> produto(s) com alerta de vencimento';
+                
+                const detalhes = document.createElement('span');
+                detalhes.className = 'alerta-count';
+                detalhes.id = 'alertasDetalhes';
+                detalhes.textContent = '0 vencidos • 0 a vencer';
+                
+                const btn = document.createElement('button');
+                btn.className = 'btn-ver-alertas';
+                btn.onclick = filtrarAlertas;
+                btn.innerHTML = '<i class="fa-solid fa-filter"></i> Ver Alertas';
+                
+                // Monta a estrutura
+                alertasInfo.appendChild(icon);
+                alertasInfo.appendChild(texto);
+                alertasInfo.appendChild(detalhes);
+                
+                container.appendChild(alertasInfo);
+                container.appendChild(btn);
+                
+                // Insere depois do flash-messages ou no início do main-content
+                const flashMessages = document.querySelector('.flash-messages');
+                const mainContent = document.querySelector('.main-content');
+                
+                if (flashMessages) {
+                    flashMessages.after(container);
+                } else if (mainContent) {
+                    mainContent.insertBefore(container, mainContent.firstChild);
+                } else {
+                    document.body.appendChild(container);
+                }
+                
+                console.log('Elementos de alerta criados dinamicamente');
+            }
+        }
 
         // Função para mostrar/ocultar campos de defensivo
         function toggleCamposDefensivo() {
@@ -937,17 +1002,21 @@
             const count = document.getElementById('estoqueCount');
             const detalhes = document.getElementById('estoqueDetalhes');
             
+            // VERIFICAÇÃO CRÍTICA
+            if (!container || !texto || !count || !detalhes) {
+                console.error('Elementos da barra de estoque não encontrados no DOM');
+                return;
+            }
+            
             if (data.total > 0) {
                 container.style.display = 'flex';
                 count.textContent = data.total;
                 
-                // Contar por severidade
                 const criticos = data.alertas.filter(a => a.severidade === 'critico').length;
                 const baixos = data.alertas.filter(a => a.severidade === 'baixo').length;
                 
                 detalhes.textContent = `${criticos} crítico(s) • ${baixos} baixo(s)`;
                 
-                // Diferentes mensagens baseadas na severidade
                 if (criticos > 0) {
                     texto.innerHTML = `<i class="fa-solid fa-exclamation-triangle"></i> ATENÇÃO! Você tem ${criticos} produto(s) ESGOTADOS`;
                     container.style.background = 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
@@ -982,15 +1051,28 @@
             }
         }
 
-        // Atualize o DOMContentLoaded para carregar alertas de estoque
+
         document.addEventListener('DOMContentLoaded', function() {
-            carregarProdutos();
-            carregarFornecedores();
-            carregarAlertasEstoque();  // NOVA LINHA
-        
+            console.log('DOM carregado, inicializando...');
+            
+            // Primeiro, garante que os elementos básicos existam
+            garantirElementosAlertas();
+            
+            // Depois carrega os dados
+            setTimeout(() => {
+                carregarProdutos();
+                carregarFornecedores();
+                carregarAlertasEstoque();
+            }, 200);
+            
+            // Intervalo para atualizações
             setInterval(async () => {
-                await carregarAlertas();
-                await carregarAlertasEstoque();  // NOVA LINHA
+                try {
+                    await carregarAlertas();
+                    await carregarAlertasEstoque();
+                } catch (error) {
+                    console.warn('Erro na atualização automática:', error);
+                }
             }, 5 * 60 * 1000);
         });
 
@@ -1008,21 +1090,31 @@
             }
         }
 
+
         function atualizarBarraAlertas(data) {
+            // Garante que os elementos existam
+            garantirElementosAlertas();
+            
             const container = document.getElementById('alertasContainer');
             const texto = document.getElementById('alertasTexto');
             const count = document.getElementById('alertasCount');
             const detalhes = document.getElementById('alertasDetalhes');
             
-            if (data.total > 0) {
+            // VERIFICAÇÃO FINAL
+            if (!container || !texto || !count || !detalhes) {
+                console.error('Elementos da barra de alertas não encontrados mesmo após criação');
+                return;
+            }
+            
+            if (data && data.total > 0) {
                 container.style.display = 'flex';
                 count.textContent = data.total;
                 
-                const vencidos = data.alertas.filter(a => a.severidade === 'vencido').length;
-                const aVencer = data.alertas.filter(a => a.severidade === 'a_vencer').length;
+                const vencidos = data.alertas ? data.alertas.filter(a => a.severidade === 'vencido').length : 0;
+                const aVencer = data.alertas ? data.alertas.filter(a => a.severidade === 'a_vencer').length : 0;
                 
                 detalhes.textContent = `${vencidos} vencido(s) • ${aVencer} a vencer`;
-            
+                
                 if (vencidos > 0) {
                     texto.innerHTML = `<i class="fa-solid fa-skull-crossbones"></i> ATENÇÃO! Você tem ${data.total} produto(s) com alerta de vencimento`;
                     container.style.background = 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
