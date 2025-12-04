@@ -779,3 +779,280 @@ def pagina_estoque_critico(request: Request):
         "messages": get_flashed_messages(request),
         "user": request.session["user"]
     })
+
+
+#ROTAS DOS ADMINISTRADORES 
+# No main.py, adicione estas novas rotas:
+
+@app.get("/api/admin/usuarios")
+def listar_todos_usuarios(
+    request: Request,
+    db: sqlite3.Connection = Depends(get_db)
+):
+    """Lista todos os usuários do sistema (apenas para administradores)"""
+    if "user" not in request.session:
+        raise HTTPException(status_code=401, detail="Não autorizado")
+    
+    user = request.session["user"]
+    if user.get("tipo") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso restrito a administradores")
+    
+    cursor = db.cursor()
+    cursor.execute("SELECT uuid, cnpj, nome, email, tipo FROM usuarios ORDER BY nome")
+    usuarios = cursor.fetchall()
+    
+    return [dict(usuario) for usuario in usuarios]
+
+@app.get("/api/admin/usuarios/{uuid}")
+def obter_usuario_admin(
+    uuid: str,
+    request: Request,
+    db: sqlite3.Connection = Depends(get_db)
+):
+    """Obtém um usuário específico (apenas para administradores)"""
+    if "user" not in request.session:
+        raise HTTPException(status_code=401, detail="Não autorizado")
+    
+    user = request.session["user"]
+    if user.get("tipo") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso restrito a administradores")
+    
+    cursor = db.cursor()
+    cursor.execute("SELECT uuid, cnpj, nome, email, tipo FROM usuarios WHERE uuid = ?", (uuid,))
+    usuario = cursor.fetchone()
+    
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    
+    return dict(usuario)
+
+@app.get("/api/admin/usuarios/estatisticas")
+def obter_estatisticas_usuarios(
+    request: Request,
+    db: sqlite3.Connection = Depends(get_db)
+):
+    """Obtém estatísticas dos usuários (apenas para administradores)"""
+    if "user" not in request.session:
+        raise HTTPException(status_code=401, detail="Não autorizado")
+    
+    user = request.session["user"]
+    if user.get("tipo") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso restrito a administradores")
+    
+    cursor = db.cursor()
+    
+    # Total de usuários
+    cursor.execute("SELECT COUNT(*) as total FROM usuarios")
+    total_usuarios = cursor.fetchone()["total"]
+    
+    # Total de agricultores
+    cursor.execute("SELECT COUNT(*) as total FROM usuarios WHERE tipo = 'agricultor'")
+    total_agricultores = cursor.fetchone()["total"]
+    
+    # Total de administradores
+    cursor.execute("SELECT COUNT(*) as total FROM usuarios WHERE tipo = 'admin'")
+    total_admins = cursor.fetchone()["total"]
+    
+    return {
+        "total_usuarios": total_usuarios,
+        "total_agricultores": total_agricultores,
+        "total_admins": total_admins
+    }
+
+@app.get("/api/admin/usuarios/recentes")
+def obter_usuarios_recentes(
+    request: Request,
+    db: sqlite3.Connection = Depends(get_db)
+):
+    """Obtém os últimos usuários cadastrados (apenas para administradores)"""
+    if "user" not in request.session:
+        raise HTTPException(status_code=401, detail="Não autorizado")
+    
+    user = request.session["user"]
+    if user.get("tipo") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso restrito a administradores")
+    
+    cursor = db.cursor()
+    cursor.execute("""
+        SELECT uuid, cnpj, nome, email, tipo 
+        FROM usuarios 
+        ORDER BY rowid DESC 
+        LIMIT 5
+    """)
+    usuarios = cursor.fetchall()
+    
+    return [dict(usuario) for usuario in usuarios]
+
+@app.post("/api/admin/usuarios")
+def criar_usuario_admin(
+    request: Request,
+    usuario: Usuario,
+    db: sqlite3.Connection = Depends(get_db)
+):
+    """Cria um novo usuário (apenas para administradores)"""
+    if "user" not in request.session:
+        raise HTTPException(status_code=401, detail="Não autorizado")
+    
+    user = request.session["user"]
+    if user.get("tipo") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso restrito a administradores")
+    
+    cursor = db.cursor()
+    
+    # Verifica se email já existe
+    cursor.execute("SELECT * FROM usuarios WHERE email = ?", (usuario.email,))
+    if cursor.fetchone():
+        raise HTTPException(status_code=400, detail="E-mail já cadastrado")
+    
+    # Verifica se CNPJ já existe
+    cursor.execute("SELECT * FROM usuarios WHERE cnpj = ?", (usuario.cnpj,))
+    if cursor.fetchone():
+        raise HTTPException(status_code=400, detail="CNPJ já cadastrado")
+    
+    # Cria o usuário
+    usuario.uuid = str(uuid.uuid4())
+    cursor.execute(
+        "INSERT INTO usuarios VALUES (?, ?, ?, ?, ?, ?)",
+        (
+            usuario.uuid,
+            usuario.cnpj,
+            usuario.nome,
+            usuario.email,
+            usuario.senha,
+            usuario.tipo.value
+        )
+    )
+    
+    db.commit()
+    
+    # Retorna sem a senha
+    return {
+        "uuid": usuario.uuid,
+        "cnpj": usuario.cnpj,
+        "nome": usuario.nome,
+        "email": usuario.email,
+        "tipo": usuario.tipo.value
+    }
+
+@app.put("/api/admin/usuarios/{uuid}")
+def atualizar_usuario_admin(
+    uuid: str,
+    request: Request,
+    usuario_data: dict,
+    db: sqlite3.Connection = Depends(get_db)
+):
+    """Atualiza um usuário (apenas para administradores)"""
+    if "user" not in request.session:
+        raise HTTPException(status_code=401, detail="Não autorizado")
+    
+    user = request.session["user"]
+    if user.get("tipo") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso restrito a administradores")
+    
+    cursor = db.cursor()
+    
+    # Verifica se o usuário existe
+    cursor.execute("SELECT * FROM usuarios WHERE uuid = ?", (uuid,))
+    usuario_existente = cursor.fetchone()
+    if not usuario_existente:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    
+    # Verifica se o novo email já existe (se foi alterado)
+    if usuario_data.get("email") != usuario_existente["email"]:
+        cursor.execute("SELECT * FROM usuarios WHERE email = ? AND uuid != ?", 
+                      (usuario_data["email"], uuid))
+        if cursor.fetchone():
+            raise HTTPException(status_code=400, detail="E-mail já cadastrado")
+    
+    # Verifica se o novo CNPJ já existe (se foi alterado)
+    if usuario_data.get("cnpj") != usuario_existente["cnpj"]:
+        cursor.execute("SELECT * FROM usuarios WHERE cnpj = ? AND uuid != ?", 
+                      (usuario_data["cnpj"], uuid))
+        if cursor.fetchone():
+            raise HTTPException(status_code=400, detail="CNPJ já cadastrado")
+    
+    # Atualiza o usuário
+    update_fields = []
+    update_values = []
+    
+    if "nome" in usuario_data:
+        update_fields.append("nome = ?")
+        update_values.append(usuario_data["nome"])
+    
+    if "email" in usuario_data:
+        update_fields.append("email = ?")
+        update_values.append(usuario_data["email"])
+    
+    if "cnpj" in usuario_data:
+        update_fields.append("cnpj = ?")
+        update_values.append(usuario_data["cnpj"])
+    
+    if "tipo" in usuario_data:
+        update_fields.append("tipo = ?")
+        update_values.append(usuario_data["tipo"])
+    
+    if "senha" in usuario_data and usuario_data["senha"]:
+        update_fields.append("senha = ?")
+        update_values.append(usuario_data["senha"])
+    
+    if update_fields:
+        update_values.append(uuid)
+        query = f"UPDATE usuarios SET {', '.join(update_fields)} WHERE uuid = ?"
+        cursor.execute(query, update_values)
+        db.commit()
+    
+    # Retorna o usuário atualizado
+    cursor.execute("SELECT uuid, cnpj, nome, email, tipo FROM usuarios WHERE uuid = ?", (uuid,))
+    usuario_atualizado = cursor.fetchone()
+    
+    return dict(usuario_atualizado)
+
+@app.delete("/api/admin/usuarios/{uuid}")
+def deletar_usuario_admin(
+    uuid: str,
+    request: Request,
+    db: sqlite3.Connection = Depends(get_db)
+):
+    """Deleta um usuário (apenas para administradores)"""
+    if "user" not in request.session:
+        raise HTTPException(status_code=401, detail="Não autorizado")
+    
+    user = request.session["user"]
+    if user.get("tipo") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso restrito a administradores")
+    
+    # Não permite que o administrador exclua a si mesmo
+    if user.get("uuid") == uuid:
+        raise HTTPException(status_code=400, detail="Não é possível excluir sua própria conta")
+    
+    cursor = db.cursor()
+    
+    # Verifica se o usuário existe
+    cursor.execute("SELECT * FROM usuarios WHERE uuid = ?", (uuid,))
+    usuario = cursor.fetchone()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    
+    # Verifica se o usuário tem produtos cadastrados
+    cursor.execute("SELECT COUNT(*) as total FROM produtos WHERE usuario_uuid = ?", (uuid,))
+    total_produtos = cursor.fetchone()["total"]
+    
+    if total_produtos > 0:
+        raise HTTPException(
+            status_code=400, 
+            detail="Não é possível excluir usuário com produtos cadastrados"
+        )
+    
+    # Exclui o usuário
+    cursor.execute("DELETE FROM usuarios WHERE uuid = ?", (uuid,))
+    db.commit()
+    
+    return {"message": "Usuário excluído com sucesso"}
+
+# Rota de logout
+@app.get("/logout")
+def logout(request: Request):
+    request.session.clear()
+    flash(request, "Você saiu do sistema.", "info")
+    url = request.url_for("login")
+    return RedirectResponse(url=url, status_code=303)
