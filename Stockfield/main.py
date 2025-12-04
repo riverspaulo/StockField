@@ -486,7 +486,6 @@ def cadastrar_produto(request: Request, produto: Produto, db: sqlite3.Connection
     usuario_uuid = request.session["user"]["uuid"]
     produto.usuario_uuid = usuario_uuid
     
-    # Calcular dias para vencer
     dias_para_vencer = None
     if produto.data_validade:
         hoje = date.today()
@@ -502,7 +501,7 @@ def cadastrar_produto(request: Request, produto: Produto, db: sqlite3.Connection
             dias_para_vencer = dias_restantes
     
     cursor.execute(
-        "INSERT INTO produtos VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",  # 18 placeholders
+        "INSERT INTO produtos VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",  
         (
             produto.uuid,                    # 1
             produto.nome,                    # 2
@@ -782,8 +781,6 @@ def pagina_estoque_critico(request: Request):
 
 
 #ROTAS DOS ADMINISTRADORES 
-# No main.py, adicione estas novas rotas:
-
 @app.get("/api/admin/usuarios")
 def listar_todos_usuarios(
     request: Request,
@@ -909,7 +906,7 @@ def criar_usuario_admin(
     if cursor.fetchone():
         raise HTTPException(status_code=400, detail="CNPJ já cadastrado")
     
-    # Cria o usuário
+
     usuario.uuid = str(uuid.uuid4())
     cursor.execute(
         "INSERT INTO usuarios VALUES (?, ?, ?, ?, ?, ?)",
@@ -925,7 +922,6 @@ def criar_usuario_admin(
     
     db.commit()
     
-    # Retorna sem a senha
     return {
         "uuid": usuario.uuid,
         "cnpj": usuario.cnpj,
@@ -950,28 +946,23 @@ def atualizar_usuario_admin(
         raise HTTPException(status_code=403, detail="Acesso restrito a administradores")
     
     cursor = db.cursor()
-    
-    # Verifica se o usuário existe
     cursor.execute("SELECT * FROM usuarios WHERE uuid = ?", (uuid,))
     usuario_existente = cursor.fetchone()
     if not usuario_existente:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
     
-    # Verifica se o novo email já existe (se foi alterado)
     if usuario_data.get("email") != usuario_existente["email"]:
         cursor.execute("SELECT * FROM usuarios WHERE email = ? AND uuid != ?", 
                       (usuario_data["email"], uuid))
         if cursor.fetchone():
             raise HTTPException(status_code=400, detail="E-mail já cadastrado")
-    
-    # Verifica se o novo CNPJ já existe (se foi alterado)
+ 
     if usuario_data.get("cnpj") != usuario_existente["cnpj"]:
         cursor.execute("SELECT * FROM usuarios WHERE cnpj = ? AND uuid != ?", 
                       (usuario_data["cnpj"], uuid))
         if cursor.fetchone():
             raise HTTPException(status_code=400, detail="CNPJ já cadastrado")
     
-    # Atualiza o usuário
     update_fields = []
     update_values = []
     
@@ -1001,7 +992,6 @@ def atualizar_usuario_admin(
         cursor.execute(query, update_values)
         db.commit()
     
-    # Retorna o usuário atualizado
     cursor.execute("SELECT uuid, cnpj, nome, email, tipo FROM usuarios WHERE uuid = ?", (uuid,))
     usuario_atualizado = cursor.fetchone()
     
@@ -1020,20 +1010,16 @@ def deletar_usuario_admin(
     user = request.session["user"]
     if user.get("tipo") != "admin":
         raise HTTPException(status_code=403, detail="Acesso restrito a administradores")
-    
-    # Não permite que o administrador exclua a si mesmo
+ 
     if user.get("uuid") == uuid:
         raise HTTPException(status_code=400, detail="Não é possível excluir sua própria conta")
     
     cursor = db.cursor()
-    
-    # Verifica se o usuário existe
     cursor.execute("SELECT * FROM usuarios WHERE uuid = ?", (uuid,))
     usuario = cursor.fetchone()
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
     
-    # Verifica se o usuário tem produtos cadastrados
     cursor.execute("SELECT COUNT(*) as total FROM produtos WHERE usuario_uuid = ?", (uuid,))
     total_produtos = cursor.fetchone()["total"]
     
@@ -1043,13 +1029,11 @@ def deletar_usuario_admin(
             detail="Não é possível excluir usuário com produtos cadastrados"
         )
     
-    # Exclui o usuário
     cursor.execute("DELETE FROM usuarios WHERE uuid = ?", (uuid,))
     db.commit()
     
     return {"message": "Usuário excluído com sucesso"}
 
-# Rota de logout
 @app.get("/logout")
 def logout(request: Request):
     request.session.clear()
