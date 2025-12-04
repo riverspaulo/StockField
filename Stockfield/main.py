@@ -50,6 +50,7 @@ def login(request: Request):
     return templates.TemplateResponse("login.html", {"request": request, "messages": get_flashed_messages(request)})
 
 
+#MEXI NESSA ROTA MATEUSSSSSS
 @app.post("/login")
 def login_action(
     request: Request,
@@ -116,7 +117,14 @@ def login_action(
         flash(request, mensagem_alerta, "warning")
     
     flash(request, f"Bem-vindo(a), {user['nome']}!", "success")
-    url = request.url_for("profile")
+    
+    # ============ VERIFICAÇÃO DE TIPO DE USUÁRIO ============
+    # Se for administrador, redireciona para página específica
+    if user["tipo"] == "admin":
+        url = request.url_for("profile_admin")
+    else:
+        url = request.url_for("profile")
+    
     return RedirectResponse(url=url, status_code=303)
 
 @app.get("/cadastro", response_class=HTMLResponse)
@@ -171,17 +179,43 @@ def cadastro_action(
     return RedirectResponse(url=url, status_code=303)
 
 
+#MATEUSSSSSSS
 @app.get("/profile", response_class=HTMLResponse)
 def profile(request: Request):
     if "user" not in request.session:
         flash(request, "Você precisa fazer login para acessar esta página.", "error")
         url = request.url_for("login")
         return RedirectResponse(url=url, status_code=303)
-    
+
+    user = request.session.get("user", {})
+    if user.get("tipo") == "admin":
+        url = request.url_for("profile_admin")
+        
+        return RedirectResponse(url=url, status_code=303)
     return templates.TemplateResponse("profile.html", {
         "request": request, 
         "messages": get_flashed_messages(request),
-        "user": request.session["user"]
+        "user": user
+    })
+
+#ISSO É NOVO MATEUS 
+@app.get("/profile_admin", response_class=HTMLResponse)
+def profile_admin(request: Request):
+    if "user" not in request.session:
+        flash(request, "Você precisa fazer login para acessar esta página.", "error")
+        url = request.url_for("login")
+        return RedirectResponse(url=url, status_code=303)
+    
+    user = request.session.get("user", {})
+    if user.get("tipo") != "admin":
+        flash(request, "Acesso restrito a administradores.", "error")
+        url = request.url_for("profile")
+        return RedirectResponse(url=url, status_code=303)
+    
+    return templates.TemplateResponse("profile_admin.html", {
+        "request": request, 
+        "messages": get_flashed_messages(request),
+        "user": user
     })
 
 
