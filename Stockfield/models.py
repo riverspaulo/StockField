@@ -40,15 +40,24 @@ class Usuario(BaseModel):
 #     localizacao: Optional[str] = None
 #     status: StatusProduto = StatusProduto.disponivel
 #     usuario_uuid: Optional[str] = None
-#     dias_para_vencer: Optional[int] = None  
+#     dias_para_vencer: Optional[int] = None
+# 
+class TipoProduto(str, Enum):
+    alimento = "alimento"
+    defensivo = "defensivo"
+    outros = "outros"  
 
 class Produto(BaseModel):
     uuid: Optional[str] = None
     nome: str
     descricao: Optional[str] = None
     categoria: str
+    tipo_produto: TipoProduto = TipoProduto.alimento  
+    numero_anvisa: Optional[str] = None  
+    cuidados_armazenamento: Optional[str] = None  
+    tipo_toxico: Optional[str] = None  
     quantidade: int = 0
-    estoque_minimo: int = 0  # NOVO CAMPO
+    estoque_minimo: int = 0
     preco_unitario: Optional[float] = None
     data_validade: Optional[date] = None
     lote: Optional[str] = None
@@ -134,8 +143,12 @@ def init_db():
             nome TEXT NOT NULL,
             descricao TEXT NOT NULL,
             categoria TEXT NOT NULL,
+            tipo_produto TEXT NOT NULL DEFAULT 'alimento',
+            numero_anvisa TEXT, 
+            cuidados_armazenamento TEXT,
+            tipo_toxico TEXT, 
             quantidade INTEGER NOT NULL,
-            estoque_minimo INTEGER NOT NULL DEFAULT 0,  -- NOVO CAMPO
+            estoque_minimo INTEGER NOT NULL DEFAULT 0,
             preco_unitario FLOAT,
             data_validade TEXT,
             lote TEXT,
