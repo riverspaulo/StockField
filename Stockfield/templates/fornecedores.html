@@ -944,7 +944,7 @@
                 </li>
 
                 <li class="side-item">
-                    <a href="/estoque_critico">
+                    <a href="/estoque-critico">
                         <i class="fa-solid fa-warehouse"></i>
                         <span class="item-description">Estoque</span>
                     </a>
@@ -1067,6 +1067,151 @@
             fechado: null,
             aberto: null
         };
+
+        // Carregar estatísticas
+        async function carregarEstatisticas() {
+            try {
+                // CORREÇÃO: Usar a rota correta /api/admin/estatisticas
+                const response = await fetch('/api/admin/estatisticas', {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // CORREÇÃO: As propriedades podem ter nomes diferentes
+                    // Vamos ajustar conforme o retorno real da API
+                    document.getElementById('totalUsuarios').textContent = data.total_usuarios || 0;
+                    
+                    // Verificar se as propriedades existem no retorno
+                    if (data.total_admins !== undefined) {
+                        document.getElementById('totalAdmins').textContent = data.total_admins;
+                    } else {
+                        // Tentar calcular a partir dos usuários se necessário
+                        document.getElementById('totalAdmins').textContent = '0';
+                    }
+                    
+                    if (data.total_agricultores !== undefined) {
+                        document.getElementById('totalAgricultores').textContent = data.total_agricultores;
+                    } else {
+                        document.getElementById('totalAgricultores').textContent = '0';
+                    }
+                    
+                    document.getElementById('totalAtivos').textContent = data.total_usuarios || 0;
+                    
+                } else if (response.status === 401) {
+                    window.location.href = '/login';
+                } else if (response.status === 404) {
+                    console.warn('Rota de estatísticas não encontrada. Usando valores padrão.');
+                    // Usar valores padrão se a rota não existir
+                    document.getElementById('totalUsuarios').textContent = '0';
+                    document.getElementById('totalAdmins').textContent = '0';
+                    document.getElementById('totalAgricultores').textContent = '0';
+                    document.getElementById('totalAtivos').textContent = '0';
+                }
+            } catch (error) {
+                console.error('Erro ao carregar estatísticas:', error);
+                mostrarMensagem('Erro ao carregar estatísticas. Verifique o console.', 'error');
+            }
+        }
+
+        // Carregar todos os usuários - CORREÇÃO DA ROTA
+        async function carregarUsuarios() {
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="loading">
+                        <div class="loader"></div>
+                        <p style="margin-top: 10px;">Carregando usuários...</p>
+                    </td>
+                </tr>
+            `;
+            
+            try {
+                // CORREÇÃO: Usar a rota correta /api/admin/usuarios
+                const response = await fetch('/api/admin/usuarios', {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const usuarios = await response.json();
+                    usuariosCache = usuarios;
+                    renderizarUsuarios(usuarios);
+                    atualizarPaginacao(usuarios);
+                } else if (response.status === 401) {
+                    window.location.href = '/login';
+                } else if (response.status === 404) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="7" style="text-align: center; color: #e74c3c; padding: 40px;">
+                                <i class="fas fa-exclamation-circle" style="font-size: 48px; margin-bottom: 20px;"></i>
+                                <h3>Rota de usuários não encontrada</h3>
+                                <p>Verifique se a API está configurada corretamente.</p>
+                                <p style="font-size: 12px; margin-top: 10px;">Endpoint esperado: /api/admin/usuarios</p>
+                            </td>
+                        </tr>
+                    `;
+                }
+            } catch (error) {
+                console.error('Erro ao carregar usuários:', error);
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; color: #e74c3c; padding: 40px;">
+                            <i class="fas fa-exclamation-circle" style="font-size: 48px; margin-bottom: 20px;"></i>
+                            <h3>Erro de conexão</h3>
+                            <p>Verifique se o servidor está rodando e tente novamente.</p>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Função auxiliar para verificar se as rotas existem
+        async function verificarRotas() {
+            const rotas = [
+                '/api/admin/estatisticas',
+                '/api/admin/usuarios'
+            ];
+            
+            console.log('Verificando rotas disponíveis...');
+            for (const rota of rotas) {
+                try {
+                    const response = await fetch(rota, {
+                        method: 'HEAD',
+                        credentials: 'include'
+                    });
+                    console.log(`${rota}: ${response.status}`);
+                } catch (error) {
+                    console.error(`Erro ao acessar ${rota}:`, error);
+                }
+            }
+        }
+
+        // Adicionar verificação no carregamento da página
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Página carregada. Verificando rotas...');
+            // Descomente a linha abaixo para depuração
+            // verificarRotas();
+            
+            const nomeUsuario = "Administrador";
+            const inicial = nomeUsuario.charAt(0).toUpperCase();
+            document.getElementById('userInitial').textContent = inicial;
+            
+            carregarEstatisticas();
+            carregarUsuarios();
+            
+            document.getElementById('searchInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    buscarUsuarios();
+                }
+            });
+        });
 
         function preloadImages() {
             preloadedImages.fechado = new Image();

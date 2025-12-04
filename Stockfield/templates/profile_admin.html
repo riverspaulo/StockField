@@ -452,13 +452,15 @@
 <body>
     <div class="container">
         <!-- Sidebar -->
-        <div class="sidebar">
-            <i class="fas fa-home active" onclick="carregarDashboard()"></i>
-            <i class="fas fa-users" onclick="carregarUsuarios()"></i>
-            <i class="fas fa-chart-bar" onclick="carregarRelatorios()"></i>
-            <i class="fas fa-cog" onclick="carregarConfiguracoes()"></i>
-            <i class="fas fa-sign-out-alt" onclick="sair()"></i>
-        </div>
+        <aside class="sidebar">
+                <i class="fa-solid fa-house" onclick="window.location.href='/profile_admin'" title="Perfil"></i>
+                <i class="fa-solid fa-truck" onclick="window.location.href='/fornecedores_admin'" title="Fornecedores"></i>
+                <!-- <i class="fa-solid fa-box" onclick="window.location.href='/produtos'" title="Produtos"></i>
+                <i class="fa-solid fa-truck" onclick="window.location.href='/fornecedores'" title="Fornecedores"></i>
+                <i class="fa-solid fa-exchange-alt active" onclick="window.location.href='/movimentacoes'" title="Movimentações"></i>
+                <i class="fa-solid fa-chart-bar" title="Relatórios"></i>
+                <i class="fa-solid fa-exclamation-triangle active" onclick="window.location.href='/estoque-critico'" title="Estoque"></i> -->
+        </aside>
 
         <!-- Conteúdo Principal -->
         <div class="main-content">

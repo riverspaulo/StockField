@@ -537,6 +537,25 @@ def cadastrar_fornecedor(fornecedor: Fornecedor, db: sqlite3.Connection = Depend
     db.commit()
     return fornecedor
 
+@app.get("/fornecedores_admin", response_class=HTMLResponse)
+def pagina_fornecedores_admin(request: Request):
+    if "user" not in request.session:
+        flash(request, "Você precisa fazer login para acessar esta página.", "error")
+        url = request.url_for("login")
+        return RedirectResponse(url=url, status_code=303)
+    
+    user = request.session.get("user", {})
+    if user.get("tipo") != "admin":
+        flash(request, "Acesso restrito a administradores.", "error")
+        url = request.url_for("profile")
+        return RedirectResponse(url=url, status_code=303)
+    
+    return templates.TemplateResponse("fornecedores_admin.html", {
+        "request": request, 
+        "messages": get_flashed_messages(request),
+        "user": user
+    })
+
 @app.get("/produtos/", response_model=List[Produto])
 def listar_produtos(request: Request, db: sqlite3.Connection = Depends(get_db)):
     cursor = db.cursor()
@@ -1315,3 +1334,22 @@ def logout(request: Request):
     flash(request, "Você saiu do sistema.", "info")
     url = request.url_for("login")
     return RedirectResponse(url=url, status_code=303)
+
+@app.get("/api/admin/fornecedores")
+def listar_todos_fornecedores_admin(
+    request: Request,
+    db: sqlite3.Connection = Depends(get_db)
+):
+    """Lista todos os fornecedores do sistema (apenas para administradores)"""
+    if "user" not in request.session:
+        raise HTTPException(status_code=401, detail="Não autorizado")
+    
+    user = request.session["user"]
+    if user.get("tipo") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso restrito a administradores")
+    
+    cursor = db.cursor()
+    cursor.execute("SELECT * FROM fornecedores ORDER BY nome")
+    fornecedores = cursor.fetchall()
+    
+    return [dict(fornecedor) for fornecedor in fornecedores]
