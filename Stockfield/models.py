@@ -27,21 +27,7 @@ class Usuario(BaseModel):
     senha: str
     tipo: TipoUsuario
 
-# class Produto(BaseModel):
-#     uuid: Optional[str] = None
-#     nome: str
-#     descricao: Optional[str] = None
-#     categoria: str
-#     quantidade: int = 0
-#     preco_unitario: Optional[float] = None
-#     data_validade: Optional[date] = None
-#     lote: Optional[str] = None
-#     fornecedor_uuid: str
-#     localizacao: Optional[str] = None
-#     status: StatusProduto = StatusProduto.disponivel
-#     usuario_uuid: Optional[str] = None
-#     dias_para_vencer: Optional[int] = None
-# 
+
 class TipoProduto(str, Enum):
     alimento = "alimento"
     defensivo = "defensivo"
@@ -119,24 +105,6 @@ def init_db():
             email TEXT NOT NULL
         )""")
 
-        # cursor.execute("""
-        # CREATE TABLE IF NOT EXISTS produtos (
-        #     uuid TEXT PRIMARY KEY,
-        #     nome TEXT NOT NULL,
-        #     descricao TEXT NOT NULL,
-        #     categoria TEXT NOT NULL,
-        #     quantidade INTEGER NOT NULL,
-        #     preco_unitario FLOAT,
-        #     data_validade TEXT,
-        #     lote TEXT,
-        #     fornecedor_uuid TEXT NOT NULL,
-        #     localizacao TEXT,
-        #     status TEXT NOT NULL,
-        #     usuario_uuid TEXT NOT NULL,
-        #     FOREIGN KEY (fornecedor_uuid) REFERENCES fornecedores (uuid),
-        #     FOREIGN KEY (usuario_uuid) REFERENCES usuarios (uuid)
-        # )""")
-
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS produtos (
             uuid TEXT PRIMARY KEY,
@@ -156,6 +124,8 @@ def init_db():
             localizacao TEXT,
             status TEXT NOT NULL,
             usuario_uuid TEXT NOT NULL,
+            dias_para_vencer TEXT,
+                       
             FOREIGN KEY (fornecedor_uuid) REFERENCES fornecedores (uuid),
             FOREIGN KEY (usuario_uuid) REFERENCES usuarios (uuid)
         )""")
