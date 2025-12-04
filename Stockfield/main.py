@@ -445,43 +445,6 @@ def cadastrar_usuario(usuario: Usuario, db: sqlite3.Connection = Depends(get_db)
     return usuario
 
 
-# @app.post("/produtos/", response_model=Produto)
-# def cadastrar_produto(request: Request ,produto: Produto, db: sqlite3.Connection = Depends(get_db)):
-#     cursor = db.cursor()
-#     produto.uuid = str(uuid.uuid4())
-#     usuario_uuid = request.session["user"]["uuid"]
-#     produto.usuario_uuid = usuario_uuid
-    
-#     if produto.data_validade:
-#         hoje = date.today()
-#         dias_restantes = (produto.data_validade - hoje).days
-        
-#         if dias_restantes < 0:
-#             produto.status = StatusProduto.vencido
-#         elif dias_restantes <= ALERTA_DIAS:
-#             produto.status = StatusProduto.a_vencer
-    
-#     cursor.execute(
-#         "INSERT INTO produtos VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-#         (
-#             produto.uuid,
-#             produto.nome,
-#             produto.descricao,
-#             produto.categoria,
-#             produto.quantidade,
-#             produto.preco_unitario,
-#             produto.data_validade.isoformat() if produto.data_validade else None,
-#             produto.lote,
-#             produto.fornecedor_uuid,
-#             produto.localizacao,
-#             produto.status.value,
-#             usuario_uuid  
-#         )
-#     )
-#     db.commit()
-#     return produto
-
-#MEXI NESSA TAMBÉM MATEUSSSSSSSSSSSSSSSSS
 @app.post("/produtos/", response_model=Produto)
 def cadastrar_produto(request: Request, produto: Produto, db: sqlite3.Connection = Depends(get_db)):
     cursor = db.cursor()
@@ -489,35 +452,42 @@ def cadastrar_produto(request: Request, produto: Produto, db: sqlite3.Connection
     usuario_uuid = request.session["user"]["uuid"]
     produto.usuario_uuid = usuario_uuid
     
+    # Calcular dias para vencer
+    dias_para_vencer = None
     if produto.data_validade:
         hoje = date.today()
         dias_restantes = (produto.data_validade - hoje).days
         
         if dias_restantes < 0:
             produto.status = StatusProduto.vencido
+            dias_para_vencer = dias_restantes
         elif dias_restantes <= ALERTA_DIAS:
             produto.status = StatusProduto.a_vencer
+            dias_para_vencer = dias_restantes
+        else:
+            dias_para_vencer = dias_restantes
     
     cursor.execute(
-        "INSERT INTO produtos VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO produtos VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",  # 18 placeholders
         (
-            produto.uuid,
-            produto.nome,
-            produto.descricao,
-            produto.categoria,
-            produto.tipo_produto.value,  # NOVO
-            produto.numero_anvisa,  # NOVO
-            produto.cuidados_armazenamento,  # NOVO
-            produto.tipo_toxico,  # NOVO
-            produto.quantidade,
-            produto.estoque_minimo,
-            produto.preco_unitario,
-            produto.data_validade.isoformat() if produto.data_validade else None,
-            produto.lote,
-            produto.fornecedor_uuid,
-            produto.localizacao,
-            produto.status.value,
-            usuario_uuid
+            produto.uuid,                    # 1
+            produto.nome,                    # 2
+            produto.descricao,               # 3
+            produto.categoria,               # 4
+            produto.tipo_produto.value,      # 5
+            produto.numero_anvisa,           # 6
+            produto.cuidados_armazenamento,  # 7
+            produto.tipo_toxico,             # 8
+            produto.quantidade,              # 9
+            produto.estoque_minimo,          # 10
+            produto.preco_unitario,          # 11
+            produto.data_validade.isoformat() if produto.data_validade else None,  # 12
+            produto.lote,                    # 13
+            produto.fornecedor_uuid,         # 14
+            produto.localizacao,             # 15
+            produto.status.value,            # 16
+            usuario_uuid,                    # 17
+            dias_para_vencer,                # 18 
         )
     )
     db.commit()
@@ -636,50 +606,6 @@ def pagina_produtos(request: Request):
         "user": request.session["user"]
     })
 
-
-# @app.put("/produtos/{uuid}", response_model=Produto)
-# def atualizar_produto(uuid: str, produto: Produto, request: Request, db: sqlite3.Connection = Depends(get_db)):
-#     cursor = db.cursor()
-#     cursor.execute("SELECT * FROM produtos WHERE uuid = ?", (uuid,))
-#     produto_existente = cursor.fetchone()
-#     if not produto_existente:
-#         raise HTTPException(status_code=404, detail="Produto não encontrado")
-  
-#     if produto.data_validade:
-#         hoje = date.today()
-#         dias_restantes = (produto.data_validade - hoje).days
-        
-#         if dias_restantes < 0:
-#             produto.status = StatusProduto.vencido
-#         elif dias_restantes <= ALERTA_DIAS:
-#             produto.status = StatusProduto.a_vencer
-#         else:
-#             produto.status = StatusProduto.disponivel
-    
-#     cursor.execute(
-#         """UPDATE produtos SET 
-#             nome = ?, descricao = ?, categoria = ?, quantidade = ?, 
-#             preco_unitario = ?, data_validade = ?, lote = ?, 
-#             fornecedor_uuid = ?, localizacao = ?, status = ? 
-#         WHERE uuid = ?""",
-#         (
-#             produto.nome,
-#             produto.descricao,
-#             produto.categoria,
-#             produto.quantidade,
-#             produto.preco_unitario,
-#             produto.data_validade.isoformat() if produto.data_validade else None,
-#             produto.lote,
-#             produto.fornecedor_uuid,
-#             produto.localizacao,
-#             produto.status.value,
-#             uuid
-#         )
-#     )
-#     db.commit()
-    
-#     produto.uuid = uuid
-#     return produto
 
 #MEXI NESSA AQUIII MATEUSSSSSSSSSSSSSSSSSSSSSSSS
 #MEXI AQUI TAMBÉM MICKA
