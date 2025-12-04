@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Aministrador - StockField</title>
+    <link rel="stylesheet" href="/static/css/profile.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .container {
+            display: flex;
+            min-height: calc(100vh - 60px);
+        }
+
+        .sidebar {
+            width: 80px;
+            background: #2c3e50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+        }
+
+        .sidebar i {
+            color: #ecf0f1;
+            font-size: 24px;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .sidebar i:hover {
+            color: #3498db;
+        }
+
+        .sidebar i.active {
+            color: #3498db;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            background: #ecf0f1;
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .content-title {
+            color: #2c3e50;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.3s;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        /* Adicione estes estilos ao seu CSS existente */
+
+        .modal-body-scroll {
+            overflow-y: auto;
+            max-height: 70vh;
+            padding: 20px;
+        }
+
+        /* Estilização da barra de rolagem para o modal */
+        .modal-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-body::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+            margin: 4px 0;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        /* Para Firefox */
+        .modal-body {
+            scrollbar-width: thin;
+            scrollbar-color: #c1c1c1 #f1f1f1;
+        }
+
+        .produtos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .produto-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-left: 4px solid #27ae60;
+        }
+
+        .produto-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+        }
+
+        .produto-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .produto-nome {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 0;
+        }
+
+        .produto-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-action {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+
+        .btn-edit {
+            color: #f39c12;
+        }
+
+        .btn-delete {
+            color: #e74c3c;
+        }
+
+        .btn-action:hover {
+            background: #f8f9fa;
+        }
+
+        .produto-info {
+            margin-bottom: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        .info-item i {
+            width: 16px;
+            color: #7f8c8d;
+        }
+
+        .produto-stats {
+            display: flex;
+            gap: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #ecf0f1;
+        }
+
+        .stat {
+            text-align: center;
+            flex: 1;
+        }
+
+        .stat-number {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-disponivel {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-esgotado {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-vencido {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 2% auto; /* Reduzi a margem superior para dar mais espaço */
+            padding: 0; /* Removemos o padding do content para aplicar no body */
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh; /* Altura máxima da modal */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0;
+            padding: 20px 30px;
+            border-bottom: 1px solid #ecf0f1;
+            flex-shrink: 0; /* Impede que o header diminua */
+        }
+
+        .modal-title {
+            font-size: 24px;
+            color: #2c3e50;
+            margin: 0;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .modal-body {
+            padding: 30px;
+            overflow-y: auto; /* Adiciona rolagem vertical */
+            flex-grow: 1; /* Ocupa o espaço restante */
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #bdc3c7;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .modal-footer {
+            padding: 20px 30px;
+            border-top: 1px solid #ecf0f1;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            flex-shrink: 0; /* Impede que o footer diminua */
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .btn-success:hover {
+            background: #219a52;
+        }
+
+        .search-container {
+            margin-bottom: 20px;
+        }
+
+        .search-box {
+            display: flex;
+            max-width: 400px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #bdc3c7;
+            border-right: none;
+            border-radius: 6px 0 0 6px;
+            font-size: 16px;
+        }
+
+        .search-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 0 6px 6px 0;
+            cursor: pointer;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #7f8c8d;
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            color: #bdc3c7;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+
+        .flash-message {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .flash-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .flash-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .flash-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+            /* Estilos para produtos com alertas */
+        .produto-card.vencido {
+            border-left: 4px solid #e74c3c;
+            background: linear-gradient(135deg, #ffffff 0%, #fff5f5 100%);
+        }
+
+        .produto-card.a-vencer {
+            border-left: 4px solid #f39c12;
+            background: linear-gradient(135deg, #ffffff 0%, #fffbf0 100%);
+        }
+
+        .status-vencido {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-a_vencer {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .alerta-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .produto-header {
+            position: relative;
+        }
+
+        .dias-restantes {
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: 8px;
+            font-weight: bold;
+        }
+
+        .dias-negativo {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .dias-baixo {
+            background: #f39c12;
+            color: white;
+        }
+
+        .dias-normal {
+            background: #27ae60;
+            color: white;
+        }
+
+        .produto-card.estoque-baixo {
+            border-left: 4px solid #f39c12;
+            background: linear-gradient(135deg, #ffffff 0%, #fffbf0 100%);
+        }
+
+        .estoque-baixo-badge {
+            background: #f39c12;
+            color: white;
+        }
+
+        .estoque-critico {
+            background: #e74c3c;
+            color: white;
+        }
+
+        /* Barra de alertas de estoque */
+        .alertas-bar.estoque {
+            background: linear-gradient(135deg, #f39c12 0%, #d35400 100%);
+        }
+
+        /* Barra de alertas no topo */
+        .alertas-bar {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+        }
+
+        .alertas-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .alerta-count {
+            background: white;
+            color: #e74c3c;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .btn-ver-alertas {
+            background: white;
+            color: #e74c3c;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s;
+        }
+
+        .btn-ver-alertas:hover {
+            background: #f8f9fa;
+            transform: translateY(-2px);
+        }
+
+        /* Personalização da barra de rolagem */
+        .modal-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-body::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        /* Estilos para defensivos agrícolas */
+        .defensivo-badge {
+            background: #e74c3c;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+
+        .produto-card.defensivo {
+            border-left: 4px solid #e74c3c;
+            background: linear-gradient(135deg, #ffffff 0%, #fff5f5 100%);
+        }
+
+        .secao-defensivos {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3498db;
+        }
+
+        .secao-defensivos h4 {
+            margin-top: 0;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .info-item.warning {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .info-item.warning i {
+            color: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <h1>Teste</h1>
+
+</body>
+</html>
