@@ -451,6 +451,7 @@
 </head>
 <body>
     <div class="container">
+        <!-- Sidebar -->
         <div class="sidebar">
             <i class="fas fa-home active" onclick="carregarDashboard()"></i>
             <i class="fas fa-users" onclick="carregarUsuarios()"></i>
@@ -459,8 +460,9 @@
             <i class="fas fa-sign-out-alt" onclick="sair()"></i>
         </div>
 
- 
+        <!-- Conteúdo Principal -->
         <div class="main-content">
+            <!-- Header -->
             <div class="content-header">
                 <h1 class="content-title" id="pageTitle">Dashboard Administrador</h1>
                 <div>
@@ -470,6 +472,7 @@
                 </div>
             </div>
 
+            <!-- Mensagens Flash -->
             <div class="flash-messages" id="flashMessages">
                 {% for message in messages %}
                 <div class="flash-message flash-{{ message.category }}">
@@ -478,7 +481,9 @@
                 {% endfor %}
             </div>
 
+            <!-- Conteúdo Dinâmico -->
             <div id="dynamicContent">
+                <!-- Dashboard Administrador -->
                 <div id="dashboardContent">
                     <div class="stats-container">
                         <div class="stat-card">
@@ -507,7 +512,7 @@
 
                     <div id="recentUsers" class="loading">
                         <div class="loader"></div>
-                        <!-- <p>Carregando usuários...</p> -->
+                        <p>Carregando usuários...</p>
                     </div>
                 </div>
 
@@ -540,7 +545,7 @@
                                 </tr>
                             </thead>
                             <tbody id="usuariosTableBody">
-                               
+                                <!-- Usuários serão carregados aqui -->
                             </tbody>
                         </table>
                     </div>
@@ -548,14 +553,16 @@
                     <div id="usuariosPagination" style="margin-top: 20px; text-align: center;"></div>
                 </div>
 
+                <!-- Relatórios -->
                 <div id="relatoriosContent" style="display: none;">
                     <h2>Relatórios</h2>
-                    <!-- <p>Em desenvolvimento...</p> -->
+                    <p>Em desenvolvimento...</p>
                 </div>
 
+                <!-- Configurações -->
                 <div id="configuracoesContent" style="display: none;">
                     <h2>Configurações do Sistema</h2>
-                    <!-- <p>Em desenvolvimento...</p> -->
+                    <p>Em desenvolvimento...</p>
                 </div>
             </div>
         </div>
@@ -621,6 +628,7 @@
         </div>
     </div>
 
+    <!-- Modal para Confirmação de Exclusão -->
     <div id="confirmDeleteModal" class="modal">
         <div class="modal-content" style="max-width: 500px;">
             <div class="modal-header">
@@ -639,6 +647,7 @@
         </div>
     </div>
 
+    <!-- Modal para Visualização Detalhada -->
     <div id="viewUsuarioModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -657,10 +666,12 @@
     </div>
 
     <script>
+        // Variáveis globais
         let usuariosCache = [];
         let usuarioParaExcluir = null;
         let currentView = 'dashboard';
 
+        // Funções de navegação
         function carregarDashboard() {
             document.getElementById('pageTitle').textContent = 'Dashboard Administrador';
             document.getElementById('dashboardContent').style.display = 'block';
@@ -669,6 +680,7 @@
             document.getElementById('configuracoesContent').style.display = 'none';
             currentView = 'dashboard';
             
+            // Atualizar menu ativo
             document.querySelectorAll('.sidebar i').forEach(icon => {
                 icon.classList.remove('active');
             });
@@ -686,6 +698,7 @@
             document.getElementById('configuracoesContent').style.display = 'none';
             currentView = 'usuarios';
             
+            // Atualizar menu ativo
             document.querySelectorAll('.sidebar i').forEach(icon => {
                 icon.classList.remove('active');
             });
@@ -700,7 +713,8 @@
             document.getElementById('usuariosContent').style.display = 'none';
             document.getElementById('relatoriosContent').style.display = 'block';
             document.getElementById('configuracoesContent').style.display = 'none';
-
+            
+            // Atualizar menu ativo
             document.querySelectorAll('.sidebar i').forEach(icon => {
                 icon.classList.remove('active');
             });
@@ -727,6 +741,7 @@
             }
         }
 
+        // Funções para gerenciamento de usuários
         async function carregarEstatisticas() {
             try {
                 const response = await fetch('/api/admin/usuarios/estatisticas', {
@@ -767,6 +782,7 @@
                         return;
                     }
                     
+                    // Criar cards para usuários recentes
                     usuarios.forEach(usuario => {
                         const card = document.createElement('div');
                         card.className = 'usuario-card';
@@ -875,6 +891,7 @@
             renderizarTabelaUsuarios(usuariosFiltrados);
         }
 
+        // Modal Functions
         function abrirModalCadastroUsuario() {
             document.getElementById('modalUsuarioTitle').textContent = 'Novo Usuário';
             document.getElementById('usuarioForm').reset();
@@ -1079,16 +1096,18 @@
             }
         }
 
+        // Event Listeners
         document.getElementById('searchUsuario')?.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 buscarUsuarios();
             }
         });
 
-    
+        // Inicialização
         document.addEventListener('DOMContentLoaded', () => {
             carregarDashboard();
             
+            // Fechar modais ao clicar fora
             window.onclick = (event) => {
                 const modals = ['usuarioModal', 'confirmDeleteModal', 'viewUsuarioModal'];
                 modals.forEach(modalId => {
