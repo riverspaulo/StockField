@@ -592,6 +592,45 @@
         .modal-body::-webkit-scrollbar-thumb:hover {
             background: #a8a8a8;
         }
+
+        /* Estilos para defensivos agrícolas */
+        .defensivo-badge {
+            background: #e74c3c;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+
+        .produto-card.defensivo {
+            border-left: 4px solid #e74c3c;
+            background: linear-gradient(135deg, #ffffff 0%, #fff5f5 100%);
+        }
+
+        .secao-defensivos {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3498db;
+        }
+
+        .secao-defensivos h4 {
+            margin-top: 0;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .info-item.warning {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .info-item.warning i {
+            color: #e74c3c;
+        }
     </style>
 </head>
 <body>
@@ -716,6 +755,18 @@
             <div class="modal-body">
                 <form id="produtoForm">
                     <input type="hidden" id="produtoUuid">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="tipoProduto">Tipo de Produto *</label>
+                            <select class="form-control" id="tipoProduto" required onchange="toggleCamposDefensivo()">
+                                <option value="alimento">Alimento/Grão</option>
+                                <option value="defensivo">Defensivo Agrícola</option>
+                                <option value="outros">Outros</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <div class="form-row">
                         <div class="form-group">
                             <label for="nome">Nome do Produto *</label>
@@ -728,6 +779,39 @@
                         </div>
                     </div>
 
+                    <!-- SEÇÃO DE DEFENSIVOS AGRÍCOLAS (APARECE APENAS QUANDO TIPO = DEFENSIVO) -->
+                    <div id="secaoDefensivos" class="secao-defensivos" style="display: none;">
+                        <h4 style="margin-top: 0; color: #2c3e50; margin-bottom: 15px;">
+                            <i class="fa-solid fa-flask-vial"></i> Informações do Defensivo Agrícola
+                        </h4>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="numeroAnvisa">Nº Registro ANVISA *</label>
+                                <input type="text" class="form-control" id="numeroAnvisa" placeholder="Ex: 123456789">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="tipoToxico">Tipo de Tóxico *</label>
+                                <select class="form-control" id="tipoToxico">
+                                    <option value="">Selecione...</option>
+                                    <option value="Classe I - Extremamente tóxico">Classe I - Extremamente tóxico</option>
+                                    <option value="Classe II - Altamente tóxico">Classe II - Altamente tóxico</option>
+                                    <option value="Classe III - Medianamente tóxico">Classe III - Medianamente tóxico</option>
+                                    <option value="Classe IV - Pouco tóxico">Classe IV - Pouco tóxico</option>
+                                    <option value="Produto Biológico">Produto Biológico</option>
+                                    <option value="Não Classificado">Não Classificado</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="cuidadosArmazenamento">Cuidados de Armazenamento *</label>
+                            <textarea class="form-control" id="cuidadosArmazenamento" rows="3" placeholder="Ex: Manter em local fresco e arejado, longe de alimentos..."></textarea>
+                            <small style="color: #7f8c8d;">Informe as precauções necessárias para armazenamento seguro</small>
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <label for="descricao">Descrição</label>
                         <textarea class="form-control" id="descricao" rows="2"></textarea>
@@ -737,21 +821,27 @@
                         <div class="form-group">
                             <label for="quantidade">Quantidade *</label>
                             <input type="number" class="form-control" id="quantidade" value="0" min="0" required>
-                        </div> 
-
-                        ISSO É NOVO MATEUSSSSS
-                        <div class="form-group">
-                                <label for="estoqueMinimo">Estoque Mínimo</label>
-                                <input type="number" class="form-control" id="estoqueMinimo" value="0" min="0">
-                                <small style="color: #7f8c8d;">Defina 0 para não monitorar</small>
-                            </div>
                         </div>
 
+                        <div class="form-group">
+                            <label for="estoqueMinimo">Estoque Mínimo</label>
+                            <input type="number" class="form-control" id="estoqueMinimo" value="0" min="0">
+                            <small style="color: #7f8c8d;">Defina 0 para não monitorar</small>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
                         <div class="form-group">
                             <label for="preco">Preço Unitário</label>
                             <input type="number" step="0.01" class="form-control" id="preco">
                         </div>
+
+                        <div class="form-group">
+                            <label for="localizacao">Localização</label>
+                            <input type="text" class="form-control" id="localizacao" placeholder="Ex: Prateleira A3, Estante 1">
+                        </div>
                     </div>
+
                     <div class="form-row">
                         <div class="form-group">
                             <label for="dataValidade">Data Validade</label>
@@ -762,6 +852,7 @@
                             <input type="text" class="form-control" id="lote">
                         </div>
                     </div>
+
                     <div class="form-row">
                         <div class="form-group">
                             <label for="fornecedorUuid">Fornecedor *</label>
@@ -775,12 +866,9 @@
                                 <option value="disponível">Disponível</option>
                                 <option value="esgotado">Esgotado</option>
                                 <option value="vencido">Vencido</option>
+                                <option value="a_vencer">A Vencer</option>
                             </select>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="localizacao">Localização</label>
-                        <input type="text" class="form-control" id="localizacao">
                     </div>
                 </form>
             </div>
@@ -794,8 +882,6 @@
         </div>
     </div>
 
-   
-
     <script>
         let produtos = [];
         let produtoEditando = null;
@@ -804,6 +890,30 @@
         let mostrarApenasAlertas = false;
         let alertasEstoque = [];
         let mostrarApenasEstoqueBaixo = false;
+
+        // Função para mostrar/ocultar campos de defensivo
+        function toggleCamposDefensivo() {
+            const tipoProduto = document.getElementById('tipoProduto').value;
+            const secaoDefensivos = document.getElementById('secaoDefensivos');
+            
+            if (tipoProduto === 'defensivo') {
+                secaoDefensivos.style.display = 'block';
+                // Torna os campos obrigatórios
+                document.getElementById('numeroAnvisa').required = true;
+                document.getElementById('tipoToxico').required = true;
+                document.getElementById('cuidadosArmazenamento').required = true;
+            } else {
+                secaoDefensivos.style.display = 'none';
+                // Remove a obrigatoriedade
+                document.getElementById('numeroAnvisa').required = false;
+                document.getElementById('tipoToxico').required = false;
+                document.getElementById('cuidadosArmazenamento').required = false;
+                // Limpa os campos
+                document.getElementById('numeroAnvisa').value = '';
+                document.getElementById('tipoToxico').value = '';
+                document.getElementById('cuidadosArmazenamento').value = '';
+            }
+        }
 
         async function carregarAlertasEstoque() {
             try {
@@ -863,7 +973,6 @@
                     Mostrar Todos
                 `;
             } else {
-              
                 renderizarProdutos(produtos);
                 mostrarApenasEstoqueBaixo = false;
                 document.querySelector('[onclick="filtrarEstoqueBaixo()"]').innerHTML = `
@@ -941,11 +1050,17 @@
             }
 
             container.innerHTML = listaProdutos.map(produto => {
-                // Verificar se produto tem alerta
-                const alerta = alertasAtivos.find(a => a.uuid === produto.uuid);
+                // Determinar classe do card baseada no tipo
                 let cardClass = 'produto-card';
+                if (produto.tipo_produto === 'defensivo') {
+                    cardClass += ' defensivo';
+                }
+
+                // Verificar se produto tem alerta de vencimento
+                const alerta = alertasAtivos.find(a => a.uuid === produto.uuid);
                 let diasBadge = '';
 
+                // Verificar alerta de estoque
                 const alertaEstoque = alertasEstoque.find(a => a.uuid === produto.uuid);
                 let estoqueBadge = '';
                 
@@ -969,12 +1084,40 @@
                     }
                 }
 
+                // Badge para defensivos
+                const tipoBadge = produto.tipo_produto === 'defensivo' 
+                    ? `<span class="defensivo-badge">DEFENSIVO</span>`
+                    : '';
+
+                // Informações específicas para defensivos
+                const infoDefensivo = produto.tipo_produto === 'defensivo' ? `
+                    <div class="info-item warning">
+                        <i class="fa-solid fa-id-card"></i>
+                        <span>ANVISA: ${produto.numero_anvisa || 'Não informado'}</span>
+                    </div>
+                    <div class="info-item warning">
+                        <i class="fa-solid fa-skull-crossbones"></i>
+                        <span>Tóxico: ${produto.tipo_toxico || 'Não classificado'}</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <span>Cuidados: ${produto.cuidados_armazenamento ? produto.cuidados_armazenamento.substring(0, 50) + (produto.cuidados_armazenamento.length > 50 ? '...' : '') : 'Não informados'}</span>
+                    </div>
+                ` : '';
+
+                // Determinar texto do tipo
+                let tipoTexto = 'Alimento';
+                if (produto.tipo_produto === 'defensivo') tipoTexto = 'Defensivo Agrícola';
+                if (produto.tipo_produto === 'outros') tipoTexto = 'Outros';
+
                 return `
                     <div class="${cardClass}">
                         <div class="produto-header">
                             <h3 class="produto-nome">
                                 ${produto.nome}
+                                ${tipoBadge}
                                 ${diasBadge}
+                                ${estoqueBadge}
                             </h3>
                             ${alerta ? '<span class="alerta-badge"><i class="fa-solid fa-exclamation"></i></span>' : ''}
                             <div class="produto-actions">
@@ -989,7 +1132,12 @@
                         <div class="produto-info">
                             <div class="info-item">
                                 <i class="fa-solid fa-tag"></i>
-                                <span>${produto.categoria}</span>
+                                <span>Tipo: ${tipoTexto}</span>
+                            </div>
+                            ${infoDefensivo}
+                            <div class="info-item">
+                                <i class="fa-solid fa-tags"></i>
+                                <span>Categoria: ${produto.categoria}</span>
                             </div>
                             <div class="info-item">
                                 <i class="fa-solid fa-align-left"></i>
@@ -1153,35 +1301,6 @@
             }
         }
 
-        // Adicione ao DOMContentLoaded
-        document.addEventListener('DOMContentLoaded', function() {
-            carregarProdutos();
-            carregarFornecedores();
-            
-            // Verificar alertas a cada 5 minutos
-            setInterval(async () => {
-                await carregarAlertas();
-            }, 5 * 60 * 1000);
-        });
-
-        
-        async function carregarProdutos() {
-            try {
-                const response = await fetch('/produtos/');
-                produtos = await response.json();
-                renderizarProdutos(produtos);
-            } catch (error) {
-                console.error('Erro ao carregar produtos:', error);
-                document.getElementById('produtos-container').innerHTML = `
-                    <div class="empty-state">
-                        <i class="fa-solid fa-exclamation-triangle"></i>
-                        <h3>Erro ao carregar produtos</h3>
-                        <p>Tente recarregar a página.</p>
-                    </div>
-                `;
-            }
-        }
-
         async function carregarFornecedores() {
             try {
                 console.log('Carregando fornecedores...');
@@ -1216,93 +1335,31 @@
             }
         }
 
-
-        
-        function renderizarProdutos(listaProdutos) {
-            const container = document.getElementById('produtos-container');
-            
-            if (listaProdutos.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fa-solid fa-box"></i>
-                        <h3>Nenhum produto cadastrado</h3>
-                        <p>Clique em "Novo Produto" para começar.</p>
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = listaProdutos.map(produto => `
-                <div class="produto-card">
-                    <div class="produto-header">
-                        <h3 class="produto-nome">${produto.nome}</h3>
-                        <div class="produto-actions">
-                            <button class="btn-action btn-edit" onclick="editarProduto('${produto.uuid}')">
-                                <i class="fa-solid fa-edit"></i>
-                            </button>
-                            <button class="btn-action btn-delete" onclick="confirmarExclusao('${produto.uuid}', '${produto.nome}')">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="produto-info">
-                        <div class="info-item">
-                            <i class="fa-solid fa-tag"></i>
-                            <span>${produto.categoria}</span>
-                        </div>
-                        <div class="info-item">
-                            <i class="fa-solid fa-align-left"></i>
-                            <span>${produto.descricao || 'Sem descrição'}</span>
-                        </div>
-                        <div class="info-item">
-                            <i class="fa-solid fa-location-dot"></i>
-                            <span>${produto.localizacao || 'Local não informado'}</span>
-                        </div>
-                        <div class="info-item">
-                            <i class="fa-solid fa-calendar"></i>
-                            <span>Validade: ${produto.data_validade || 'Não informada'}</span>
-                        </div>
-                        <div class="info-item">
-                            <i class="fa-solid fa-barcode"></i>
-                            <span>Lote: ${produto.lote || 'Não informado'}</span>
-                        </div>
-                    </div>
-                    <div class="produto-stats">
-                        <div class="stat">
-                            <div class="stat-number">${produto.quantidade}</div>
-                            <div class="stat-label">Quantidade</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-number">R$ ${produto.preco_unitario ? produto.preco_unitario.toFixed(2) : '0.00'}</div>
-                            <div class="stat-label">Preço Unit.</div>
-                        </div>
-                        <div class="stat">
-                            <div class="status-badge status-${produto.status}">${produto.status}</div>
-                            <div class="stat-label">Status</div>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        
         function filtrarProdutos() {
             const termo = document.getElementById('searchInput').value.toLowerCase();
             const produtosFiltrados = produtos.filter(produto =>
                 produto.nome.toLowerCase().includes(termo) ||
                 produto.categoria.toLowerCase().includes(termo) ||
                 produto.descricao?.toLowerCase().includes(termo) ||
-                produto.localizacao?.toLowerCase().includes(termo)
+                produto.localizacao?.toLowerCase().includes(termo) ||
+                produto.tipo_produto?.toLowerCase().includes(termo) ||
+                (produto.tipo_produto === 'defensivo' && 
+                 (produto.numero_anvisa?.toLowerCase().includes(termo) ||
+                  produto.tipo_toxico?.toLowerCase().includes(termo) ||
+                  produto.cuidados_armazenamento?.toLowerCase().includes(termo)))
             );
             renderizarProdutos(produtosFiltrados);
         }
-
 
         async function abrirModalCadastro() {
             produtoEditando = null;
             document.getElementById('modalTitle').textContent = 'Novo Produto';
             document.getElementById('produtoForm').reset();
             document.getElementById('produtoUuid').value = '';
+            
+            // Definir tipo padrão
+            document.getElementById('tipoProduto').value = 'alimento';
+            toggleCamposDefensivo(); // Esconde campos de defensivo por padrão
             
             try {
                 await carregarFornecedores();
@@ -1318,10 +1375,8 @@
             produtoEditando = null;
         }
 
-    
         async function editarProduto(uuid) {
             try {
-               
                 await carregarFornecedores();
                 const response = await fetch(`/produtos/editar/${uuid}`);
                 if (!response.ok) {
@@ -1345,8 +1400,16 @@
                 document.getElementById('fornecedorUuid').value = produto.fornecedor_uuid;
                 document.getElementById('localizacao').value = produto.localizacao || '';
                 document.getElementById('status').value = produto.status;
-                document.getElementById('estoqueMinimo').value = produto.estoque_minimo || 0; 
-                // ESSA LINHA DE BAIXO É NOVA
+                document.getElementById('estoqueMinimo').value = produto.estoque_minimo || 0;
+                
+                // NOVOS CAMPOS
+                document.getElementById('tipoProduto').value = produto.tipo_produto || 'alimento';
+                document.getElementById('numeroAnvisa').value = produto.numero_anvisa || '';
+                document.getElementById('tipoToxico').value = produto.tipo_toxico || '';
+                document.getElementById('cuidadosArmazenamento').value = produto.cuidados_armazenamento || '';
+                
+                // Atualiza a exibição dos campos de defensivo
+                toggleCamposDefensivo();
                 
                 document.getElementById('produtoModal').style.display = 'block';
             } catch (error) {
@@ -1355,19 +1418,13 @@
             }
         }
 
-        function debugFornecedores() {
-            console.log('Fornecedores na memória:', fornecedores);
-            console.log('Select element:', document.getElementById('fornecedorUuid'));
-            console.log('Select options:', document.getElementById('fornecedorUuid').options);
-        }
-
-        
+        // Form submission
         document.getElementById('produtoForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const produtoData = {
                 nome: document.getElementById('nome').value,
-                estoque_minimo: parseInt(document.getElementById('estoqueMinimo').value), //ISSO É NOVO
+                estoque_minimo: parseInt(document.getElementById('estoqueMinimo').value),
                 descricao: document.getElementById('descricao').value,
                 categoria: document.getElementById('categoria').value,
                 quantidade: parseInt(document.getElementById('quantidade').value),
@@ -1376,7 +1433,13 @@
                 lote: document.getElementById('lote').value,
                 fornecedor_uuid: document.getElementById('fornecedorUuid').value,
                 localizacao: document.getElementById('localizacao').value,
-                status: document.getElementById('status').value
+                status: document.getElementById('status').value,
+                
+                // NOVOS CAMPOS
+                tipo_produto: document.getElementById('tipoProduto').value,
+                numero_anvisa: document.getElementById('numeroAnvisa').value || null,
+                tipo_toxico: document.getElementById('tipoToxico').value || null,
+                cuidados_armazenamento: document.getElementById('cuidadosArmazenamento').value || null
             };
 
             try {
@@ -1390,7 +1453,6 @@
                         body: JSON.stringify(produtoData)
                     });
                 } else {
-
                     response = await fetch('/produtos/', {
                         method: 'POST',
                         headers: {
@@ -1417,13 +1479,11 @@
             }
         });
 
-       
         function confirmarExclusao(uuid, nome) {
             if (confirm(`Tem certeza que deseja excluir o produto "${nome}"?`)) {
                 excluirProduto(uuid);
             }
         }
-
 
         async function excluirProduto(uuid) {
             try {
@@ -1444,7 +1504,6 @@
             }
         }
 
-     
         function mostrarMensagem(mensagem, tipo) {
             alert(mensagem);
         }
@@ -1458,11 +1517,159 @@
 
         document.getElementById('searchInput').addEventListener('input', filtrarProdutos);
 
-    
         document.addEventListener('DOMContentLoaded', function() {
             carregarProdutos();
             carregarFornecedores();
         });
+
+        // TESTE AGRO
+
+        function toggleCamposDefensivo() {
+            const tipoProduto = document.getElementById('tipoProduto').value;
+            const secaoDefensivos = document.getElementById('secaoDefensivos');
+            
+            if (tipoProduto === 'defensivo') {
+                secaoDefensivos.style.display = 'block';
+                document.getElementById('numeroAnvisa').required = true;
+                document.getElementById('tipoToxico').required = true;
+                document.getElementById('cuidadosArmazenamento').required = true;
+            } else {
+                secaoDefensivos.style.display = 'none';
+                document.getElementById('numeroAnvisa').required = false;
+                document.getElementById('tipoToxico').required = false;
+                document.getElementById('cuidadosArmazenamento').required = false;
+                document.getElementById('numeroAnvisa').value = '';
+                document.getElementById('tipoToxico').value = '';
+                document.getElementById('cuidadosArmazenamento').value = '';
+            }
+        }
+
+        async function editarProduto(uuid) {
+            try {
+                await carregarFornecedores();
+                const response = await fetch(`/produtos/editar/${uuid}`);
+                if (!response.ok) {
+                    throw new Error('Produto não encontrado');
+                }
+                
+                const produto = await response.json();
+                
+                if (!produto) return;
+
+                produtoEditando = produto;
+                document.getElementById('modalTitle').textContent = 'Editar Produto';
+                document.getElementById('produtoUuid').value = produto.uuid;
+                document.getElementById('nome').value = produto.nome;
+                document.getElementById('descricao').value = produto.descricao || '';
+                document.getElementById('categoria').value = produto.categoria;
+                document.getElementById('quantidade').value = produto.quantidade;
+                document.getElementById('preco').value = produto.preco_unitario || '';
+                document.getElementById('dataValidade').value = produto.data_validade || '';
+                document.getElementById('lote').value = produto.lote || '';
+                document.getElementById('fornecedorUuid').value = produto.fornecedor_uuid;
+                document.getElementById('localizacao').value = produto.localizacao || '';
+                document.getElementById('status').value = produto.status;
+                document.getElementById('estoqueMinimo').value = produto.estoque_minimo || 0;
+                
+                document.getElementById('tipoProduto').value = produto.tipo_produto || 'alimento';
+                document.getElementById('numeroAnvisa').value = produto.numero_anvisa || '';
+                document.getElementById('tipoToxico').value = produto.tipo_toxico || '';
+                document.getElementById('cuidadosArmazenamento').value = produto.cuidados_armazenamento || '';
+                
+                toggleCamposDefensivo();
+                
+                document.getElementById('produtoModal').style.display = 'block';
+            } catch (error) {
+                console.error('Erro ao carregar produto para edição:', error);
+                mostrarMensagem('Erro ao carregar dados do produto: ' + error.message, 'error');
+            }
+        }
+
+        document.getElementById('produtoForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const produtoData = {
+                nome: document.getElementById('nome').value,
+                estoque_minimo: parseInt(document.getElementById('estoqueMinimo').value),
+                descricao: document.getElementById('descricao').value,
+                categoria: document.getElementById('categoria').value,
+                quantidade: parseInt(document.getElementById('quantidade').value),
+                preco_unitario: document.getElementById('preco').value ? parseFloat(document.getElementById('preco').value) : null,
+                data_validade: document.getElementById('dataValidade').value || null,
+                lote: document.getElementById('lote').value,
+                fornecedor_uuid: document.getElementById('fornecedorUuid').value,
+                localizacao: document.getElementById('localizacao').value,
+                status: document.getElementById('status').value,
+                
+
+                tipo_produto: document.getElementById('tipoProduto').value,
+                numero_anvisa: document.getElementById('numeroAnvisa').value || null,
+                tipo_toxico: document.getElementById('tipoToxico').value || null,
+                cuidados_armazenamento: document.getElementById('cuidadosArmazenamento').value || null
+            };
+        });
+
+        function renderizarProdutos(listaProdutos) {
+            const container = document.getElementById('produtos-container');
+            
+            if (listaProdutos.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-box"></i>
+                        <h3>Nenhum produto cadastrado</h3>
+                        <p>Clique em "Novo Produto" para começar.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = listaProdutos.map(produto => {
+                const tipoBadge = produto.tipo_produto === 'defensivo' 
+                    ? `<span class="status-badge" style="background: #e74c3c; color: white; margin-left: 8px;">DEFENSIVO</span>`
+                    : '';
+                
+
+                const infoDefensivo = produto.tipo_produto === 'defensivo' ? `
+                    <div class="info-item">
+                        <i class="fa-solid fa-id-card"></i>
+                        <span>ANVISA: ${produto.numero_anvisa || 'Não informado'}</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fa-solid fa-skull-crossbones"></i>
+                        <span>Tóxico: ${produto.tipo_toxico || 'Não classificado'}</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <span>Cuidados: ${produto.cuidados_armazenamento ? produto.cuidados_armazenamento.substring(0, 50) + '...' : 'Não informados'}</span>
+                    </div>
+                ` : '';
+                
+                return `
+                    <div class="produto-card">
+                        <div class="produto-header">
+                            <h3 class="produto-nome">
+                                ${produto.nome}
+                                ${tipoBadge}
+                            </h3>
+                            <!-- ... resto do header ... -->
+                        </div>
+                        <div class="produto-info">
+                            <div class="info-item">
+                                <i class="fa-solid fa-tag"></i>
+                                <span>Tipo: ${produto.tipo_produto === 'defensivo' ? 'Defensivo Agrícola' : produto.tipo_produto === 'alimento' ? 'Alimento' : 'Outros'}</span>
+                            </div>
+                            ${infoDefensivo}
+                            <div class="info-item">
+                                <i class="fa-solid fa-tag"></i>
+                                <span>${produto.categoria}</span>
+                            </div>
+                            <!-- ... resto das informações ... -->
+                        </div>
+                        <!-- ... resto do card ... -->
+                    </div>
+                `;
+            }).join('');
+        }
     </script>
 </body>
 </html>
