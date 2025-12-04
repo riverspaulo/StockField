@@ -499,14 +499,18 @@ def cadastrar_produto(request: Request, produto: Produto, db: sqlite3.Connection
             produto.status = StatusProduto.a_vencer
     
     cursor.execute(
-        "INSERT INTO produtos VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO produtos VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         (
             produto.uuid,
             produto.nome,
             produto.descricao,
             produto.categoria,
+            produto.tipo_produto.value,  # NOVO
+            produto.numero_anvisa,  # NOVO
+            produto.cuidados_armazenamento,  # NOVO
+            produto.tipo_toxico,  # NOVO
             produto.quantidade,
-            produto.estoque_minimo,  # NOVO CAMPO
+            produto.estoque_minimo,
             produto.preco_unitario,
             produto.data_validade.isoformat() if produto.data_validade else None,
             produto.lote,
@@ -678,6 +682,7 @@ def pagina_produtos(request: Request):
 #     return produto
 
 #MEXI NESSA AQUIII MATEUSSSSSSSSSSSSSSSSSSSSSSSS
+#MEXI AQUI TAMBÉM MICKA
 @app.put("/produtos/{uuid}", response_model=Produto)
 def atualizar_produto(uuid: str, produto: Produto, request: Request, db: sqlite3.Connection = Depends(get_db)):
     cursor = db.cursor()
@@ -699,16 +704,21 @@ def atualizar_produto(uuid: str, produto: Produto, request: Request, db: sqlite3
     
     cursor.execute(
         """UPDATE produtos SET 
-            nome = ?, descricao = ?, categoria = ?, quantidade = ?, 
-            estoque_minimo = ?, preco_unitario = ?, data_validade = ?, lote = ?, 
+            nome = ?, descricao = ?, categoria = ?, tipo_produto = ?,
+            numero_anvisa = ?, cuidados_armazenamento = ?, tipo_toxico = ?,
+            quantidade = ?, estoque_minimo = ?, preco_unitario = ?, data_validade = ?, lote = ?, 
             fornecedor_uuid = ?, localizacao = ?, status = ? 
         WHERE uuid = ?""",
         (
             produto.nome,
             produto.descricao,
             produto.categoria,
+            produto.tipo_produto.value,
+            produto.numero_anvisa,
+            produto.cuidados_armazenamento,
+            produto.tipo_toxico,
             produto.quantidade,
-            produto.estoque_minimo,  # NOVO CAMPO
+            produto.estoque_minimo,
             produto.preco_unitario,
             produto.data_validade.isoformat() if produto.data_validade else None,
             produto.lote,
