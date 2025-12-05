@@ -58,6 +58,7 @@ class Fornecedor(BaseModel):
     nome: str
     telefone: str
     email: Optional[str] = None
+    usuario_uuid: Optional[str] = None
 
 class Movimento(BaseModel):
     uuid: Optional[str] = None
@@ -102,7 +103,9 @@ def init_db():
             uuid TEXT PRIMARY KEY,
             nome TEXT NOT NULL,
             telefone TEXT NOT NULL,
-            email TEXT NOT NULL
+            email TEXT NOT NULL,
+            usuario_uuid TEXT NOT NULL,
+            FOREIGN KEY (usuario_uuid) REFERENCES usuarios (uuid)
         )""")
 
         cursor.execute("""

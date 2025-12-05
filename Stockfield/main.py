@@ -1,5 +1,6 @@
 #pip install fastapi uvicorn pydantic
 #uvicorn main:app
+# No seu main.py ou routes.py
 
 from fastapi import FastAPI, Request, Form, Depends, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -544,12 +545,13 @@ def pagina_produtos_admin(request: Request):
     })
 
 @app.post("/fornecedores/", response_model=Fornecedor)
-def cadastrar_fornecedor(fornecedor: Fornecedor, db: sqlite3.Connection = Depends(get_db)):
+def cadastrar_fornecedor(request:Request, fornecedor: Fornecedor, db: sqlite3.Connection = Depends(get_db)):
     cursor = db.cursor()
+    usuario_uuid = request.session["user"]["uuid"]
     fornecedor.uuid = str(uuid.uuid4())
     cursor.execute(
-        "INSERT INTO fornecedores VALUES (?, ?, ?, ?)",
-        (fornecedor.uuid, fornecedor.nome, fornecedor.telefone, fornecedor.email)
+        "INSERT INTO fornecedores VALUES (?, ?, ?, ?, ?)",
+        (fornecedor.uuid, fornecedor.nome, fornecedor.telefone, fornecedor.email, usuario_uuid)
     )
     db.commit()
     return fornecedor
@@ -610,9 +612,10 @@ def deletar_produto(uuid: str, db: sqlite3.Connection = Depends(get_db)):
     return {"message": "Produto deletado com sucesso"}
 
 @app.get("/fornecedores/", response_model=List[Fornecedor])
-def listar_fornecedores(db: sqlite3.Connection = Depends(get_db)):
+def listar_fornecedores(request:Request, db: sqlite3.Connection = Depends(get_db)):
     cursor = db.cursor()
-    cursor.execute("SELECT * FROM fornecedores")
+    usuario_uuid = request.session["user"]["uuid"] 
+    cursor.execute("SELECT * FROM fornecedores WHERE usuario_uuid = ?", (usuario_uuid,))
     fornecedores = [Fornecedor(**dict(row)) for row in cursor.fetchall()]
     return fornecedores
 
@@ -1076,6 +1079,20 @@ def logout(request: Request):
     flash(request, "Você saiu do sistema.", "info")
     url = request.url_for("login")
     return RedirectResponse(url=url, status_code=303)
+
+
+@app.post("/logout")
+async def logout(request: Request):
+    response = RedirectResponse(url="/login", status_code=302)
+    response.delete_cookie(key="access_token")
+    return response
+
+
+@app.api_route("/logout", methods=["GET", "POST"])
+async def logout(request: Request):
+    response = RedirectResponse(url="/login", status_code=302)
+    response.delete_cookie(key="access_token")
+    return response
 
 
 @app.get("/api/admin/usuarios")
