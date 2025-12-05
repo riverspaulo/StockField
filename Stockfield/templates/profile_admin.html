@@ -68,6 +68,7 @@
             font-size: 24px;
         }
 
+        /* MODIFICAÇÃO AQUI: Adicionado overflow-y: auto para barra de rolagem */
         main {
             margin-top: 114px;
             margin-left: 18px;
@@ -85,14 +86,42 @@
             display: flex;
             flex-direction: column;
             height: calc(100vh - 132px); 
-            overflow: hidden; 
+            overflow-y: auto; /* Alterado de hidden para auto */
+            overflow-x: hidden; /* Mantém o overflow horizontal escondido */
+        }
+
+        /* Estilização da barra de rolagem do main */
+        main::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        main::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+            margin: 5px 0;
+        }
+
+        main::-webkit-scrollbar-thumb {
+            background: #96bd3e;
+            border-radius: 10px;
+            border: 2px solid #f1f1f1;
+        }
+
+        main::-webkit-scrollbar-thumb:hover {
+            background: #7fa531;
+        }
+
+        /* Para Firefox */
+        main {
+            scrollbar-width: thin;
+            scrollbar-color: #96bd3e #f1f1f1;
         }
 
         .main-content {
             display: flex;
             flex-direction: column;
             flex: 1;
-            overflow: hidden;
+            min-height: min-content; /* Garante que o conteúdo possa expandir */
         }
 
         #sidebar {
@@ -406,34 +435,15 @@
             font-weight: 500;
         }
 
-        /* Tabela de Usuários */
+        /* Tabela de Usuários - MODIFICAÇÃO: Removido overflow-y auto pois agora o main tem */
         .usuarios-table-container {
             flex: 1;
-            overflow-y: auto;
-            padding-right: 5px;
             margin-top: 10px;
             background: white;
             border-radius: 16px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
             padding: 20px;
-        }
-
-        .usuarios-table-container::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .usuarios-table-container::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-
-        .usuarios-table-container::-webkit-scrollbar-thumb {
-            background: #96bd3e;
-            border-radius: 10px;
-        }
-
-        .usuarios-table-container::-webkit-scrollbar-thumb:hover {
-            background: #7fa531;
+            min-height: 400px; /* Altura mínima para a tabela */
         }
 
         .usuarios-table {
@@ -448,6 +458,9 @@
             text-align: left;
             font-weight: 600;
             border-bottom: 2px solid #e9ecef;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
 
         .usuarios-table td {
@@ -568,6 +581,26 @@
             max-width: 600px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             border: 2px solid #96bd3e;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb {
+            background: #96bd3e;
+            border-radius: 10px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb:hover {
+            background: #7fa531;
         }
 
         .modal-header {
@@ -723,14 +756,14 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            min-height: min-content;
         }
 
         .content-section {
             flex: 1;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            min-height: min-content;
         }
 
         /* Loader */
@@ -753,6 +786,11 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+
+        /* Espaçamento para melhor visualização */
+        .content-spacing {
+            margin-bottom: 30px;
         }
 
         /* Responsividade */
@@ -805,6 +843,8 @@
             main {
                 width: 100%;
                 height: calc(100vh - 110px);
+                margin-top: 100px;
+                padding: 20px;
             }
 
             body {
@@ -835,6 +875,15 @@
                 flex-direction: column;
                 gap: 0;
             }
+
+            .usuarios-table-container {
+                padding: 15px;
+                overflow-x: auto;
+            }
+
+            .usuarios-table {
+                min-width: 600px; /* Para permitir rolagem horizontal em mobile */
+            }
         }
 
         @media (max-width: 576px) {
@@ -853,6 +902,34 @@
             
             .header-logo {
                 height: 30px;
+            }
+
+            main {
+                padding: 15px;
+                margin-top: 90px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            header {
+                padding: 12px 15px 12px 65px;
+            }
+            
+            main {
+                margin-top: 80px;
+                margin-left: 10px;
+                margin-right: 10px;
+                width: calc(100% - 20px);
+                padding: 15px;
+                height: calc(100vh - 95px);
+            }
+            
+            .header-logo {
+                height: 25px;
+            }
+            
+            .usuarios-table-container {
+                padding: 12px;
             }
         }
     </style>
@@ -878,7 +955,7 @@
                         </span>
                     </a>
                 </li>
-
+                
                 <li class="side-item">
                     <a href="/produtos_admin">
                         <i class="fa-solid fa-box"></i>
@@ -933,7 +1010,6 @@
             </div>
 
             <div id="dynamicContent">
-                <!-- Dashboard Administrador -->
                 <div id="dashboardContent" class="content-section">
                     <div class="stats-container">
                         <div class="stat-card">
@@ -957,6 +1033,8 @@
                             <div class="stat-label">Usuários Ativos</div>
                         </div>
                     </div>
+
+                    <div class="content-spacing"></div>
 
                     <!-- Gestão de Usuários -->
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -997,12 +1075,12 @@
                             </tbody>
                         </table>
                     </div>
+                    <div style="height: 30px;"></div>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- Modal para Cadastro/Edição de Usuário -->
     <div id="usuarioModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -1060,7 +1138,6 @@
         </div>
     </div>
 
-    <!-- Modal para Confirmação de Exclusão -->
     <div id="confirmDeleteModal" class="modal">
         <div class="modal-content" style="max-width: 500px;">
             <div class="modal-header">
@@ -1079,7 +1156,6 @@
         </div>
     </div>
 
-    <!-- Modal para Visualização Detalhada -->
     <div id="viewUsuarioModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -1098,7 +1174,6 @@
     </div>
 
     <script>
-        // Configurações do Logo
         const LOGO_FECHADO = "/static/images/ezgif.com-animated-gif-maker.gif";
         const LOGO_ABERTO = "/static/images/logo_colorida.png";
         const HEADER_LOGO = "/static/images/logo_colorida.png";
@@ -1108,11 +1183,9 @@
             aberto: null
         };
 
-        // Variáveis globais
         let usuariosCache = [];
         let usuarioParaExcluir = null;
 
-        // Funções do Sidebar
         document.addEventListener('DOMContentLoaded', function() {
             const sidebar = document.getElementById('sidebar');
             const logo = document.getElementById('logo_avatar_avatar');
@@ -1168,7 +1241,6 @@
                 logo.style.margin = "0";
             });
 
-            // Event Listeners
             document.getElementById('searchUsuario')?.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
                     buscarUsuarios();
@@ -1178,6 +1250,40 @@
             document.getElementById('usuarioForm')?.addEventListener('submit', function(e) {
                 e.preventDefault();
                 salvarUsuario();
+            });
+
+            window.onclick = function(event) {
+                const modals = ['usuarioModal', 'confirmDeleteModal', 'viewUsuarioModal'];
+                modals.forEach(modalId => {
+                    const modal = document.getElementById(modalId);
+                    if (event.target === modal) {
+                        if (modalId === 'confirmDeleteModal') {
+                            fecharModalConfirmacao();
+                        } else if (modalId === 'viewUsuarioModal') {
+                            fecharModalVisualizacao();
+                        } else {
+                            fecharModalUsuario();
+                        }
+                    }
+                });
+            };
+
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    const modals = ['usuarioModal', 'confirmDeleteModal', 'viewUsuarioModal'];
+                    modals.forEach(modalId => {
+                        const modal = document.getElementById(modalId);
+                        if (modal.style.display === 'block') {
+                            if (modalId === 'confirmDeleteModal') {
+                                fecharModalConfirmacao();
+                            } else if (modalId === 'viewUsuarioModal') {
+                                fecharModalVisualizacao();
+                            } else {
+                                fecharModalUsuario();
+                            }
+                        }
+                    });
+                }
             });
         });
 
@@ -1220,7 +1326,6 @@
             }
         }
 
-        // Funções para gerenciamento de usuários
         async function carregarEstatisticas() {
             try {
                 const response = await fetch('/api/admin/estatisticas', {
@@ -1348,7 +1453,6 @@
             renderizarTabelaUsuarios(usuariosFiltrados);
         }
 
-        // Modal Functions
         function abrirModalCadastroUsuario() {
             document.getElementById('modalUsuarioTitle').textContent = 'Novo Usuário';
             document.getElementById('usuarioForm').reset();
@@ -1480,8 +1584,7 @@
                 cnpj,
                 tipo
             };
-            
-            // Adicionar senha apenas se fornecida
+      
             if (senha) {
                 usuarioData.senha = senha;
             }
@@ -1489,7 +1592,6 @@
             try {
                 let response;
                 if (uuid) {
-                    // Edição
                     response = await fetch(`/api/admin/usuarios/${uuid}`, {
                         method: 'PUT',
                         headers: {
@@ -1499,7 +1601,6 @@
                         credentials: 'include'
                     });
                 } else {
-                    // Cadastro
                     response = await fetch('/api/admin/usuarios', {
                         method: 'POST',
                         headers: {
@@ -1569,41 +1670,6 @@
                 }
             }, 5000);
         }
-
-        // Fechar modais ao clicar fora
-        window.onclick = function(event) {
-            const modals = ['usuarioModal', 'confirmDeleteModal', 'viewUsuarioModal'];
-            modals.forEach(modalId => {
-                const modal = document.getElementById(modalId);
-                if (event.target === modal) {
-                    if (modalId === 'confirmDeleteModal') {
-                        fecharModalConfirmacao();
-                    } else if (modalId === 'viewUsuarioModal') {
-                        fecharModalVisualizacao();
-                    } else {
-                        fecharModalUsuario();
-                    }
-                }
-            });
-        };
-
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                const modals = ['usuarioModal', 'confirmDeleteModal', 'viewUsuarioModal'];
-                modals.forEach(modalId => {
-                    const modal = document.getElementById(modalId);
-                    if (modal.style.display === 'block') {
-                        if (modalId === 'confirmDeleteModal') {
-                            fecharModalConfirmacao();
-                        } else if (modalId === 'viewUsuarioModal') {
-                            fecharModalVisualizacao();
-                        } else {
-                            fecharModalUsuario();
-                        }
-                    }
-                });
-            }
-        });
     </script>
 </body>
 </html>
