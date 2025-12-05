@@ -2,6 +2,7 @@ from typing import List, Optional, Literal
 from datetime import date, datetime, timedelta
 from enum import Enum
 import sqlite3, uuid
+import hashlib
 from pydantic import BaseModel
 
 DATABASE_URL = "./stockfield.db"
@@ -70,7 +71,6 @@ class Movimento(BaseModel):
     usuario_uuid: Optional[str] = None
 
 
-# Database - CORREÇÃO AQUI
 def get_db():
     conn = sqlite3.connect(DATABASE_URL, check_same_thread=False)
     conn.row_factory = sqlite3.Row
@@ -93,10 +93,10 @@ def init_db():
             tipo TEXT NOT NULL
         )""")
 
-        cursor.execute("""SELECT * FROM usuarios WHERE email="admin@admin" """)
         if not cursor.fetchone():
             adm_uuid = str(uuid.uuid4())
-            cursor.execute("""INSERT INTO usuarios VALUES (?, "123.456.789-00", "Admin", "admin@admin", "useradm", "admin")""",(adm_uuid,))
+            senha_admin_hash = hashlib.sha256("useradm".encode()).hexdigest()
+            cursor.execute("""INSERT INTO usuarios VALUES (?, "123.456.789-00", "Admin", "admin@admin", ?, "admin")""",(adm_uuid, senha_admin_hash))
         
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS fornecedores (
