@@ -3,197 +3,489 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <title>Profile Administrador - StockField</title>
-    <link rel="stylesheet" href="/static/css/profile.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        .container {
-            display: flex;
-            min-height: calc(100vh - 60px);
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
         }
 
-        .sidebar {
-            width: 80px;
-            background: #2c3e50;
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: #e6e7d1;
+            padding-left: 82px;
+            color: #0d2329;
+            overflow: hidden; 
+        }
+
+        header {
+            background-color: #e6e7d1;
+            width: 100%;
+            padding: 24px;
+            padding-left: 100px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 998;
+            max-height: 96px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 4px 10px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-logo {
+            height: 200px; 
+            width: 200px;
+            object-fit: contain;
+        }
+
+        .user-info-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #66802e;
+            font-weight: 600;
+        }
+
+        .user-info-header i {
+            font-size: 24px;
+        }
+
+        main {
+            margin-top: 114px;
+            margin-left: 18px;
+            margin-right: 18px;
+            margin-bottom: 18px;
+            border-radius: 25px;
+            width: calc(100% - 36px);
+            padding: 30px;
+            background-color: #e9e9e9;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 997;
+            opacity: 95%;
+            color: black;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            padding: 20px 0;
-        }
-
-        .sidebar i {
-            color: #ecf0f1;
-            font-size: 24px;
-            margin: 20px 0;
-            cursor: pointer;
-            transition: color 0.3s;
-        }
-
-        .sidebar i:hover {
-            color: #3498db;
-        }
-
-        .sidebar i.active {
-            color: #3498db;
+            height: calc(100vh - 132px); 
+            overflow: hidden; 
         }
 
         .main-content {
+            display: flex;
+            flex-direction: column;
             flex: 1;
-            padding: 20px;
-            background: #ecf0f1;
+            overflow: hidden;
+        }
+
+        #sidebar {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background-color: #e6e7d1;
+            height: 100vh;
+            width: 82px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 999;
+            transition: all .5s;
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #sidebar_content {
+            padding: 12px;
+        }
+
+        #logo_avatar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 24px;
+            margin-top: 8px;
+        }
+
+        #logo_avatar_avatar {
+            min-width: 55px;
+            min-height: 55px;
+            object-fit: cover;
+            border-radius: 20px;
+            transition: all 0.3s ease; 
+        }
+
+        #sidebar.open-sidebar #logo_avatar_avatar {
+            width: 180px !important;
+            height: 55px !important;
+            object-fit: cover !important;
+            margin: 5px 0 !important;
+        }
+
+        #logo_avatar_infos {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #logo_avatar_infos span:last-child {
+            color: #afa8a8;
+            font-size: 12px;
+        }
+
+        #side_items {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            list-style: none;
+        }
+
+        .side-item {
+            border-radius: 8px;
+            padding: 14px;
+            cursor: pointer;
+        }
+
+        .side-item.active {
+            background-color: #66802e;
+        }
+
+        .side-item:hover:not(.active),
+        #logout_btn:hover {
+            background-color: #e9e9e9;
+        }
+
+        .side-item a {
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #66802e;
+        }
+
+        .side-item.active a {
+            background-color: transparent;
+            color: #e9e9e9;
+            border: none;
+        }
+
+        .side-item.animated-active a {
+            background-color: transparent;
+            color: #e3e9f7;
+        }
+
+        .side-item a i {
+            background: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            color: inherit;
+        }
+
+        #logout {
+            border-top: 1px solid #e3e9f7;
+            padding: 12px;
+        }
+
+        #logout_btn {
+            border: none;
+            gap: 20px;
+            padding: 12px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            cursor: pointer;
+            background-color: transparent;
+        }
+
+        #close-sidebar{
+            display: none;
+        }
+
+        #open_btn {
+            position: absolute;
+            top: 38px;
+            right: -10px;
+            background-color: #66802e;
+            color: #e3e9f7;
+            border-radius: 100%;
+            width: 20px;
+            height: 20px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .hamburger-btn {
+            display: none;
+            font-size: 2rem;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            position: fixed;
+            top: 15px;
+            left: 10px;
+            margin-right: 60px;
+            z-index: 1001;
+            color: #66802e;
+        }
+
+        #open_btn_icon {
+            transition: transform .3s ease;
+        }
+
+        .open-sidebar #open_btn_icon {
+            transform: rotate(180deg);
+        }
+
+        .item-description {
+            width: 0px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            font-size: 14px;
+            transition: width .6s;
+            height: 0px;
+        }
+
+        #sidebar.open-sidebar {
+            width: 250px;
+        }
+
+        #sidebar.open-sidebar .item-description {
+            width: 150px;
+            height: auto;
+        }
+
+        #sidebar.open-sidebar .side-item a {
+            justify-content: flex-start;
+            gap: 14px;
         }
 
         .content-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
-        }
-
-        .content-title {
-            color: #2c3e50;
-            font-size: 28px;
-            font-weight: bold;
-        }
-
-        .btn-primary {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: background 0.3s;
-        }
-
-        .btn-primary:hover {
-            background: #2980b9;
-        }
-
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-        }
-
-        .modal-content {
-            background-color: white;
-            margin: 2% auto;
-            padding: 0;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 800px;
-            max-height: 90vh;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0;
-            padding: 20px 30px;
-            border-bottom: 1px solid #ecf0f1;
+            margin-bottom: 20px;
             flex-shrink: 0;
         }
 
-        .modal-title {
-            font-size: 24px;
-            color: #2c3e50;
-            margin: 0;
-        }
-
-        .close {
-            color: #aaa;
+        .content-title {
+            color: #96bd3e;
             font-size: 28px;
             font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .content-title i {
+            font-size: 30px;  
+            color: #96bd3e;   
+            background: white; 
+            padding: 16px;    
+            border-radius: 16px; 
+            box-shadow: 0 6px 20px rgba(150, 189, 62, 0.2); 
+            transition: all 0.3s ease; 
+        }
+
+        .content-title i:hover {
+            transform: scale(1.05) rotate(5deg); 
+            box-shadow: 0 8px 25px rgba(150, 189, 62, 0.3); 
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #7fa531 0%, #96bd3e 100%); 
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 12px;
             cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 
+                0 6px 20px rgba(127, 165, 49, 0.3),
+                0 2px 8px rgba(0, 0, 0, 0.1);
+            letter-spacing: 0.3px;
+            position: relative;
+            overflow: hidden;
         }
 
-        .close:hover {
-            color: #000;
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
         }
 
-        .modal-body {
-            padding: 30px;
-            overflow-y: auto;
-            flex-grow: 1;
+        .btn-primary:hover {
+            transform: translateY(-3px); 
+            box-shadow: 
+                0 12px 28px rgba(127, 165, 49, 0.4),
+                0 4px 12px rgba(0, 0, 0, 0.12);
+            background: linear-gradient(135deg, #96bd3e 0%, #7fa531 100%); 
         }
 
-        /* Estilos para a tabela de usuários */
+        .btn-primary:hover::before {
+            left: 100%; 
+        }
+
+        .btn-primary i {
+            font-size: 18px;
+            transition: transform 0.3s ease;
+        }
+
+        .btn-primary:hover i {
+            transform: scale(1.1); 
+        }
+
+        /* Cards de Estatísticas */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-left: 5px solid #96bd3e;
+            text-align: center;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px); 
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+
+        .stat-card i {
+            font-size: 32px;
+            margin-bottom: 15px;
+            color: #96bd3e;
+        }
+
+        .stat-number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Tabela de Usuários */
         .usuarios-table-container {
-            overflow-x: auto;
-            margin-top: 20px;
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 5px;
+            margin-top: 10px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            padding: 20px;
+        }
+
+        .usuarios-table-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .usuarios-table-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .usuarios-table-container::-webkit-scrollbar-thumb {
+            background: #96bd3e;
+            border-radius: 10px;
+        }
+
+        .usuarios-table-container::-webkit-scrollbar-thumb:hover {
+            background: #7fa531;
         }
 
         .usuarios-table {
             width: 100%;
             border-collapse: collapse;
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .usuarios-table th {
-            background: #2c3e50;
-            color: white;
+            background: #f8f9fa;
+            color: #2c3e50;
             padding: 15px;
             text-align: left;
-            font-weight: bold;
+            font-weight: 600;
+            border-bottom: 2px solid #e9ecef;
         }
 
         .usuarios-table td {
             padding: 15px;
-            border-bottom: 1px solid #ecf0f1;
+            border-bottom: 1px solid #e9ecef;
+            color: #555;
         }
 
         .usuarios-table tr:hover {
-            background: #f8f9fa;
+            background-color: #f8f9fa;
         }
 
-        .usuarios-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        /* Badges para tipos de usuário */
+        /* Badges */
         .tipo-badge {
             padding: 6px 12px;
             border-radius: 20px;
             font-size: 12px;
-            font-weight: bold;
+            font-weight: 600;
             text-transform: uppercase;
         }
 
         .tipo-admin {
-            background: #3498db;
-            color: white;
+            background: #e3f2fd;
+            color: #1976d2;
         }
 
         .tipo-agricultor {
-            background: #27ae60;
-            color: white;
+            background: #e8f5e9;
+            color: #2e7d32;
         }
 
-        /* Botões de ação */
+        /* Botões de Ação */
         .btn-action {
             background: none;
             border: none;
             cursor: pointer;
             padding: 8px;
-            border-radius: 4px;
+            border-radius: 6px;
             transition: background 0.3s;
             margin: 0 2px;
         }
@@ -214,7 +506,98 @@
             background: #f8f9fa;
         }
 
-        /* Formulário de usuário */
+        /* Search */
+        .search-container {
+            margin-bottom: 20px;
+            flex-shrink: 0;
+        }
+
+        .search-box {
+            display: flex;
+            max-width: 400px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #96bd3e; 
+            border-right: none;
+            border-radius: 6px 0 0 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            background-color: white;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #66802e; 
+        }
+
+        .search-btn {
+            background: #7fa531;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 0 6px 6px 0;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .search-btn:hover {
+            background: #66802e;
+        }
+
+        /* Modais */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: #e9e9e9; 
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 2px solid #96bd3e;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #96bd3e;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            color: #66802e; 
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .close {
+            color: #96bd3e; 
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close:hover {
+            color: #66802e; 
+        }
+
         .form-group {
             margin-bottom: 20px;
         }
@@ -223,21 +606,23 @@
             display: block;
             margin-bottom: 8px;
             font-weight: bold;
-            color: #2c3e50;
+            color: #66802e; 
         }
 
         .form-control {
             width: 100%;
             padding: 12px;
-            border: 2px solid #bdc3c7;
-            border-radius: 6px;
+            border: 2px solid #96bd3e; 
+            border-radius: 8px;
             font-size: 16px;
-            transition: border-color 0.3s;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            background-color: white;
         }
 
         .form-control:focus {
             outline: none;
-            border-color: #3498db;
+            border-color: #66802e; 
+            box-shadow: 0 0 0 3px rgba(150, 189, 62, 0.2); 
         }
 
         .form-row {
@@ -249,134 +634,118 @@
             flex: 1;
         }
 
-        /* Estatísticas */
-        .stats-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-
-        .stat-number {
-            font-size: 32px;
-            font-weight: bold;
-            color: #2c3e50;
-            margin: 10px 0;
-        }
-
-        .stat-label {
-            color: #7f8c8d;
-            font-size: 14px;
-        }
-
-        /* Botões */
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
         }
 
         .btn-success {
-            background: #27ae60;
+            background: #7fa531; 
             color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-weight: 600;
         }
 
         .btn-success:hover {
-            background: #219a52;
-        }
-
-        .btn-danger {
-            background: #e74c3c;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #c0392b;
+            background: #66802e; 
         }
 
         .btn-secondary {
             background: #95a5a6;
             color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s;
         }
 
         .btn-secondary:hover {
             background: #7f8c8d;
         }
 
-        /* Barra de pesquisa */
-        .search-container {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .search-input {
-            flex: 1;
-            padding: 12px;
-            border: 2px solid #bdc3c7;
-            border-radius: 6px;
-            font-size: 16px;
-        }
-
-        .search-btn {
-            background: #3498db;
+        .btn-danger {
+            background: #e74c3c;
             color: white;
             border: none;
-            padding: 12px 24px;
+            padding: 10px 20px;
             border-radius: 6px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            transition: background 0.3s;
+            font-weight: 600;
         }
 
-        /* Mensagens */
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        /* Flash Messages */
         .flash-messages {
             margin-bottom: 20px;
+            flex-shrink: 0;
         }
 
         .flash-message {
             padding: 12px;
             border-radius: 6px;
             margin-bottom: 10px;
+            border-left: 4px solid;
         }
 
         .flash-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-left-color: #96bd3e;
         }
 
         .flash-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+            background: #ffebee;
+            color: #c62828;
+            border-left-color: #e74c3c;
         }
 
         .flash-info {
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
+            background: #e3f2fd;
+            color: #1565c0;
+            border-left-color: #3498db;
+        }
+
+        /* Conteúdo Dinâmico */
+        #dynamicContent {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .content-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
         /* Loader */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+
         .loader {
             display: inline-block;
             width: 50px;
             height: 50px;
             border: 5px solid #f3f3f3;
-            border-top: 5px solid #3498db;
+            border-top: 5px solid #96bd3e;
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
@@ -386,97 +755,176 @@
             100% { transform: rotate(360deg); }
         }
 
-        .loading {
-            text-align: center;
-            padding: 40px;
+        /* Responsividade */
+        @media (max-width: 768px) {
+            header {
+                background-color: #e6e7d1;
+                width: 100%;
+                padding: 21px 21px 21px 21px;
+                position: fixed;
+                top: 0;
+                left: 0;
+                z-index: 998;
+                max-height: 96px;
+                display: flex;
+                align-items: center;
+                gap: 20px;
+                box-shadow: 4px 10px 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .hamburger-btn {
+                display: block;
+            }
+
+            #close-sidebar {
+                display: block;
+                background: transparent;
+                border: none;
+                color:#66802e; 
+                font-size: 2rem;
+                cursor: pointer;
+                position: absolute;
+                top: 20px;
+                right: 15px;
+            }
+
+            #open_btn {
+                display: none;
+            }
+
+            #sidebar {
+                transform: translateX(-100%);
+                width: 250px;
+                transition: transform 0.3s ease;
+            }
+
+            #sidebar.open-sidebar {
+                transform: translateX(0);
+            }
+
+            main {
+                width: 100%;
+                height: calc(100vh - 110px);
+            }
+
+            body {
+                padding: 0;
+            }
+
+            .header-logo {
+                height: 40px;
+            }
+            
+            .content-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-content {
+                margin: 10% auto;
+                width: 95%;
+                padding: 20px;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
         }
 
-        /* Cards de usuário */
-        .usuarios-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        .usuario-card {
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transition: transform 0.3s;
-        }
-
-        .usuario-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-
-        .usuario-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .usuario-nome {
-            font-size: 18px;
-            font-weight: bold;
-            color: #2c3e50;
-            margin: 0;
-        }
-
-        .usuario-info {
-            margin-bottom: 15px;
-        }
-
-        .info-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 8px;
-            color: #555;
-        }
-
-        .info-item i {
-            width: 16px;
-            color: #7f8c8d;
-        }
-
-        .usuario-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
+        @media (max-width: 576px) {
+            header {
+                padding-left: 70px;
+            }
+            
+            .content-title {
+                font-size: 1.5rem;
+            }
+            
+            .btn-primary {
+                padding: 10px 18px;
+                font-size: 14px;
+            }
+            
+            .header-logo {
+                height: 30px;
+            }
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-                <i class="fa-solid fa-house" onclick="window.location.href='/profile_admin'" title="Perfil"></i>
-                <i class="fa-solid fa-truck" onclick="window.location.href='/fornecedores_admin'" title="Fornecedores"></i>
-                <i class="fa-solid fa-box" onclick="window.location.href='/produtos_admin'" title="Produtos"></i>
-                <!-- <i class="fa-solid fa-box" onclick="window.location.href='/produtos'" title="Produtos"></i>
-                <i class="fa-solid fa-truck" onclick="window.location.href='/fornecedores'" title="Fornecedores"></i>
-                <i class="fa-solid fa-exchange-alt active" onclick="window.location.href='/movimentacoes'" title="Movimentações"></i>
-                <i class="fa-solid fa-chart-bar" title="Relatórios"></i>
-                <i class="fa-solid fa-exclamation-triangle active" onclick="window.location.href='/estoque-critico'" title="Estoque"></i> -->
-        </aside>
 
-        <!-- Conteúdo Principal -->
-        <div class="main-content">
-            <!-- Header -->
-            <div class="content-header">
-                <h1 class="content-title" id="pageTitle">Dashboard Administrador</h1>
-                <div>
-                    <span style="margin-right: 20px; color: #2c3e50;">
-                        <i class="fas fa-user-circle"></i> {{ user.nome }}
-                    </span>
-                </div>
+<body>
+    <nav id="sidebar">
+        <div id="sidebar_content">
+            <button id="close-sidebar" aria-label="Fechar menu">&times;</button>
+            <div id="logo_avatar">
+                <img src="" 
+                     id="logo_avatar_avatar" 
+                     alt="StockField Logo"
+                     style="width: 55px; height: 55px; object-fit: cover; border-radius: 20px;">
             </div>
 
-            <!-- Mensagens Flash -->
-            <div class="flash-messages" id="flashMessages">
+            <ul id="side_items">
+                <li class="side-item active">
+                    <a href="/profile_admin">
+                        <i class="fa-solid fa-house"></i>
+                        <span class="item-description">
+                           Dashboard
+                        </span>
+                    </a>
+                </li>
+
+                <li class="side-item">
+                    <a href="/produtos_admin">
+                        <i class="fa-solid fa-box"></i>
+                        <span class="item-description">
+                            Produtos
+                        </span>
+                    </a>
+                </li>
+            </ul>
+
+            <button id="open_btn">
+                <i id="open_btn_icon" class="fa-solid fa-chevron-right"></i>
+            </button>
+        </div>
+
+        <div id="logout">
+            <form action="/logout" method="POST">
+                <button id="logout_btn" type="submit">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span class="item-description" style="color: black;">Sair</span>
+                </button>
+            </form>
+        </div>                   
+    </nav>
+
+    <header>
+        <button class="hamburger-btn" id="open_btn2">&#9776;</button>
+        <div class="header-logo-container">
+            <img src="/static/images/logo_colorida.png" alt="StockField Logo" class="header-logo" id="header-logo">
+        </div>
+        <div class="user-info-header">
+            <i class="fas fa-user-circle"></i>
+            <span>{{ user.nome }}</span>
+        </div>
+    </header>
+    
+    <main class="fade-in">
+        <div class="main-content">
+            <div class="content-header">
+                <h1 class="content-title">
+                    <i class="fa-solid fa-chart-line"></i>
+                    Dashboard Administrador
+                </h1>
+            </div>
+
+            <div id="flashMessages" class="flash-messages">
                 {% for message in messages %}
                 <div class="flash-message flash-{{ message.category }}">
                     {{ message.message }}
@@ -484,44 +932,47 @@
                 {% endfor %}
             </div>
 
-            <!-- Conteúdo Dinâmico -->
             <div id="dynamicContent">
                 <!-- Dashboard Administrador -->
-                <div id="dashboardContent">
+                <div id="dashboardContent" class="content-section">
                     <div class="stats-container">
                         <div class="stat-card">
-                            <i class="fas fa-users fa-2x" style="color: #3498db;"></i>
+                            <i class="fas fa-users"></i>
                             <div class="stat-number" id="totalUsuarios">0</div>
                             <div class="stat-label">Total de Usuários</div>
                         </div>
                         <div class="stat-card">
-                            <i class="fas fa-seedling fa-2x" style="color: #27ae60;"></i>
+                            <i class="fas fa-seedling"></i>
                             <div class="stat-number" id="totalAgricultores">0</div>
                             <div class="stat-label">Agricultores</div>
                         </div>
                         <div class="stat-card">
-                            <i class="fas fa-user-shield fa-2x" style="color: #e74c3c;"></i>
+                            <i class="fas fa-user-shield"></i>
                             <div class="stat-number" id="totalAdmins">0</div>
                             <div class="stat-label">Administradores</div>
                         </div>
+                        <div class="stat-card">
+                            <i class="fas fa-user-check"></i>
+                            <div class="stat-number" id="totalAtivos">0</div>
+                            <div class="stat-label">Usuários Ativos</div>
+                        </div>
                     </div>
 
-                </div>
-
-                <!-- Gestão de Usuários -->
-                <div id="usuariosContent" style="display: none;">
+                    <!-- Gestão de Usuários -->
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h2>Gestão de Usuários</h2>
+                        <h2 style="color: #96bd3e; font-size: 24px;">Gestão de Usuários</h2>
                         <button class="btn-primary" onclick="abrirModalCadastroUsuario()">
                             <i class="fas fa-plus"></i> Novo Usuário
                         </button>
                     </div>
 
                     <div class="search-container">
-                        <input type="text" id="searchUsuario" class="search-input" placeholder="Buscar por nome, email ou CNPJ...">
-                        <button class="search-btn" onclick="buscarUsuarios()">
-                            <i class="fas fa-search"></i> Buscar
-                        </button>
+                        <div class="search-box">
+                            <input type="text" id="searchUsuario" class="search-input" placeholder="Buscar por nome, email ou CNPJ...">
+                            <button class="search-btn" onclick="buscarUsuarios()">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="usuarios-table-container">
@@ -537,28 +988,19 @@
                                 </tr>
                             </thead>
                             <tbody id="usuariosTableBody">
-                                <!-- Usuários serão carregados aqui -->
+                                <tr>
+                                    <td colspan="6" class="loading">
+                                        <div class="loader"></div>
+                                        <p style="margin-top: 10px;">Carregando usuários...</p>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
-
-                    <div id="usuariosPagination" style="margin-top: 20px; text-align: center;"></div>
-                </div>
-
-                <!-- Relatórios -->
-                <div id="relatoriosContent" style="display: none;">
-                    <h2>Relatórios</h2>
-                    <p>Em desenvolvimento...</p>
-                </div>
-
-                <!-- Configurações -->
-                <div id="configuracoesContent" style="display: none;">
-                    <h2>Configurações do Sistema</h2>
-                    <p>Em desenvolvimento...</p>
                 </div>
             </div>
         </div>
-    </div>
+    </main>
 
     <!-- Modal para Cadastro/Edição de Usuário -->
     <div id="usuarioModal" class="modal">
@@ -567,56 +1009,54 @@
                 <h2 class="modal-title" id="modalUsuarioTitle">Novo Usuário</h2>
                 <span class="close" onclick="fecharModalUsuario()">&times;</span>
             </div>
-            <div class="modal-body">
-                <form id="usuarioForm">
-                    <input type="hidden" id="usuarioUuid">
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="nome">Nome Completo *</label>
-                            <input type="text" id="nome" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="email">Email *</label>
-                            <input type="email" id="email" class="form-control" required>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="cnpj">CNPJ *</label>
-                            <input type="text" id="cnpj" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="tipo">Tipo de Usuário *</label>
-                            <select id="tipo" class="form-control" required>
-                                <option value="">Selecione...</option>
-                                <option value="agricultor">Agricultor</option>
-                                <option value="admin">Administrador</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="senha">Senha *</label>
-                            <input type="password" id="senha" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="confirmarSenha">Confirmar Senha *</label>
-                            <input type="password" id="confirmarSenha" class="form-control" required>
-                        </div>
-                    </div>
-
+            <form id="usuarioForm">
+                <input type="hidden" id="usuarioUuid">
+                
+                <div class="form-row">
                     <div class="form-group">
-                        <small style="color: #7f8c8d;">* Campos obrigatórios</small>
+                        <label for="nome">Nome Completo *</label>
+                        <input type="text" id="nome" class="form-control" required>
                     </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="fecharModalUsuario()">Cancelar</button>
-                <button class="btn btn-success" onclick="salvarUsuario()">Salvar Usuário</button>
-            </div>
+                    <div class="form-group">
+                        <label for="email">Email *</label>
+                        <input type="email" id="email" class="form-control" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cnpj">CNPJ *</label>
+                        <input type="text" id="cnpj" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="tipo">Tipo de Usuário *</label>
+                        <select id="tipo" class="form-control" required>
+                            <option value="">Selecione...</option>
+                            <option value="agricultor">Agricultor</option>
+                            <option value="admin">Administrador</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="senha">Senha *</label>
+                        <input type="password" id="senha" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmarSenha">Confirmar Senha *</label>
+                        <input type="password" id="confirmarSenha" class="form-control" required>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="fecharModalUsuario()">Cancelar</button>
+                    <button type="submit" class="btn-success">
+                        <i class="fa-solid fa-save"></i>
+                        Salvar Usuário
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -632,9 +1072,9 @@
                 <p id="deleteUsuarioInfo" style="font-weight: bold; color: #e74c3c;"></p>
                 <p><small>Atenção: Esta ação não pode ser desfeita!</small></p>
             </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="fecharModalConfirmacao()">Cancelar</button>
-                <button class="btn btn-danger" onclick="confirmarExclusaoUsuario()">Excluir</button>
+            <div class="form-actions">
+                <button class="btn-secondary" onclick="fecharModalConfirmacao()">Cancelar</button>
+                <button class="btn-danger" onclick="confirmarExclusaoUsuario()">Excluir</button>
             </div>
         </div>
     </div>
@@ -651,95 +1091,143 @@
                     <!-- Detalhes serão carregados aqui -->
                 </div>
             </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="fecharModalVisualizacao()">Fechar</button>
+            <div class="form-actions">
+                <button class="btn-secondary" onclick="fecharModalVisualizacao()">Fechar</button>
             </div>
         </div>
     </div>
 
     <script>
+        // Configurações do Logo
+        const LOGO_FECHADO = "/static/images/ezgif.com-animated-gif-maker.gif";
+        const LOGO_ABERTO = "/static/images/logo_colorida.png";
+        const HEADER_LOGO = "/static/images/logo_colorida.png";
+        
+        let preloadedImages = {
+            fechado: null,
+            aberto: null
+        };
+
         // Variáveis globais
         let usuariosCache = [];
         let usuarioParaExcluir = null;
-        let currentView = 'dashboard';
 
-        // Funções de navegação
-        function carregarDashboard() {
-            document.getElementById('pageTitle').textContent = 'Dashboard Administrador';
-            document.getElementById('dashboardContent').style.display = 'block';
-            document.getElementById('usuariosContent').style.display = 'none';
-            document.getElementById('relatoriosContent').style.display = 'none';
-            document.getElementById('configuracoesContent').style.display = 'none';
-            currentView = 'dashboard';
+        // Funções do Sidebar
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const logo = document.getElementById('logo_avatar_avatar');
+            const openBtn = document.getElementById('open_btn');
+            const openBtn2 = document.getElementById('open_btn2');
+            const closeSidebarBtn = document.getElementById('close-sidebar');
+            const headerLogo = document.getElementById('header-logo');
             
-            // Atualizar menu ativo
-            document.querySelectorAll('.sidebar i').forEach(icon => {
-                icon.classList.remove('active');
-            });
-            document.querySelector('.fa-home').classList.add('active');
+            preloadImages();
             
+            if (preloadedImages.fechado.complete) {
+                logo.src = preloadedImages.fechado.src;
+            } else {
+                preloadedImages.fechado.onload = function() {
+                    logo.src = this.src;
+                };
+            }
+            
+            logo.style.width = "55px";
+            logo.style.height = "55px";
+            logo.style.objectFit = "cover";
+            logo.style.transition = "all 0.3s ease";
+        
+            if (headerLogo) {
+                headerLogo.src = HEADER_LOGO + "?v=" + Date.now();
+                headerLogo.style.height = "200px";
+            }
+            
+            // Carregar dados iniciais
             carregarEstatisticas();
-            carregarUsuariosRecentes();
-        }
-
-        function carregarUsuarios() {
-            document.getElementById('pageTitle').textContent = 'Gestão de Usuários';
-            document.getElementById('dashboardContent').style.display = 'none';
-            document.getElementById('usuariosContent').style.display = 'block';
-            document.getElementById('relatoriosContent').style.display = 'none';
-            document.getElementById('configuracoesContent').style.display = 'none';
-            currentView = 'usuarios';
-            
-            // Atualizar menu ativo
-            document.querySelectorAll('.sidebar i').forEach(icon => {
-                icon.classList.remove('active');
-            });
-            document.querySelector('.fa-users').classList.add('active');
-            
             carregarTodosUsuarios();
-        }
 
-        function carregarRelatorios() {
-            document.getElementById('pageTitle').textContent = 'Relatórios';
-            document.getElementById('dashboardContent').style.display = 'none';
-            document.getElementById('usuariosContent').style.display = 'none';
-            document.getElementById('relatoriosContent').style.display = 'block';
-            document.getElementById('configuracoesContent').style.display = 'none';
-            
-            // Atualizar menu ativo
-            document.querySelectorAll('.sidebar i').forEach(icon => {
-                icon.classList.remove('active');
+            openBtn.addEventListener('click', function() {
+                toggleSidebar(sidebar, logo);
             });
-            document.querySelector('.fa-chart-bar').classList.add('active');
-        }
 
-        function carregarConfiguracoes() {
-            document.getElementById('pageTitle').textContent = 'Configurações';
-            document.getElementById('dashboardContent').style.display = 'none';
-            document.getElementById('usuariosContent').style.display = 'none';
-            document.getElementById('relatoriosContent').style.display = 'none';
-            document.getElementById('configuracoesContent').style.display = 'block';
-            
-            // Atualizar menu ativo
-            document.querySelectorAll('.sidebar i').forEach(icon => {
-                icon.classList.remove('active');
+            openBtn2.addEventListener('click', function() {
+                toggleSidebar(sidebar, logo);
             });
-            document.querySelector('.fa-cog').classList.add('active');
+
+            closeSidebarBtn.addEventListener('click', function() {
+                sidebar.classList.remove('open-sidebar');
+                
+                if (preloadedImages.fechado && preloadedImages.fechado.complete) {
+                    logo.src = preloadedImages.fechado.src;
+                } else {
+                    logo.src = LOGO_FECHADO + "?v=" + Date.now();
+                }
+                
+                logo.style.width = "55px";
+                logo.style.height = "55px";
+                logo.style.objectFit = "cover";
+                logo.style.margin = "0";
+            });
+
+            // Event Listeners
+            document.getElementById('searchUsuario')?.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    buscarUsuarios();
+                }
+            });
+
+            document.getElementById('usuarioForm')?.addEventListener('submit', function(e) {
+                e.preventDefault();
+                salvarUsuario();
+            });
+        });
+
+        function preloadImages() {
+            preloadedImages.fechado = new Image();
+            preloadedImages.fechado.src = LOGO_FECHADO + "?v=" + Date.now();
+            
+            preloadedImages.aberto = new Image();
+            preloadedImages.aberto.src = LOGO_ABERTO + "?v=" + Date.now();
         }
 
-        function sair() {
-            if (confirm('Deseja realmente sair?')) {
-                window.location.href = '/logout';
+        function toggleSidebar(sidebar, logo) {
+            const isOpening = !sidebar.classList.contains('open-sidebar');
+            sidebar.classList.toggle('open-sidebar');
+
+            if (sidebar.classList.contains('open-sidebar')) {
+                
+                if (preloadedImages.aberto && preloadedImages.aberto.complete) {
+                    logo.src = preloadedImages.aberto.src;
+                } else {
+                    logo.src = LOGO_ABERTO + "?v=" + Date.now();
+                }
+                
+                logo.style.width = "180px";       
+                logo.style.height = "55px";      
+                logo.style.objectFit = "cover";  
+                logo.style.margin = "5px 0";     
+            } else {
+                
+                if (preloadedImages.fechado && preloadedImages.fechado.complete) {
+                    logo.src = preloadedImages.fechado.src;
+                } else {
+                    logo.src = LOGO_FECHADO + "?v=" + Date.now();
+                }
+                
+                logo.style.width = "55px";
+                logo.style.height = "55px";
+                logo.style.objectFit = "cover";
+                logo.style.margin = "0";
             }
         }
 
         // Funções para gerenciamento de usuários
         async function carregarEstatisticas() {
             try {
-                const response = await fetch('/api/admin/usuarios/estatisticas', {
+                const response = await fetch('/api/admin/estatisticas', {
                     headers: {
                         'Content-Type': 'application/json'
-                    }
+                    },
+                    credentials: 'include'
                 });
                 
                 if (response.ok) {
@@ -748,82 +1236,52 @@
                     document.getElementById('totalUsuarios').textContent = data.total_usuarios || 0;
                     document.getElementById('totalAgricultores').textContent = data.total_agricultores || 0;
                     document.getElementById('totalAdmins').textContent = data.total_admins || 0;
+                    document.getElementById('totalAtivos').textContent = data.total_usuarios || 0;
                 }
             } catch (error) {
                 console.error('Erro ao carregar estatísticas:', error);
             }
         }
 
-        async function carregarUsuariosRecentes() {
-            const container = document.getElementById('recentUsers');
-            container.innerHTML = '<div class="loader"></div><p>Carregando usuários...</p>';
-            
-            try {
-                const response = await fetch('/api/admin/usuarios/recentes', {
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                if (response.ok) {
-                    const usuarios = await response.json();
-                    container.innerHTML = '';
-                    
-                    if (usuarios.length === 0) {
-                        container.innerHTML = '<p>Nenhum usuário cadastrado.</p>';
-                        return;
-                    }
-                    
-                    // Criar cards para usuários recentes
-                    usuarios.forEach(usuario => {
-                        const card = document.createElement('div');
-                        card.className = 'usuario-card';
-                        card.innerHTML = `
-                            <div class="usuario-header">
-                                <h3 class="usuario-nome">${usuario.nome}</h3>
-                                <span class="tipo-badge ${usuario.tipo === 'admin' ? 'tipo-admin' : 'tipo-agricultor'}">
-                                    ${usuario.tipo === 'admin' ? 'Admin' : 'Agricultor'}
-                                </span>
-                            </div>
-                            <div class="usuario-info">
-                                <div class="info-item">
-                                    <i class="fas fa-envelope"></i>
-                                    <span>${usuario.email}</span>
-                                </div>
-                                <div class="info-item">
-                                    <i class="fas fa-id-card"></i>
-                                    <span>${usuario.cnpj}</span>
-                                </div>
-                            </div>
-                        `;
-                        container.appendChild(card);
-                    });
-                }
-            } catch (error) {
-                console.error('Erro ao carregar usuários recentes:', error);
-                container.innerHTML = '<p style="color: #e74c3c;">Erro ao carregar usuários.</p>';
-            }
-        }
-
         async function carregarTodosUsuarios() {
             const tbody = document.getElementById('usuariosTableBody');
-            tbody.innerHTML = '<tr><td colspan="6" class="loading"><div class="loader"></div><p>Carregando usuários...</p></td></tr>';
             
             try {
                 const response = await fetch('/api/admin/usuarios', {
                     headers: {
                         'Content-Type': 'application/json'
-                    }
+                    },
+                    credentials: 'include'
                 });
                 
                 if (response.ok) {
                     const usuarios = await response.json();
                     usuariosCache = usuarios;
                     renderizarTabelaUsuarios(usuarios);
+                } else if (response.status === 401) {
+                    window.location.href = '/login';
+                } else if (response.status === 404) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: #e74c3c; padding: 40px;">
+                                <i class="fas fa-exclamation-circle" style="font-size: 48px; margin-bottom: 20px;"></i>
+                                <h3>Rota de usuários não encontrada</h3>
+                                <p>Verifique se a API está configurada corretamente.</p>
+                            </td>
+                        </tr>
+                    `;
                 }
             } catch (error) {
                 console.error('Erro ao carregar usuários:', error);
-                tbody.innerHTML = '<tr><td colspan="6" style="color: #e74c3c; text-align: center;">Erro ao carregar usuários.</td></tr>';
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; color: #e74c3c; padding: 40px;">
+                            <i class="fas fa-exclamation-circle" style="font-size: 48px; margin-bottom: 20px;"></i>
+                            <h3>Erro de conexão</h3>
+                            <p>Verifique se o servidor está rodando e tente novamente.</p>
+                        </td>
+                    </tr>
+                `;
             }
         }
 
@@ -832,7 +1290,14 @@
             tbody.innerHTML = '';
             
             if (usuarios.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Nenhum usuário encontrado.</td></tr>';
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 40px; color: #7f8c8d;">
+                            <i class="fas fa-users" style="font-size: 48px; margin-bottom: 20px;"></i>
+                            <h3>Nenhum usuário encontrado</h3>
+                        </td>
+                    </tr>
+                `;
                 return;
             }
             
@@ -888,6 +1353,8 @@
             document.getElementById('modalUsuarioTitle').textContent = 'Novo Usuário';
             document.getElementById('usuarioForm').reset();
             document.getElementById('usuarioUuid').value = '';
+            document.getElementById('senha').required = true;
+            document.getElementById('confirmarSenha').required = true;
             document.getElementById('usuarioModal').style.display = 'block';
         }
 
@@ -909,7 +1376,8 @@
                 const response = await fetch(`/api/admin/usuarios/${uuid}`, {
                     headers: {
                         'Content-Type': 'application/json'
-                    }
+                    },
+                    credentials: 'include'
                 });
                 
                 if (response.ok) {
@@ -917,29 +1385,25 @@
                     
                     const detalhesDiv = document.getElementById('usuarioDetalhes');
                     detalhesDiv.innerHTML = `
-                        <div class="usuario-card">
-                            <div class="usuario-header">
-                                <h3 class="usuario-nome">${usuario.nome}</h3>
+                        <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                <h3 style="color: #2c3e50; margin: 0;">${usuario.nome}</h3>
                                 <span class="tipo-badge ${usuario.tipo === 'admin' ? 'tipo-admin' : 'tipo-agricultor'}">
                                     ${usuario.tipo === 'admin' ? 'Administrador' : 'Agricultor'}
                                 </span>
                             </div>
-                            <div class="usuario-info">
-                                <div class="info-item">
-                                    <i class="fas fa-envelope"></i>
+                            <div style="margin-bottom: 15px;">
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                                    <i class="fas fa-envelope" style="color: #96bd3e;"></i>
                                     <span><strong>Email:</strong> ${usuario.email}</span>
                                 </div>
-                                <div class="info-item">
-                                    <i class="fas fa-id-card"></i>
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                                    <i class="fas fa-id-card" style="color: #96bd3e;"></i>
                                     <span><strong>CNPJ:</strong> ${usuario.cnpj}</span>
                                 </div>
-                                <div class="info-item">
-                                    <i class="fas fa-calendar"></i>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <i class="fas fa-calendar" style="color: #96bd3e;"></i>
                                     <span><strong>Data de Cadastro:</strong> ${new Date().toLocaleDateString('pt-BR')}</span>
-                                </div>
-                                <div class="info-item">
-                                    <i class="fas fa-key"></i>
-                                    <span><strong>Tipo de Conta:</strong> ${usuario.tipo === 'admin' ? 'Administrador' : 'Agricultor'}</span>
                                 </div>
                             </div>
                         </div>
@@ -949,7 +1413,7 @@
                 }
             } catch (error) {
                 console.error('Erro ao carregar detalhes do usuário:', error);
-                alert('Erro ao carregar detalhes do usuário.');
+                mostrarMensagem('Erro ao carregar detalhes do usuário.', 'error');
             }
         }
 
@@ -958,7 +1422,8 @@
                 const response = await fetch(`/api/admin/usuarios/${uuid}`, {
                     headers: {
                         'Content-Type': 'application/json'
-                    }
+                    },
+                    credentials: 'include'
                 });
                 
                 if (response.ok) {
@@ -972,17 +1437,19 @@
                     document.getElementById('tipo').value = usuario.tipo;
                     document.getElementById('senha').required = false;
                     document.getElementById('confirmarSenha').required = false;
+                    document.getElementById('senha').placeholder = "Deixe em branco para manter a senha atual";
+                    document.getElementById('confirmarSenha').placeholder = "Deixe em branco para manter a senha atual";
                     
                     document.getElementById('usuarioModal').style.display = 'block';
                 }
             } catch (error) {
                 console.error('Erro ao carregar usuário para edição:', error);
-                alert('Erro ao carregar dados do usuário.');
+                mostrarMensagem('Erro ao carregar dados do usuário.', 'error');
             }
         }
 
         function excluirUsuario(uuid, nome) {
-            usuarioParaExcluir = uuid;
+            usuarioParaExcluir = { uuid, nome };
             document.getElementById('deleteUsuarioInfo').textContent = `Usuário: ${nome}`;
             document.getElementById('confirmDeleteModal').style.display = 'block';
         }
@@ -1003,7 +1470,7 @@
             const confirmarSenha = document.getElementById('confirmarSenha').value;
             
             if (senha !== confirmarSenha) {
-                alert('As senhas não coincidem!');
+                mostrarMensagem('As senhas não coincidem!', 'error');
                 return;
             }
             
@@ -1011,9 +1478,13 @@
                 nome,
                 email,
                 cnpj,
-                tipo,
-                senha
+                tipo
             };
+            
+            // Adicionar senha apenas se fornecida
+            if (senha) {
+                usuarioData.senha = senha;
+            }
             
             try {
                 let response;
@@ -1024,7 +1495,8 @@
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify(usuarioData)
+                        body: JSON.stringify(usuarioData),
+                        credentials: 'include'
                     });
                 } else {
                     // Cadastro
@@ -1033,27 +1505,23 @@
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify(usuarioData)
+                        body: JSON.stringify(usuarioData),
+                        credentials: 'include'
                     });
                 }
                 
                 if (response.ok) {
                     fecharModalUsuario();
-                    alert('Usuário salvo com sucesso!');
-                    
-                    if (currentView === 'dashboard') {
-                        carregarEstatisticas();
-                        carregarUsuariosRecentes();
-                    } else {
-                        carregarTodosUsuarios();
-                    }
+                    mostrarMensagem('Usuário salvo com sucesso!', 'success');
+                    carregarEstatisticas();
+                    carregarTodosUsuarios();
                 } else {
                     const error = await response.json();
-                    alert(`Erro: ${error.detail || 'Erro ao salvar usuário'}`);
+                    mostrarMensagem(`Erro: ${error.detail || 'Erro ao salvar usuário'}`, 'error');
                 }
             } catch (error) {
                 console.error('Erro ao salvar usuário:', error);
-                alert('Erro ao salvar usuário.');
+                mostrarMensagem('Erro ao salvar usuário.', 'error');
             }
         }
 
@@ -1061,50 +1529,70 @@
             if (!usuarioParaExcluir) return;
             
             try {
-                const response = await fetch(`/api/admin/usuarios/${usuarioParaExcluir}`, {
+                const response = await fetch(`/api/admin/usuarios/${usuarioParaExcluir.uuid}`, {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json'
-                    }
+                    },
+                    credentials: 'include'
                 });
                 
                 if (response.ok) {
                     fecharModalConfirmacao();
-                    alert('Usuário excluído com sucesso!');
-                    
-                    if (currentView === 'dashboard') {
-                        carregarEstatisticas();
-                        carregarUsuariosRecentes();
-                    } else {
-                        carregarTodosUsuarios();
-                    }
+                    mostrarMensagem('Usuário excluído com sucesso!', 'success');
+                    carregarEstatisticas();
+                    carregarTodosUsuarios();
                 } else {
                     const error = await response.json();
-                    alert(`Erro: ${error.detail || 'Erro ao excluir usuário'}`);
+                    mostrarMensagem(`Erro: ${error.detail || 'Erro ao excluir usuário'}`, 'error');
                 }
             } catch (error) {
                 console.error('Erro ao excluir usuário:', error);
-                alert('Erro ao excluir usuário.');
+                mostrarMensagem('Erro ao excluir usuário.', 'error');
             }
         }
 
-        // Event Listeners
-        document.getElementById('searchUsuario')?.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                buscarUsuarios();
-            }
-        });
-
-        // Inicialização
-        document.addEventListener('DOMContentLoaded', () => {
-            carregarDashboard();
+        function mostrarMensagem(mensagem, tipo) {
+            const flashContainer = document.getElementById('flashMessages');
+            const flashClass = tipo === 'success' ? 'flash-success' : 
+                            tipo === 'error' ? 'flash-error' : 'flash-info';
             
-            // Fechar modais ao clicar fora
-            window.onclick = (event) => {
+            const flashDiv = document.createElement('div');
+            flashDiv.className = `flash-message ${flashClass}`;
+            flashDiv.textContent = mensagem;
+            
+            flashContainer.appendChild(flashDiv);
+            
+            setTimeout(() => {
+                if (flashDiv.parentNode === flashContainer) {
+                    flashDiv.remove();
+                }
+            }, 5000);
+        }
+
+        // Fechar modais ao clicar fora
+        window.onclick = function(event) {
+            const modals = ['usuarioModal', 'confirmDeleteModal', 'viewUsuarioModal'];
+            modals.forEach(modalId => {
+                const modal = document.getElementById(modalId);
+                if (event.target === modal) {
+                    if (modalId === 'confirmDeleteModal') {
+                        fecharModalConfirmacao();
+                    } else if (modalId === 'viewUsuarioModal') {
+                        fecharModalVisualizacao();
+                    } else {
+                        fecharModalUsuario();
+                    }
+                }
+            });
+        };
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
                 const modals = ['usuarioModal', 'confirmDeleteModal', 'viewUsuarioModal'];
                 modals.forEach(modalId => {
                     const modal = document.getElementById(modalId);
-                    if (event.target === modal) {
+                    if (modal.style.display === 'block') {
                         if (modalId === 'confirmDeleteModal') {
                             fecharModalConfirmacao();
                         } else if (modalId === 'viewUsuarioModal') {
@@ -1114,7 +1602,7 @@
                         }
                     }
                 });
-            };
+            }
         });
     </script>
 </body>
