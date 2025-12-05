@@ -11,6 +11,7 @@ from typing import List
 from datetime import date
 import uuid
 import sqlite3
+import hashlib
 import os
 
 from models import Produto, Usuario, Fornecedor, Movimento, init_db, get_db, TipoUsuario, TipoMovimento, StatusProduto
@@ -21,7 +22,7 @@ init_db()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-ALERTA_DIAS = 7  # Dias para considerar produto "a vencer"
+ALERTA_DIAS = 7
 
 def flash(request: Request, message: str, category: str = "info"):
     if "messages" not in request.session:
@@ -60,7 +61,9 @@ def login_action(
     db: sqlite3.Connection = Depends(get_db)
 ):
     cursor = db.cursor()
-    cursor.execute("SELECT * FROM usuarios WHERE cnpj = ? AND senha = ?", (cnpj, senha))
+    senha_hash = hashlib.sha256(senha.encode()).hexdigest()
+    
+    cursor.execute("SELECT * FROM usuarios WHERE cnpj = ? AND senha = ?", (cnpj, senha_hash))
     user = cursor.fetchone()
 
     if not user:
@@ -75,7 +78,6 @@ def login_action(
         "tipo": user["tipo"]
     }
 
-    # VERIFICAÇÃO DE ALERTAS DE ESTOQUE BAIXO
     from models import obter_resumo_estoque
     resumo_estoque = obter_resumo_estoque(db, user["uuid"])
     
@@ -160,17 +162,18 @@ def cadastro_action(
         url = request.url_for("cadastro")
         return RedirectResponse(url=url, status_code=303)
 
-    
     tipos_validos = [tipo.value for tipo in TipoUsuario]
     if tipo_usuario not in tipos_validos:
         flash(request, "Tipo de usuário inválido!", "error")
         url = request.url_for("cadastro")
         return RedirectResponse(url=url, status_code=303)
 
+    senha_hash = hashlib.sha256(senha.encode()).hexdigest()
+    
     novo_uuid = str(uuid.uuid4())
     cursor.execute(
         "INSERT INTO usuarios VALUES (?, ?, ?, ?, ?, ?)",
-        (novo_uuid, cnpj, nome, email, senha, tipo_usuario)
+        (novo_uuid, cnpj, nome, email, senha_hash, tipo_usuario)  # Usa senha_hash
     )
     db.commit()
     flash(request, "Cadastro realizado com sucesso! Faça login para continuar.", "success")
