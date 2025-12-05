@@ -71,14 +71,35 @@
             display: flex;
             flex-direction: column;
             height: calc(100vh - 132px);
-            overflow: hidden;
+            overflow-y: auto; /* Alterado de hidden para auto */
+        }
+
+        /* Estilização da barra de rolagem do main */
+        main::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        main::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+            margin: 5px 0;
+        }
+
+        main::-webkit-scrollbar-thumb {
+            background: #96bd3e;
+            border-radius: 10px;
+            border: 2px solid #f1f1f1;
+        }
+
+        main::-webkit-scrollbar-thumb:hover {
+            background: #7fa531;
         }
 
         .main-content {
             display: flex;
             flex-direction: column;
             flex: 1;
-            overflow: hidden;
+            /* Removido overflow: hidden para permitir rolagem interna se necessário */
         }
 
         #sidebar {
@@ -377,7 +398,7 @@
             display: flex;
             flex-direction: column;
             flex: 1;
-            overflow: hidden;
+            min-height: 0; /* Adicionado para melhor compatibilidade com flex */
         }
 
         .produtos-container-wrapper {
