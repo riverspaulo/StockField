@@ -10,6 +10,7 @@ from typing import List
 from datetime import date
 import uuid
 import sqlite3
+import hashlib
 import os
 
 from models import Produto, Usuario, Fornecedor, Movimento, init_db, get_db, TipoUsuario, TipoMovimento, StatusProduto
@@ -59,7 +60,12 @@ def login_action(
     db: sqlite3.Connection = Depends(get_db)
 ):
     cursor = db.cursor()
-    cursor.execute("SELECT * FROM usuarios WHERE cnpj = ? AND senha = ?", (cnpj, senha))
+    
+    # AQUI ESTÁ A MUDANÇA: Criptografa a senha antes de comparar
+    senha_hash = hashlib.sha256(senha.encode()).hexdigest()
+    
+    # Busca por CNPJ e senha criptografada
+    cursor.execute("SELECT * FROM usuarios WHERE cnpj = ? AND senha = ?", (cnpj, senha_hash))
     user = cursor.fetchone()
 
     if not user:
@@ -159,17 +165,19 @@ def cadastro_action(
         url = request.url_for("cadastro")
         return RedirectResponse(url=url, status_code=303)
 
-    
     tipos_validos = [tipo.value for tipo in TipoUsuario]
     if tipo_usuario not in tipos_validos:
         flash(request, "Tipo de usuário inválido!", "error")
         url = request.url_for("cadastro")
         return RedirectResponse(url=url, status_code=303)
 
+    # AQUI ESTÁ A MUDANÇA: Criptografa a senha
+    senha_hash = hashlib.sha256(senha.encode()).hexdigest()
+    
     novo_uuid = str(uuid.uuid4())
     cursor.execute(
         "INSERT INTO usuarios VALUES (?, ?, ?, ?, ?, ?)",
-        (novo_uuid, cnpj, nome, email, senha, tipo_usuario)
+        (novo_uuid, cnpj, nome, email, senha_hash, tipo_usuario)  # Usa senha_hash
     )
     db.commit()
     flash(request, "Cadastro realizado com sucesso! Faça login para continuar.", "success")
