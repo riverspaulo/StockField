@@ -992,7 +992,7 @@
         </div>
     </header>
     
-    <main class="fade-in">
+    <!-- <main class="fade-in">
         <div class="main-content">
             <div class="content-header">
                 <h1 class="content-title">
@@ -1031,6 +1031,50 @@
                             <i class="fas fa-user-check"></i>
                             <div class="stat-number" id="totalAtivos">0</div>
                             <div class="stat-label">Usuários Ativos</div>
+                        </div>
+                    </div>
+
+                    <div class="content-spacing"></div> -->
+
+    <main class="fade-in">
+        <div class="main-content">
+            <div class="content-header">
+                <h1 class="content-title">
+                    <i class="fa-solid fa-chart-line"></i>
+                    Dashboard Administrador
+                </h1>
+            </div>
+
+            <div id="flashMessages" class="flash-messages">
+                {% for message in messages %}
+                <div class="flash-message flash-{{ message.category }}">
+                    {{ message.message }}
+                </div>
+                {% endfor %}
+            </div>
+
+            <div id="dynamicContent">
+                <div id="dashboardContent" class="content-section">
+                    <div class="stats-container">
+                        <div class="stat-card">
+                            <i class="fas fa-users"></i>
+                            <div class="stat-number" id="totalUsuarios">0</div>
+                            <div class="stat-label">Total de Usuários</div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-seedling"></i>
+                            <div class="stat-number" id="totalAgricultores">0</div>
+                            <div class="stat-label">Agricultores</div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-user-shield"></i>
+                            <div class="stat-number" id="totalAdmins">0</div>
+                            <div class="stat-label">Administradores</div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-box"></i>
+                            <div class="stat-number" id="totalProdutos">0</div>
+                            <div class="stat-label">Total Produtos</div>
                         </div>
                     </div>
 
@@ -1174,7 +1218,50 @@
     </div>
 
     <script>
-        const LOGO_FECHADO = "/static/images/ezgif.com-animated-gif-maker.gif";
+        // const LOGO_FECHADO = "/static/images/ezgif.com-animated-gif-maker.gif";
+        // const LOGO_ABERTO = "/static/images/logo_colorida.png";
+        // const HEADER_LOGO = "/static/images/logo_colorida.png";
+        
+        // let preloadedImages = {
+        //     fechado: null,
+        //     aberto: null
+        // };
+
+        // let usuariosCache = [];
+        // let usuarioParaExcluir = null;
+
+        // document.addEventListener('DOMContentLoaded', function() {
+        //     const sidebar = document.getElementById('sidebar');
+        //     const logo = document.getElementById('logo_avatar_avatar');
+        //     const openBtn = document.getElementById('open_btn');
+        //     const openBtn2 = document.getElementById('open_btn2');
+        //     const closeSidebarBtn = document.getElementById('close-sidebar');
+        //     const headerLogo = document.getElementById('header-logo');
+            
+        //     preloadImages();
+            
+        //     if (preloadedImages.fechado.complete) {
+        //         logo.src = preloadedImages.fechado.src;
+        //     } else {
+        //         preloadedImages.fechado.onload = function() {
+        //             logo.src = this.src;
+        //         };
+        //     }
+            
+        //     logo.style.width = "55px";
+        //     logo.style.height = "55px";
+        //     logo.style.objectFit = "cover";
+        //     logo.style.transition = "all 0.3s ease";
+        
+        //     if (headerLogo) {
+        //         headerLogo.src = HEADER_LOGO + "?v=" + Date.now();
+        //         headerLogo.style.height = "200px";
+        //     }
+            
+        //     // Carregar dados iniciais
+        //     carregarEstatisticas();
+        //     carregarTodosUsuarios();
+         const LOGO_FECHADO = "/static/images/ezgif.com-animated-gif-maker.gif";
         const LOGO_ABERTO = "/static/images/logo_colorida.png";
         const HEADER_LOGO = "/static/images/logo_colorida.png";
         
@@ -1328,7 +1415,7 @@
 
         async function carregarEstatisticas() {
             try {
-                const response = await fetch('/api/admin/estatisticas', {
+                const response = await fetch('/api/admin/usuarios/estatisticas', {
                     headers: {
                         'Content-Type': 'application/json'
                     },

@@ -1,6 +1,5 @@
 #pip install fastapi uvicorn pydantic
 #uvicorn main:app
-# No seu main.py ou routes.py
 
 from fastapi import FastAPI, Request, Form, Depends, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
