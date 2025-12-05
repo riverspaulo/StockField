@@ -544,12 +544,13 @@ def pagina_produtos_admin(request: Request):
     })
 
 @app.post("/fornecedores/", response_model=Fornecedor)
-def cadastrar_fornecedor(fornecedor: Fornecedor, db: sqlite3.Connection = Depends(get_db)):
+def cadastrar_fornecedor(request:Request, fornecedor: Fornecedor, db: sqlite3.Connection = Depends(get_db)):
     cursor = db.cursor()
+    usuario_uuid = request.session["user"]["uuid"]
     fornecedor.uuid = str(uuid.uuid4())
     cursor.execute(
-        "INSERT INTO fornecedores VALUES (?, ?, ?, ?)",
-        (fornecedor.uuid, fornecedor.nome, fornecedor.telefone, fornecedor.email)
+        "INSERT INTO fornecedores VALUES (?, ?, ?, ?, ?)",
+        (fornecedor.uuid, fornecedor.nome, fornecedor.telefone, fornecedor.email, usuario_uuid)
     )
     db.commit()
     return fornecedor
@@ -610,9 +611,10 @@ def deletar_produto(uuid: str, db: sqlite3.Connection = Depends(get_db)):
     return {"message": "Produto deletado com sucesso"}
 
 @app.get("/fornecedores/", response_model=List[Fornecedor])
-def listar_fornecedores(db: sqlite3.Connection = Depends(get_db)):
+def listar_fornecedores(request:Request, db: sqlite3.Connection = Depends(get_db)):
     cursor = db.cursor()
-    cursor.execute("SELECT * FROM fornecedores")
+    usuario_uuid = request.session["user"]["uuid"] 
+    cursor.execute("SELECT * FROM fornecedores WHERE usuario_uuid = ?", (usuario_uuid,))
     fornecedores = [Fornecedor(**dict(row)) for row in cursor.fetchall()]
     return fornecedores
 
