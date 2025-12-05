@@ -21,7 +21,7 @@ init_db()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-ALERTA_DIAS = 7  # Dias para considerar produto "a vencer"
+ALERTA_DIAS = 7
 
 def flash(request: Request, message: str, category: str = "info"):
     if "messages" not in request.session:
@@ -60,11 +60,8 @@ def login_action(
     db: sqlite3.Connection = Depends(get_db)
 ):
     cursor = db.cursor()
-    
-    # AQUI ESTÁ A MUDANÇA: Criptografa a senha antes de comparar
     senha_hash = hashlib.sha256(senha.encode()).hexdigest()
     
-    # Busca por CNPJ e senha criptografada
     cursor.execute("SELECT * FROM usuarios WHERE cnpj = ? AND senha = ?", (cnpj, senha_hash))
     user = cursor.fetchone()
 
@@ -80,7 +77,6 @@ def login_action(
         "tipo": user["tipo"]
     }
 
-    # VERIFICAÇÃO DE ALERTAS DE ESTOQUE BAIXO
     from models import obter_resumo_estoque
     resumo_estoque = obter_resumo_estoque(db, user["uuid"])
     
@@ -171,7 +167,6 @@ def cadastro_action(
         url = request.url_for("cadastro")
         return RedirectResponse(url=url, status_code=303)
 
-    # AQUI ESTÁ A MUDANÇA: Criptografa a senha
     senha_hash = hashlib.sha256(senha.encode()).hexdigest()
     
     novo_uuid = str(uuid.uuid4())
