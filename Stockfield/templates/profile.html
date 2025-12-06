@@ -319,6 +319,7 @@
                          /* Maior respiro entre as colunas */
             justify-content: space-between;
             width: 1400px;
+            background-color: #2176b8;
             height: 480px;
             border-radius: 10px;        /* Visual mais suave */
             
@@ -327,19 +328,26 @@
         .info-left {
             display: flex;
             flex-direction: column;
-            gap: 20px;                      
-            width: 350px;                  
+            gap: 20px;                      /* Espaço uniforme entre perfil e calendário */
+            width: 350px;                   /* largura mais elegante e proporcional */
+            min-width: 300px;
             height: 460px;
+            background-color: #2e3b0e;
+                             /* leve respiro interno */
+     
             border-radius: 12px;
         }
 
         .info-right {
             display: flex;
             flex-direction: column;
-            gap: 20px;                      
-            width: 900px;                   
+            gap: 20px;                      /* Espaço uniforme entre perfil e calendário */
+            width: 900px;                   /* largura mais elegante e proporcional */
             min-width: 700px;
             height: 460px;
+            background-color: #7f8c8d;
+                             /* leve respiro interno */
+     
             border-radius: 12px;
             
         }
@@ -350,7 +358,9 @@
             padding: 25px;
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.12);
-            width: 320px;            
+            
+            
+            width: 320px;                   /* ocupa toda a coluna harmoniosamente */
             min-height: 200px;
         }
 
@@ -384,8 +394,8 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.12);
             
 
-            flex: 0 1 850px;    /* largura reduzida */
-            max-width: 850px;
+            flex: 0 1 900px;    /* largura reduzida */
+            max-width: 900px;
             height: 300px;  /* altura mais compacta */
             
             margin-right: 40px;
@@ -530,12 +540,11 @@
 
         /* CARD DE ALERTAS - segue o mesmo padrão dos info-cards */
         .alertas-section {
-            display: flex;
             background: white;
             padding: 20px 25px;
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            flex-direction: column;
+            border-left: 5px solid #3498db;
             margin-bottom: 20px;
             width: 710px;
         }
@@ -560,7 +569,7 @@
 
         /* Botão "Ver Produtos" */
         .btn-ver-alertas {
-            background-color: #96bd3e;
+            background-color: #3498db;
             color: white;
             padding: 8px 15px;
             border-radius: 8px;
@@ -574,7 +583,7 @@
         }
 
         .btn-ver-alertas:hover {
-            background-color: #66802e;
+            background-color: #2176b8;
         }
 
         /* Área interna dos alertas */
@@ -827,7 +836,7 @@
                 </li>
 
                 <li class="side-item">
-                    <a href="#">
+                    <a href="/relatorios">
                         <i class="fa-solid fa-chart-bar"></i>
                         <span class="item-description">Relatórios</span>
                     </a>
@@ -864,6 +873,17 @@
                     <i class="fa-solid fa-truck"></i>
                     Perfil do Usuário
                 </h1>
+
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for msg in messages %}
+                            <div class="flash-message flash-{{ msg.category }}">
+                                <i class="fa-solid fa-{% if msg.category == 'success' %}check-circle{% elif msg.category == 'error' %}exclamation-circle{% else %}info-circle{% endif %}"></i>
+                                {{ msg.message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
 
             </div>
 
@@ -915,9 +935,7 @@
                                 </div>
                             </div>
 
-                            <!-- help plisss -->
-
-                            <div class="alertas-section" >
+                            <div id="alertasSection" class="alertas-section" style="display: none;">
                                 <div class="alertas-header">
                                     <h3 class="alertas-title">
                                         <i class="fa-solid fa-bell"></i>
