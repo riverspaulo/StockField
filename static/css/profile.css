@@ -1,0 +1,238 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family:'Poppins', sans-serif;
+}
+
+body {
+    background-color: #f4f5f0;
+}
+
+.top-bar {
+    background-color: white;
+    padding: 8px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+}
+
+.logo {
+    margin-right: 20px;
+    justify-content: center;
+    display: flex;
+}
+
+
+#stockfield-logo {
+    width: 215px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 20px;
+
+}
+
+.search-bar {
+    display: flex;
+    width: 40%;
+    margin-right: 80px;
+}
+
+.search-bar input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #f7f7f7;
+    border-right: none;
+    border-radius: 20px 0 0 20px;
+    background-color: #f7f7f7;
+}
+
+.search-bar input:focus {
+    outline: none;
+    border: none;
+}
+
+.search-bar button {
+    /* background-color: #475c1f; */
+    background-color: #7a9b33;
+    border: none;
+    padding: 12px 15px;
+    border-radius: 0 20px 20px 0;
+    cursor: pointer;
+    color: white;
+}
+
+.user-icon i {
+    font-size: 26px;
+    color: #7a9b33;
+}
+
+.container {
+    display: flex;
+}
+
+.sidebar {
+    background-color:white;
+    width: 70px;
+    height: calc(100vh - 60px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 5px;
+    gap: 20px;
+}
+
+.sidebar i {
+    font-size: 24px;
+    color: #7a9b33;
+    cursor: pointer;
+}
+
+.main-content {
+    width: calc(100% - 70px);
+    padding: 20px;
+    background-color: #d8de9d;
+}
+
+.menu-buttons {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 10px;
+    margin-top: 10px;
+    padding-left: 420px;
+    
+}
+
+.menu-buttons button:hover{
+    background-color: #66802e;
+    color: #dceb7b;
+}
+
+.btn {
+    /* background-color: #496412; */
+    background-color: #7a9b33;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.content-area {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    
+}
+
+.left-widgets {
+    width: 25%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.calendario, .info-box {
+    background-color: white;
+    border-radius: 10px;
+    height: 220px;
+    margin-bottom: 10px;
+    margin-top: 10px;
+    width: 300px;
+    padding: 8px;
+    overflow: hidden; /* mantém dentro da caixa */
+}
+
+.calendario h3 {
+    text-align: center;
+    color: white;
+    margin-bottom: 5px;
+    font-weight: bold;
+    background-color: #88a84f;
+    border-radius: 5px;
+}
+
+.main-box {
+    border-radius: 10px;
+    height: 460px;
+    width: 890px;
+    margin-right: 80px;
+    background-color: white;
+    
+}
+
+
+#calendar {
+    font-size: 12px;
+}
+
+
+.calendar-days .today {
+    background-color:  #d2db94!important;
+    color: black;
+    
+}
+
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.calendar-header button {
+    background-color: #496412;
+    color: white;
+    border: none;
+    padding: 2px 6px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 10px;
+}
+
+.calendar-header span {
+    font-weight: bold;
+    color: #2e3b0e;
+    font-size: 14px;
+}
+
+.calendar-weekdays, .calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+}
+
+.calendar-weekdays div {
+    font-weight: bold;
+    padding: 2px;
+    color: #496412;
+    font-size: 11px;
+}
+
+.calendar-days {
+    max-height: 120px; /* Ajuste para caber dentro */
+    overflow-y: auto;
+}
+
+.calendar-days div {
+    padding: 5px;
+    margin: 1px;
+    background-color: #f0f4d4;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.calendar-days div:hover {
+    background-color: #d2db94;
+}
+
+
+

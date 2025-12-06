@@ -304,52 +304,39 @@
             max-width: 1400px;
             margin: 0 auto;
             height: 800px;
-            
             display: flex;
             flex-direction: row;
-            
-            
-            
-            /* garante que haja espaço para os filhos */
+    
         }
 
         .profile-info {
             display: flex;
             flex-direction: row;
-                         /* Maior respiro entre as colunas */
             justify-content: space-between;
             width: 1400px;
-            background-color: #2176b8;
             height: 480px;
-            border-radius: 10px;        /* Visual mais suave */
+            border-radius: 10px;     
             
         }
 
         .info-left {
             display: flex;
             flex-direction: column;
-            gap: 20px;                      /* Espaço uniforme entre perfil e calendário */
-            width: 350px;                   /* largura mais elegante e proporcional */
+            gap: 20px;                      
+            width: 350px;                   
             min-width: 300px;
             height: 460px;
-            background-color: #2e3b0e;
-                             /* leve respiro interno */
-     
             border-radius: 12px;
         }
 
         .info-right {
             display: flex;
             flex-direction: column;
-            gap: 20px;                      /* Espaço uniforme entre perfil e calendário */
-            width: 900px;                   /* largura mais elegante e proporcional */
-            min-width: 700px;
-            height: 460px;
-            background-color: #7f8c8d;
-                             /* leve respiro interno */
-     
+            margin-right: 50px;
+            gap: 20px;              /* espaçamento harmônico entre os cards */
+            width: 900px;
+            min-height: 460px;
             border-radius: 12px;
-            
         }
 
 
@@ -358,9 +345,7 @@
             padding: 25px;
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.12);
-            
-            
-            width: 320px;                   /* ocupa toda a coluna harmoniosamente */
+            width: 320px;
             min-height: 200px;
         }
 
@@ -393,10 +378,9 @@
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.12);
             
-
             flex: 0 1 900px;    /* largura reduzida */
             max-width: 900px;
-            height: 300px;  /* altura mais compacta */
+            height: 200px;  /* altura mais compacta */
             
             margin-right: 40px;
             
@@ -538,28 +522,55 @@
             background-color: #d2db94;
         }
 
-        /* CARD DE ALERTAS - segue o mesmo padrão dos info-cards */
-        .alertas-section {
-            background: white;
-            padding: 20px 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            border-left: 5px solid #3498db;
-            margin-bottom: 20px;
-            width: 710px;
+        .info-right-row {
+            display: flex;
+            justify-content: space-between;
+            height: 700px;
+            width: 96%;
+            
         }
 
+
+
+        /* CARD DE ALERTAS - segue o mesmo padrão dos info-cards */
+        
+        .relatorios-section {
+            background: white;
+            padding: 10px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            height: 120px;
+            min-width: 380px;
+            margin-top: 28px;         
+            
+        }
+
+        .alertas-section {
+            background: white;
+            padding: 10px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            height: 120px;
+            display: flex;
+            flex-wrap: wrap;
+            width: 400px;
+            margin-top: 28px;         
+        }
+
+
         /* Cabeçalho interno */
-        .alertas-header {
+        .alertas-header, .relatorios-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
             margin-bottom: 15px;
+            width: 420px;
+            
         }
 
         /* Título */
-        .alertas-title {
-            font-size: 1.3rem;
+        .alertas-title, .relatorio-title {
+            font-size: 1.1rem;
             margin: 0;
             color: #333;
             display: flex;
@@ -568,8 +579,8 @@
         }
 
         /* Botão "Ver Produtos" */
-        .btn-ver-alertas {
-            background-color: #3498db;
+        .btn-download {
+            background-color: #66802e;
             color: white;
             padding: 8px 15px;
             border-radius: 8px;
@@ -582,8 +593,23 @@
             gap: 6px;
         }
 
-        .btn-ver-alertas:hover {
-            background-color: #2176b8;
+        .btn-ver-alertas {
+            
+            background-color: #66802e;
+            color: white;
+            padding: 4px 6px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-ver-alertas:hover, .btn-download:hover {
+            background-color: #496412;
         }
 
         /* Área interna dos alertas */
@@ -591,9 +617,36 @@
             background: #f7f9ff;
             padding: 15px;
             border-radius: 10px;
-            max-height: 200px;
+            height: 10px;
             overflow-y: auto;
             border: 1px solid #e0e7ff;
+            width: 380px;
+        }
+
+        .relatorios-content p {
+            font-size: 0.85rem;
+            text-align: center;
+        } 
+
+        .log-card {
+            background: white;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .log-card b {
+            color: #333;
+        }
+
+        .detalhes {
+            margin-top: 8px;
+            padding: 10px;
+            background: #f8f8f8;
+            border-left: 4px solid #4A90E2;
+            border-radius: 4px;
+            white-space: pre-line; /* mantém quebras */
         }
 
        
@@ -835,12 +888,6 @@
                     </a>
                 </li>
 
-                <li class="side-item">
-                    <a href="/relatorios">
-                        <i class="fa-solid fa-chart-bar"></i>
-                        <span class="item-description">Relatórios</span>
-                    </a>
-                </li>
 
             </ul>
 
@@ -935,21 +982,55 @@
                                 </div>
                             </div>
 
-                            <div id="alertasSection" class="alertas-section" style="display: none;">
-                                <div class="alertas-header">
-                                    <h3 class="alertas-title">
-                                        <i class="fa-solid fa-bell"></i>
-                                        Alertas de Vencimento
-                                    </h3>
-                                    <button class="btn-ver-alertas" onclick="window.location.href='/produtos'">
-                                        <i class="fa-solid fa-box"></i>
-                                        Ver Produtos
-                                    </button>
+                            <div class="info-right-row">
+
+                                <div class="alertas-section">
+                                    <div class="alertas-header">
+                                        <h3 class="alertas-title">
+                                            <i class="fa-solid fa-bell"></i>
+                                            Alertas de Vencimento
+                                        </h3>
+                                        <button class="btn-ver-alertas" onclick="window.location.href='/produtos'">
+                                            <i class="fa-solid fa-box"></i>
+                                            Produtos
+                                        </button>
+                                    </div>
+
+                                    <div class="alertas-content" id="alertasList">
+                                        <!-- alertas aqui -->
+                                    </div>
                                 </div>
-                                <div class="alertas-content" id="alertasList">
-                                    <!-- Alertas serão carregados aqui -->
+
+                                <div class="relatorios-section">
+                                    <div class="relatorios-header">
+                                        <h3 class="relatorio-title">
+                                            <i class="fa-solid fa-clipboard"></i>
+                                            Relatório de Movimentações
+                                        </h3>
+
+                                        <a href="/relatorio/logs/pdf" class="btn-download" target="_blank">
+                                            <i class="fa-solid fa-download"></i>
+                                            Download
+                                        </a>
+                                        
+                                    </div>
+
+                                    <div class="relatorios-content">
+                                        <p>Baixe o arquivo e tenha acesso as suas movimentações!</p>
+                                        {% for log in logs %}
+                                        <div class="log-card">
+                                            <div><b>Data:</b> {{ log['data'] }}</div>
+                                            <div><b>Usuário:</b> {{ log['usuario_nome'] }}</div>
+                                            <div><b>Ação:</b> {{ log['acao'] }}</div>
+                                            <div class="detalhes">{{ log['detalhes'].replace("|", "\n") }}</div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
                                 </div>
+
                             </div>
+
+
 
                         </div>
                         
