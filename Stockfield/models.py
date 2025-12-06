@@ -93,10 +93,16 @@ def init_db():
             tipo TEXT NOT NULL
         )""")
 
-        # if not cursor.fetchone():
-        #     adm_uuid = str(uuid.uuid4())
-        #     senha_admin_hash = hashlib.sha256("useradm".encode()).hexdigest()
-        #     cursor.execute("""INSERT INTO usuarios VALUES (?, "123.456.789-00", "Admin", "admin@admin", ?, "admin")""",(adm_uuid, senha_admin_hash))
+        cursor.execute("SELECT * FROM usuarios WHERE email = 'admin@admin'")
+        admin_existente = cursor.fetchone()
+
+        if not admin_existente:
+            adm_uuid = str(uuid.uuid4())
+            senha_admin_hash = hashlib.sha256("useradm".encode()).hexdigest()
+            cursor.execute(
+                """INSERT INTO usuarios VALUES (?, "123.456.789-00", "Admin", "admin@admin", ?, "admin")""",
+                (adm_uuid, senha_admin_hash)
+            )
         
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS fornecedores (
