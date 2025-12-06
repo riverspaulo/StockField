@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Logs do Sistema</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f2f2;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .log-card {
+            background: white;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .log-card b {
+            color: #333;
+        }
+
+        .detalhes {
+            margin-top: 8px;
+            padding: 10px;
+            background: #f8f8f8;
+            border-left: 4px solid #4A90E2;
+            border-radius: 4px;
+            white-space: pre-line; /* mantém quebras */
+        }
+    </style>
+</head>
+<body>
+
+<h1>Logs do Sistema</h1>
+
+{% for log in logs %}
+    <div class="log-card">
+        <div><b>Data:</b> {{ log['data'] }}</div>
+        <div><b>Usuário:</b> {{ log['usuario_nome'] }}</div>
+        <div><b>Ação:</b> {{ log['acao'] }}</div>
+
+        <div class="detalhes">
+            {{ log['detalhes'].replace("|", "\n") }}
+        </div>
+    </div>
+{% endfor %}
+
+    <a href="/relatorio/logs/pdf" class="btn-download" target="_blank">
+        📄 Baixar Relatório
+    </a>
+
+</body>
+</html>

@@ -2,7 +2,7 @@
 #uvicorn main:app
 
 from fastapi import FastAPI, Request, Form, Depends, HTTPException
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
@@ -12,8 +12,16 @@ import uuid
 import sqlite3
 import hashlib
 import os
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.units import cm
+from PIL import Image as PILImage
+from reportlab.lib.utils import ImageReader
+from io import BytesIO
 
-from models import Produto, Usuario, Fornecedor, Movimento, init_db, get_db, TipoUsuario, TipoMovimento, StatusProduto
+from models import Produto, Usuario, Fornecedor, Movimento, init_db, get_db, TipoUsuario, TipoMovimento, StatusProduto, registrar_log
 
 app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key="chave_super_secreta")
@@ -360,8 +368,7 @@ def registrar_entrada(movimento: Movimento, request: Request, db: sqlite3.Connec
     cursor = db.cursor()
     usuario_uuid = str(request.session["user"]["uuid"])
     movimento.usuario_uuid = usuario_uuid
-    
-    
+
     cursor.execute("SELECT * FROM produtos WHERE uuid = ? AND usuario_uuid = ?", (movimento.produto_uuid, movimento.usuario_uuid))
     produto = cursor.fetchone()
     if not produto:
@@ -374,7 +381,7 @@ def registrar_entrada(movimento: Movimento, request: Request, db: sqlite3.Connec
     
     movimento.uuid = str(uuid.uuid4())
     movimento.tipo = TipoMovimento.entrada
-    
+
     cursor.execute(
         "INSERT INTO movimentos VALUES (?, ?, ?, ?, ?, ?, ?)",
         (
@@ -387,10 +394,10 @@ def registrar_entrada(movimento: Movimento, request: Request, db: sqlite3.Connec
             movimento.usuario_uuid  
         )
     )
+
     nova_quantidade = produto["quantidade"] + movimento.quantidade
-    
     novo_status = "disponível" if nova_quantidade > 0 else "esgotado"
-    
+
     cursor.execute(
         "UPDATE produtos SET quantidade = ?, status = ? WHERE uuid = ?",
         (nova_quantidade, novo_status, movimento.produto_uuid)
@@ -407,7 +414,19 @@ def registrar_entrada(movimento: Movimento, request: Request, db: sqlite3.Connec
         }
     
     db.commit()
+
+    # Registrar log da entrada
+    detalhes = (
+    f"Movimento UUID: {movimento.uuid} | "
+    f"Produto: {produto['nome']} | "
+    f"Quantidade: +{movimento.quantidade} unidades | "
+    f"Fornecedor: {fornecedor['nome']} | "
+    f"Data: {movimento.data.isoformat()}"
+)
+    registrar_log(db, usuario_uuid, "Entrada de estoque", detalhes)
+
     return movimento
+
 
 
 #MATEUSSSSSSSSSSSSSSSSSSSS
@@ -464,7 +483,18 @@ def registrar_saida(movimento: Movimento, request: Request, db: sqlite3.Connecti
         }
     
     db.commit()
+
+    # Registrar log da saída
+    detalhes = (
+        f"Movimento UUID: {movimento.uuid} | "
+        f"Produto: {produto['nome']} | "
+        f"Quantidade: -{movimento.quantidade} unidades | "
+        f"Data: {movimento.data.isoformat()}"
+    )
+    registrar_log(db, usuario_uuid, "Saída de estoque", detalhes)
+
     return movimento
+
 
 # ROTAS DA API - CORREÇÃO DAS ROTAS CRÍTICAS
 @app.post("/usuarios/", response_model=Usuario)
@@ -499,6 +529,9 @@ def cadastrar_produto(request: Request, produto: Produto, db: sqlite3.Connection
             dias_para_vencer = dias_restantes
         else:
             dias_para_vencer = dias_restantes
+
+    cursor.execute("SELECT * FROM fornecedores WHERE uuid = ?", (produto.fornecedor_uuid,))
+    fornecedor = cursor.fetchone()
     
     cursor.execute(
         "INSERT INTO produtos VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",  
@@ -524,6 +557,15 @@ def cadastrar_produto(request: Request, produto: Produto, db: sqlite3.Connection
         )
     )
     db.commit()
+    # Registrar log do cadastro
+    detalhes = (
+        f"UUID: {produto.uuid} | "
+        f"Produto: {produto.nome}| "
+        f"Quantidade: {produto.quantidade} unidades | "
+        f"Fornecedor: {fornecedor['nome']} | "
+        f"Data de validade: {produto.data_validade.isoformat()}"
+    )
+    registrar_log(db, usuario_uuid, "Novo Produto cadastrado", detalhes)
     return produto
 
 
@@ -556,6 +598,12 @@ def cadastrar_fornecedor(request:Request, fornecedor: Fornecedor, db: sqlite3.Co
         (fornecedor.uuid, fornecedor.nome, fornecedor.telefone, fornecedor.email, usuario_uuid)
     )
     db.commit()
+    # Registrar log do cadastro
+    detalhes = (
+        f"UUID: {fornecedor.uuid} | "
+        f"Nome: {fornecedor.nome} | "
+    )
+    registrar_log(db, usuario_uuid, "Novo fornecedor cadastrado", detalhes)
     return fornecedor
 
 @app.get("/fornecedores_admin", response_class=HTMLResponse)
@@ -603,14 +651,21 @@ def obter_produto(nome: str, db: sqlite3.Connection = Depends(get_db)):
     return Produto(**produto_dict)
 
 @app.delete("/produtos/{uuid}", response_model=dict)
-def deletar_produto(uuid: str, db: sqlite3.Connection = Depends(get_db)):
+def deletar_produto(request:Request, uuid: str, db: sqlite3.Connection = Depends(get_db)):
     cursor = db.cursor()
     cursor.execute("SELECT * FROM produtos WHERE uuid = ?", (uuid,))
     produto = cursor.fetchone()
+    usuario_uuid = request.session["user"]["uuid"]
     if produto is None:
         raise HTTPException(status_code=404, detail="Produto não encontrado")
     cursor.execute("DELETE FROM produtos WHERE uuid = ?", (uuid,))
     db.commit()
+    # Registrar log
+    detalhes = (
+        f"UUID: {produto["uuid"]} | "
+        f"Nome: {produto["nome"]} | "
+    )
+    registrar_log(db, usuario_uuid, "Produto deletado", detalhes)
     return {"message": "Produto deletado com sucesso"}
 
 @app.get("/fornecedores/", response_model=List[Fornecedor])
@@ -1495,3 +1550,128 @@ def obter_produto_admin(
         produto_dict["data_validade"] = date.fromisoformat(produto_dict["data_validade"])
     
     return produto_dict
+
+
+# Função para recortar a imagem da logo
+def cortar_logo(caminho_logo):
+    """Remove automaticamente bordas vazias / transparentes da logo."""
+    try:
+        img = PILImage.open(caminho_logo)
+        bbox = img.getbbox()
+        if bbox:
+            img_crop = img.crop(bbox)
+        else:
+            img_crop = img
+        novo_caminho = caminho_logo.replace(".png", "_crop.png")
+        img_crop.save(novo_caminho)
+
+        return novo_caminho
+    except Exception as e:
+        print("Erro ao recortar logo:", e)
+        return caminho_logo
+
+@app.get("/relatorio/logs/pdf")
+def relatorio_logs_pdf(request: Request, db: sqlite3.Connection = Depends(get_db)):
+    if "user" not in request.session:
+        return RedirectResponse("/login")
+
+    usuario_uuid = request.session["user"]["uuid"]
+    usuario_nome = request.session["user"]["nome"]
+
+
+    cursor = db.cursor()
+    cursor.execute("""
+        SELECT logs.data, logs.acao, logs.detalhes, usuarios.nome AS usuario_nome
+        FROM logs
+        JOIN usuarios ON logs.usuario_uuid = usuarios.uuid
+        WHERE logs.usuario_uuid = ?
+        ORDER BY logs.data DESC
+    """, (usuario_uuid,))
+    logs = cursor.fetchall()
+
+    buffer_pdf = BytesIO()
+
+    styles = getSampleStyleSheet()
+    style_title = styles["Heading1"]
+    style_normal = styles["Normal"]
+
+    doc = SimpleDocTemplate(
+        buffer_pdf,
+        pagesize=A4,
+        rightMargin=2*cm,
+        leftMargin=2*cm,
+        topMargin=2*cm,
+        bottomMargin=2*cm
+    )
+
+    elementos = []
+
+    # Logo
+    logo_path = os.path.join("static", "images", "logo_colorida.png")
+    logo_path_crop = cortar_logo(logo_path)
+
+    if os.path.exists(logo_path_crop):
+        img_reader = ImageReader(logo_path_crop)
+        iw, ih = img_reader.getSize()
+        largura_desejada = 4 * cm
+        proporcao = largura_desejada / iw
+        altura_ajustada = ih * proporcao
+        img = Image(logo_path_crop, width=largura_desejada, height=altura_ajustada)
+        img.hAlign = 'LEFT'
+        elementos.append(img)
+        elementos.append(Spacer(1, 15))
+
+    # Título
+    elementos.append(Paragraph("<br/>Relatório do estoque", style_title))
+    elementos.append(Spacer(1, 20))
+
+    # Conteúdo
+    for row in logs:
+        data = row["data"] or ""
+        usuario_nome = row["usuario_nome"] or ""
+        acao = row["acao"] or ""
+        detalhes_raw = row["detalhes"] or "-"
+        detalhes_html = detalhes_raw.replace("|", "<br/>")
+
+        texto = (
+            f"<b>Data:</b> {data}<br/>"
+            f"<b>Usuário:</b> {usuario_nome}<br/>"
+            f"<b>Ação:</b> {acao}<br/>"
+            f"<b>Detalhes:</b><br/>{detalhes_html}<br/><br/>"
+        )
+
+        elementos.append(Paragraph(texto, style_normal))
+        elementos.append(Spacer(1, 12))
+
+    doc.build(elementos)
+
+    buffer_pdf.seek(0)
+
+    return StreamingResponse(
+        buffer_pdf,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f"attachment; filename=Relatorio_{usuario_nome}.pdf"
+        }
+    )
+
+
+@app.get("/relatorios", response_class=HTMLResponse)
+def pagina_relatorios(request: Request, db: sqlite3.Connection = Depends(get_db)):
+    if "user" not in request.session:
+        return RedirectResponse("/login")
+
+    usuario_uuid = request.session["user"]["uuid"]
+
+    cursor = db.cursor()
+    cursor.execute("""
+        SELECT logs.data, logs.acao, logs.detalhes, usuarios.nome AS usuario_nome
+        FROM logs
+        JOIN usuarios ON logs.usuario_uuid = usuarios.uuid
+        WHERE logs.usuario_uuid = ?
+        ORDER BY logs.data DESC
+    """, (usuario_uuid,))
+
+    logs = cursor.fetchall()
+
+    return templates.TemplateResponse("relatorios.html", {"request": request, "logs": logs})

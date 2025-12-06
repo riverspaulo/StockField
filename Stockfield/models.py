@@ -93,10 +93,10 @@ def init_db():
             tipo TEXT NOT NULL
         )""")
 
-        if not cursor.fetchone():
-            adm_uuid = str(uuid.uuid4())
-            senha_admin_hash = hashlib.sha256("useradm".encode()).hexdigest()
-            cursor.execute("""INSERT INTO usuarios VALUES (?, "123.456.789-00", "Admin", "admin@admin", ?, "admin")""",(adm_uuid, senha_admin_hash))
+        # if not cursor.fetchone():
+        #     adm_uuid = str(uuid.uuid4())
+        #     senha_admin_hash = hashlib.sha256("useradm".encode()).hexdigest()
+        #     cursor.execute("""INSERT INTO usuarios VALUES (?, "123.456.789-00", "Admin", "admin@admin", ?, "admin")""",(adm_uuid, senha_admin_hash))
         
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS fornecedores (
@@ -146,6 +146,17 @@ def init_db():
             FOREIGN KEY (fornecedor_uuid) REFERENCES fornecedores (uuid),
             FOREIGN KEY (usuario_uuid) REFERENCES usuarios (uuid)
         )""")
+
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS logs (
+            uuid TEXT PRIMARY KEY,
+            usuario_uuid TEXT NOT NULL,
+            acao TEXT NOT NULL,
+            detalhes TEXT,
+            data TEXT NOT NULL,
+            FOREIGN KEY (usuario_uuid) REFERENCES usuarios (uuid)
+        )
+        """)
         
         conn.commit()
 
@@ -429,3 +440,16 @@ def obter_resumo_estoque(db: sqlite3.Connection, usuario_uuid: str):
         "produto_mais_critico": mais_critico_info,
         "total_alertas": estoque_baixo
     }
+
+
+def registrar_log(db, usuario_uuid: str, acao: str, detalhes: str = None):
+    cursor = db.cursor()
+    log_id = str(uuid.uuid4())
+    data = datetime.now().strftime("%Y-%m-%d %H:%M")
+
+    cursor.execute("""
+        INSERT INTO logs (uuid, usuario_uuid, acao, detalhes, data)
+        VALUES (?, ?, ?, ?, ?)
+    """, (log_id, usuario_uuid, acao, detalhes, data))
+
+    db.commit()
