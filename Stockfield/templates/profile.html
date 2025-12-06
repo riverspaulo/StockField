@@ -1,3 +1,4 @@
+<!-- Novo teste -->
 <!DOCTYPE html>
 <html lang="pt-br"> 
 <head>
@@ -319,7 +320,7 @@
                          /* Maior respiro entre as colunas */
             justify-content: space-between;
             width: 1400px;
-            
+            background-color: #2176b8;
             height: 480px;
             border-radius: 10px;        /* Visual mais suave */
             
@@ -332,14 +333,24 @@
             width: 350px;                   /* largura mais elegante e proporcional */
             min-width: 300px;
             height: 460px;
+            background-color: #2e3b0e;
+                             /* leve respiro interno */
+     
+            border-radius: 12px;
+        }
+
+        .info-right {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;                      /* Espaço uniforme entre perfil e calendário */
+            width: 900px;                   /* largura mais elegante e proporcional */
+            min-width: 700px;
+            height: 460px;
+            background-color: #7f8c8d;
                              /* leve respiro interno */
      
             border-radius: 12px;
             
-            
-
-            
-           
         }
 
 
@@ -527,6 +538,65 @@
         .calendar-days div:hover {
             background-color: #d2db94;
         }
+
+        /* CARD DE ALERTAS - segue o mesmo padrão dos info-cards */
+        .alertas-section {
+            background: white;
+            padding: 20px 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-left: 5px solid #3498db;
+            margin-bottom: 20px;
+            width: 710px;
+        }
+
+        /* Cabeçalho interno */
+        .alertas-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        /* Título */
+        .alertas-title {
+            font-size: 1.3rem;
+            margin: 0;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Botão "Ver Produtos" */
+        .btn-ver-alertas {
+            background-color: #3498db;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-ver-alertas:hover {
+            background-color: #2176b8;
+        }
+
+        /* Área interna dos alertas */
+        .alertas-content {
+            background: #f7f9ff;
+            padding: 15px;
+            border-radius: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #e0e7ff;
+        }
+
        
 
         @media (max-width: 768px) {
@@ -823,23 +893,6 @@
                     
                     <div class="profile-info">
 
-                        
-                        <!-- Adicione esta seção após o profile-info -->
-                        <div id="alertasSection" class="alertas-section" style="display: none;">
-                            <div class="alertas-header">
-                                <h3 class="alertas-title">
-                                    <i class="fa-solid fa-bell"></i>
-                                    Alertas de Vencimento
-                                </h3>
-                                <button class="btn-ver-alertas" onclick="window.location.href='/produtos'">
-                                    <i class="fa-solid fa-box"></i>
-                                    Ver Produtos
-                                </button>
-                            </div>
-                            <div class="alertas-content" id="alertasList">
-                                <!-- Alertas serão carregados aqui -->
-                            </div>
-                        </div>
 
                         <div class="info-left">
                             <div class="info-card-perfil">
@@ -865,23 +918,42 @@
                                 </div>
                             </div>
                         </div>
-                        
 
-                        <div class="info-card">
-                            <h3><i class="fa-solid fa-chart-line"></i> Estatísticas Rápidas</h3>
-                            <div class="dashboard-stats">
-                                <div class="stat-card">
-                                    <i class="fa-solid fa-box"></i>
-                                    <div class="stat-number" id="total-produtos">0</div>
-                                    <div class="stat-label">Produtos</div>
-                                </div>
-                                <div class="stat-card">
-                                    <i class="fa-solid fa-truck"></i>
-                                    <div class="stat-number" id="total-fornecedores">0</div>
-                                    <div class="stat-label">Fornecedores</div>
+                        <div class="info-right">
+                            <div class="info-card">
+                                <h3><i class="fa-solid fa-chart-line"></i> Estatísticas Rápidas</h3>
+                                <div class="dashboard-stats">
+                                    <div class="stat-card">
+                                        <i class="fa-solid fa-box"></i>
+                                        <div class="stat-number" id="total-produtos">0</div>
+                                        <div class="stat-label">Produtos</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <i class="fa-solid fa-truck"></i>
+                                        <div class="stat-number" id="total-fornecedores">0</div>
+                                        <div class="stat-label">Fornecedores</div>
+                                    </div>
                                 </div>
                             </div>
+
+                            <div id="alertasSection" class="alertas-section" style="display: none;">
+                                <div class="alertas-header">
+                                    <h3 class="alertas-title">
+                                        <i class="fa-solid fa-bell"></i>
+                                        Alertas de Vencimento
+                                    </h3>
+                                    <button class="btn-ver-alertas" onclick="window.location.href='/produtos'">
+                                        <i class="fa-solid fa-box"></i>
+                                        Ver Produtos
+                                    </button>
+                                </div>
+                                <div class="alertas-content" id="alertasList">
+                                    <!-- Alertas serão carregados aqui -->
+                                </div>
+                            </div>
+
                         </div>
+                        
                     </div>
 
                 </div>
