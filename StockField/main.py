@@ -13,15 +13,9 @@ import sqlite3
 import hashlib
 import os
 from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.lib.units import cm
-from PIL import Image as PILImage
 from reportlab.lib.utils import ImageReader
-from io import BytesIO
 
-from models import Produto, Usuario, Fornecedor, Movimento, init_db, get_db, TipoUsuario, TipoMovimento, StatusProduto, registrar_log
+from models import Produto, Usuario, Fornecedor, Movimento, init_db, get_db, TipoUsuario, TipoMovimento, StatusProduto, registrar_log, cortar_logo, gerar_pdf_logs
 
 app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key="chave_super_secreta")
@@ -1552,23 +1546,6 @@ def obter_produto_admin(
     return produto_dict
 
 
-# Função para recortar a imagem da logo
-def cortar_logo(caminho_logo):
-    """Remove automaticamente bordas vazias / transparentes da logo."""
-    try:
-        img = PILImage.open(caminho_logo)
-        bbox = img.getbbox()
-        if bbox:
-            img_crop = img.crop(bbox)
-        else:
-            img_crop = img
-        novo_caminho = caminho_logo.replace(".png", "_crop.png")
-        img_crop.save(novo_caminho)
-
-        return novo_caminho
-    except Exception as e:
-        print("Erro ao recortar logo:", e)
-        return caminho_logo
 
 @app.get("/relatorio/logs/pdf")
 def relatorio_logs_pdf(request: Request, db: sqlite3.Connection = Depends(get_db)):
@@ -1576,10 +1553,11 @@ def relatorio_logs_pdf(request: Request, db: sqlite3.Connection = Depends(get_db
         return RedirectResponse("/login")
 
     usuario_uuid = request.session["user"]["uuid"]
-    usuario_nome = request.session["user"]["nome"]
+    usuario_nome = request.session["user"]["nome"].replace(" ", "_")
 
 
     cursor = db.cursor()
+
     cursor.execute("""
         SELECT logs.data, logs.acao, logs.detalhes, usuarios.nome AS usuario_nome
         FROM logs
@@ -1589,63 +1567,46 @@ def relatorio_logs_pdf(request: Request, db: sqlite3.Connection = Depends(get_db
     """, (usuario_uuid,))
     logs = cursor.fetchall()
 
-    buffer_pdf = BytesIO()
+    buffer_pdf = gerar_pdf_logs(logs, usuario_nome)
 
-    styles = getSampleStyleSheet()
-    style_title = styles["Heading1"]
-    style_normal = styles["Normal"]
-
-    doc = SimpleDocTemplate(
+    return StreamingResponse(
         buffer_pdf,
-        pagesize=A4,
-        rightMargin=2*cm,
-        leftMargin=2*cm,
-        topMargin=2*cm,
-        bottomMargin=2*cm
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="Relatorio_{usuario_nome}.pdf"'
+        }
     )
 
-    elementos = []
 
-    # Logo
-    logo_path = os.path.join("static", "images", "logo_colorida.png")
-    logo_path_crop = cortar_logo(logo_path)
+@app.get("/api/admin/relatorio/logs/pdf/{usuario_uuid}")
+def relatorio_logs_pdf_admin(usuario_uuid: str, request: Request, db: sqlite3.Connection = Depends(get_db)):
+    if "user" not in request.session:
+        return RedirectResponse("/login")
+    
+    if request.session["user"]["tipo"] != "admin":
+        raise HTTPException(status_code=403, detail="Apenas administradores podem acessar este relatório.")
 
-    if os.path.exists(logo_path_crop):
-        img_reader = ImageReader(logo_path_crop)
-        iw, ih = img_reader.getSize()
-        largura_desejada = 4 * cm
-        proporcao = largura_desejada / iw
-        altura_ajustada = ih * proporcao
-        img = Image(logo_path_crop, width=largura_desejada, height=altura_ajustada)
-        img.hAlign = 'LEFT'
-        elementos.append(img)
-        elementos.append(Spacer(1, 15))
+    cursor = db.cursor()
 
-    # Título
-    elementos.append(Paragraph("<br/>Relatório do estoque", style_title))
-    elementos.append(Spacer(1, 20))
+    # Buscar todos os logs do usuário escolhido
+    cursor.execute("""
+        SELECT logs.data, logs.acao, logs.detalhes, usuarios.nome AS usuario_nome
+        FROM logs
+        JOIN usuarios ON logs.usuario_uuid = usuarios.uuid
+        WHERE logs.usuario_uuid = ?
+        ORDER BY logs.data DESC
+    """, (usuario_uuid,))
+    logs = cursor.fetchall()
 
-    # Conteúdo
-    for row in logs:
-        data = row["data"] or ""
-        usuario_nome = row["usuario_nome"] or ""
-        acao = row["acao"] or ""
-        detalhes_raw = row["detalhes"] or "-"
-        detalhes_html = detalhes_raw.replace("|", "<br/>")
+    cursor.execute("SELECT nome FROM usuarios WHERE uuid = ?", (usuario_uuid,))
+    row = cursor.fetchone()
 
-        texto = (
-            f"<b>Data:</b> {data}<br/>"
-            f"<b>Usuário:</b> {usuario_nome}<br/>"
-            f"<b>Ação:</b> {acao}<br/>"
-            f"<b>Detalhes:</b><br/>{detalhes_html}<br/><br/>"
-        )
+    if not row:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado.")
 
-        elementos.append(Paragraph(texto, style_normal))
-        elementos.append(Spacer(1, 12))
+    usuario_nome = row["nome"].replace(" ", "_")
 
-    doc.build(elementos)
-
-    buffer_pdf.seek(0)
+    buffer_pdf = gerar_pdf_logs(logs, usuario_nome)
 
     return StreamingResponse(
         buffer_pdf,
@@ -1654,6 +1615,8 @@ def relatorio_logs_pdf(request: Request, db: sqlite3.Connection = Depends(get_db
             "Content-Disposition": f"attachment; filename=Relatorio_{usuario_nome}.pdf"
         }
     )
+
+
 
 
 @app.get("/relatorios", response_class=HTMLResponse)
