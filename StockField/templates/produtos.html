@@ -1179,7 +1179,6 @@
             <div id="flash-messages" class="flash-messages">
             </div>
 
-            <!-- Barra de alertas de vencimento -->
             <div id="alertasContainer" class="alertas-bar" style="display: none;">
                 <div class="alertas-info">
                     <i class="fa-solid fa-exclamation-triangle"></i>
@@ -1192,7 +1191,6 @@
                 </button>
             </div>
 
-            <!-- Barra de alertas de estoque baixo -->
             <div id="estoqueContainer" class="alertas-bar estoque" style="display: none;">
                 <div class="alertas-info">
                     <i class="fa-solid fa-boxes"></i>
@@ -1227,7 +1225,6 @@
         </div>
     </main>
 
-    <!-- Modal para Cadastro/Edição -->
     <div id="produtoModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -1239,8 +1236,8 @@
                     <input type="hidden" id="produtoUuid">
                     
                     <div class="form-group">
-                        <label for="tipoProduto">Categoria</label>
-                        <select class="form-control" id="tipoProduto" required onchange="toggleCamposDefensivo()">
+                        <label for="categoria">Categoria *</label>
+                        <select class="form-control" id="categoria" required onchange="toggleCamposDefensivo()">
                             <option value="alimento">Alimento/Grão</option>
                             <option value="defensivo">Defensivo Agrícola</option>
                             <option value="outros">Outros</option>
@@ -1254,7 +1251,6 @@
                         </div>
                     </div>
 
-                    <!-- Seção de Defensivos Agrícolas -->
                     <div id="secaoDefensivos" class="secao-defensivos" style="display: none;">
                         <h4>
                             <i class="fa-solid fa-flask-vial"></i> Informações do Defensivo Agrícola
@@ -1375,7 +1371,6 @@
             const closeSidebarBtn = document.getElementById('close-sidebar');
             const headerLogo = document.getElementById('header-logo');
             
-            // Carregar dados iniciais
             carregarProdutos();
             carregarFornecedores();
             
@@ -1409,7 +1404,6 @@
             document.getElementById('searchInput').addEventListener('input', filtrarProdutos);
             document.getElementById('produtoForm').addEventListener('submit', salvarProduto);
             
-            // Configurar intervalo para atualizações automáticas
             setInterval(async () => {
                 try {
                     await carregarAlertas();
@@ -1441,10 +1435,10 @@
 
         // Função para mostrar/ocultar campos de defensivo
         function toggleCamposDefensivo() {
-            const tipoProduto = document.getElementById('tipoProduto').value;
+            const categoria = document.getElementById('categoria').value;
             const secaoDefensivos = document.getElementById('secaoDefensivos');
             
-            if (tipoProduto === 'defensivo') {
+            if (categoria === 'defensivo') {
                 secaoDefensivos.style.display = 'block';
                 document.getElementById('numeroAnvisa').required = true;
                 document.getElementById('tipoToxico').required = true;
@@ -1587,13 +1581,11 @@
             }
 
             container.innerHTML = listaProdutos.map(produto => {
-                // Determinar classe do card baseada no tipo
                 let cardClass = 'produto-card';
-                if (produto.tipo_produto === 'defensivo') {
+                if (produto.categoria === 'defensivo') {
                     cardClass += ' defensivo';
                 }
 
-                // Verificar alertas
                 const alertaVencimento = alertasAtivos.find(a => a.uuid === produto.uuid);
                 const alertaEstoque = alertasEstoque.find(a => a.uuid === produto.uuid);
                 
@@ -1620,8 +1612,7 @@
                     }
                 }
 
-                // Badges
-                const tipoBadge = produto.tipo_produto === 'defensivo' 
+                const tipoBadge = produto.categoria === 'defensivo' 
                     ? `<span class="defensivo-badge">DEFENSIVO</span>`
                     : '';
 
@@ -1629,8 +1620,7 @@
                     ? '<span class="alerta-badge"><i class="fa-solid fa-exclamation"></i></span>' 
                     : '';
 
-                // Informações específicas para defensivos
-                const infoDefensivo = produto.tipo_produto === 'defensivo' ? `
+                const infoDefensivo = produto.categoria === 'defensivo' ? `
                     <div class="info-item warning">
                         <i class="fa-solid fa-id-card"></i>
                         <span>ANVISA: ${produto.numero_anvisa || 'Não informado'}</span>
@@ -1663,7 +1653,8 @@
                         <div class="produto-info">
                             <div class="info-item">
                                 <i class="fa-solid fa-tag"></i>
-                                <span>${produto.categoria}</span>
+                                <span>Categoria: ${produto.categoria === 'alimento' ? 'Alimento/Grão' : 
+                                         produto.categoria === 'defensivo' ? 'Defensivo Agrícola' : 'Outros'}</span>
                             </div>
                             ${infoDefensivo}
                             <div class="info-item">
@@ -1703,7 +1694,6 @@
             const termo = document.getElementById('searchInput').value.toLowerCase();
             const produtosFiltrados = produtos.filter(produto =>
                 produto.nome.toLowerCase().includes(termo) ||
-                produto.categoria.toLowerCase().includes(termo) ||
                 produto.descricao?.toLowerCase().includes(termo) ||
                 produto.localizacao?.toLowerCase().includes(termo)
             );
@@ -1782,13 +1772,13 @@
             }
         }
 
-        // Modal functions
+        // Modal
         function abrirModalCadastro() {
             produtoEditando = null;
             document.getElementById('modalTitle').textContent = 'Novo Produto';
             document.getElementById('produtoForm').reset();
             document.getElementById('produtoUuid').value = '';
-            document.getElementById('tipoProduto').value = 'alimento';
+            document.getElementById('categoria').value = 'alimento';
             toggleCamposDefensivo();
             
             document.getElementById('produtoModal').style.display = 'block';
@@ -1818,7 +1808,7 @@
                 document.getElementById('produtoUuid').value = produto.uuid;
                 document.getElementById('nome').value = produto.nome;
                 document.getElementById('descricao').value = produto.descricao || '';
-                document.getElementById('categoria').value = produto.categoria;
+                document.getElementById('categoria').value = produto.categoria || 'alimento';
                 document.getElementById('quantidade').value = produto.quantidade;
                 document.getElementById('preco').value = produto.preco_unitario || '';
                 document.getElementById('dataValidade').value = produto.data_validade || '';
@@ -1827,7 +1817,6 @@
                 document.getElementById('localizacao').value = produto.localizacao || '';
                 document.getElementById('status').value = produto.status;
                 document.getElementById('estoqueMinimo').value = produto.estoque_minimo || 0;
-                document.getElementById('tipoProduto').value = produto.tipo_produto || 'alimento';
                 document.getElementById('numeroAnvisa').value = produto.numero_anvisa || '';
                 document.getElementById('tipoToxico').value = produto.tipo_toxico || '';
                 document.getElementById('cuidadosArmazenamento').value = produto.cuidados_armazenamento || '';
@@ -1846,17 +1835,16 @@
             
             const produtoData = {
                 nome: document.getElementById('nome').value,
-                estoque_minimo: parseInt(document.getElementById('estoqueMinimo').value),
                 descricao: document.getElementById('descricao').value,
                 categoria: document.getElementById('categoria').value,
                 quantidade: parseInt(document.getElementById('quantidade').value),
+                estoque_minimo: parseInt(document.getElementById('estoqueMinimo').value),
                 preco_unitario: document.getElementById('preco').value ? parseFloat(document.getElementById('preco').value) : null,
                 data_validade: document.getElementById('dataValidade').value || null,
                 lote: document.getElementById('lote').value,
                 fornecedor_uuid: document.getElementById('fornecedorUuid').value,
                 localizacao: document.getElementById('localizacao').value,
                 status: document.getElementById('status').value,
-                tipo_produto: document.getElementById('tipoProduto').value,
                 numero_anvisa: document.getElementById('numeroAnvisa').value || null,
                 tipo_toxico: document.getElementById('tipoToxico').value || null,
                 cuidados_armazenamento: document.getElementById('cuidadosArmazenamento').value || null
@@ -1895,7 +1883,6 @@
             }
         }
 
-        // Excluir produto
         function confirmarExclusao(uuid, nome) {
             if (confirm(`Tem certeza que deseja excluir o produto "${nome}"?`)) {
                 excluirProduto(uuid);
@@ -1940,7 +1927,6 @@
             }, 5000);
         }
 
-        // Event listeners
         window.onclick = function(event) {
             const modal = document.getElementById('produtoModal');
             if (event.target === modal) {
