@@ -1681,26 +1681,6 @@ def relatorio_logs_pdf_admin(usuario_uuid: str, request: Request, db: sqlite3.Co
     )
 
 
-# @app.get("/relatorios", response_class=HTMLResponse)
-# def pagina_relatorios(request: Request, db: sqlite3.Connection = Depends(get_db)):
-#     if "user" not in request.session:
-#         return RedirectResponse("/login")
-
-#     usuario_uuid = request.session["user"]["uuid"]
-
-#     cursor = db.cursor()
-#     cursor.execute("""
-#         SELECT logs.data, logs.acao, logs.detalhes, usuarios.nome AS usuario_nome
-#         FROM logs
-#         JOIN usuarios ON logs.usuario_uuid = usuarios.uuid
-#         WHERE logs.usuario_uuid = ?
-#         ORDER BY logs.data DESC
-#     """, (usuario_uuid,))
-
-#     logs = cursor.fetchall()
-
-#     return templates.TemplateResponse("relatorios.html", {"request": request, "logs": logs})
-
 
 @app.get("/api/debug/estatisticas")
 def debug_estatisticas(request:Request, db: sqlite3.Connection = Depends(get_db)):
