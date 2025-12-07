@@ -7,12 +7,13 @@ from pydantic import BaseModel
 import os
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Table, TableStyle
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import cm
 from PIL import Image as PILImage
 from reportlab.lib.utils import ImageReader
 from io import BytesIO
+from reportlab.lib import colors
 
 DATABASE_URL = "./stockfield.db"
 
@@ -488,20 +489,45 @@ def cortar_logo(caminho_logo):
         print("Erro ao recortar logo:", e)
         return caminho_logo
 
+
+
 def gerar_pdf_logs(logs, usuario_nome):
     buffer_pdf = BytesIO()
 
+    # Styles
     styles = getSampleStyleSheet()
-    style_title = styles["Heading1"]
-    style_normal = styles["Normal"]
+    style_title = ParagraphStyle(
+        name="TituloRelatorio",
+        fontSize=20,
+        leading=26,
+        textColor=colors.HexColor("#7b9b34"),
+        spaceAfter=20,
+    )
+    style_normal = ParagraphStyle(
+        "normal_wrap",
+        parent=styles["Normal"],
+        fontName="Helvetica",
+        fontSize=9,
+        leading=11,
+    )
+    style_header = ParagraphStyle(
+        "header",
+        parent=styles["Normal"],
+        fontName="Helvetica-Bold",
+        fontSize=10,
+        alignment=1,
+        textColor=colors.white
+    )
 
+    # Documento
+    margin = 2 * cm
     doc = SimpleDocTemplate(
         buffer_pdf,
         pagesize=A4,
-        rightMargin=2*cm,
-        leftMargin=2*cm,
-        topMargin=2*cm,
-        bottomMargin=2*cm
+        rightMargin=margin,
+        leftMargin=margin,
+        topMargin=margin,
+        bottomMargin=margin
     )
 
     elementos = []
@@ -513,37 +539,97 @@ def gerar_pdf_logs(logs, usuario_nome):
     if os.path.exists(logo_path_crop):
         img_reader = ImageReader(logo_path_crop)
         iw, ih = img_reader.getSize()
-        largura_desejada = 4 * cm
-        proporcao = largura_desejada / iw
-        altura_ajustada = ih * proporcao
-        img = Image(logo_path_crop, width=largura_desejada, height=altura_ajustada)
+        largura = 5 * cm
+        proporcao = largura / iw
+        altura = ih * proporcao
+        img = Image(logo_path_crop, width=largura, height=altura)
         img.hAlign = 'LEFT'
         elementos.append(img)
-        elementos.append(Spacer(1, 15))
+        elementos.append(Spacer(1, 12))
 
     # Título
-    elementos.append(Paragraph("<br/>Relatório do estoque", style_title))
-    elementos.append(Spacer(1, 20))
+    elementos.append(Paragraph("<br/>Relatório do Estoque", style_title))
+    elementos.append(Spacer(1, 12))
 
-    # Conteúdo
+    header = [
+        Paragraph("Data", style_header),
+        Paragraph("Usuário", style_header),
+        Paragraph("Ação", style_header),
+        Paragraph("Detalhes", style_header)
+    ]
+
+    tabela_dados = [header]
+
     for row in logs:
-        data = row["data"] or ""
+        data_raw = row["data"] or ""
         usuario = row["usuario_nome"] or ""
         acao = row["acao"] or ""
         detalhes_raw = row["detalhes"] or "-"
-        detalhes_html = detalhes_raw.replace("|", "<br/>")
 
-        texto = (
-            f"<b>Data:</b> {data}<br/>"
-            f"<b>Usuário:</b> {usuario}<br/>"
-            f"<b>Ação:</b> {acao}<br/>"
-            f"<b>Detalhes:</b><br/>{detalhes_html}<br/><br/>"
-        )
+        linhas = detalhes_raw.split("|")
+        detalhes_formatado = ""
+        for linha in linhas:
+            if ":" in linha:
+                chave, valor = linha.split(":", 1)
+                detalhes_formatado += f"<b>{chave.strip()}:</b> {valor.strip()}<br/>"
+            else:
+                detalhes_formatado += linha.strip() + "<br/>"
 
-        elementos.append(Paragraph(texto, style_normal))
-        elementos.append(Spacer(1, 12))
+        tabela_dados.append([
+            Paragraph(data_raw, style_normal),
+            Paragraph(usuario, style_normal),
+            Paragraph(acao, style_normal),
+            Paragraph(detalhes_formatado, style_normal)
+        ])
+
+
+    page_width, page_height = A4
+    usable_width = page_width - (2 * margin)
+
+    col_perc = [0.20, 0.25, 0.20, 0.35]
+    colWidths = [usable_width * p for p in col_perc]
+
+    total = sum(colWidths)
+    if total > usable_width:
+        diff = total - usable_width
+        colWidths[-1] -= diff
+
+    tabela = Table(tabela_dados, colWidths=colWidths, repeatRows=1)
+
+    # Estilo da tabela
+    tabela.setStyle(TableStyle([
+        # Cabeçalho
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#96bd3e")),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('ALIGN', (0,0), (-1,0), 'CENTER'),
+        ('VALIGN', (0,0), (-1,0), 'MIDDLE'),
+        ('FONTSIZE', (0, 0), (-1, 0), 11),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
+        ('TOPPADDING', (0, 0), (-1, 0), 10),
+
+        # Corpo
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 9),
+        ('TEXTCOLOR', (0, 1), (-1, -1), colors.HexColor("#1C1C1C")),
+        ('VALIGN', (0, 1), (-1, -1), 'TOP'),
+
+        # Padding interno
+        ('LEFTPADDING', (0, 1), (-1, -1), 6),
+        ('RIGHTPADDING', (0, 1), (-1, -1), 6),
+        ('TOPPADDING', (0, 1), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
+
+        # Linhas alternadas
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.whitesmoke, colors.HexColor("#F8F9F9")]),
+
+        # Bordas suaves
+        ('GRID', (0, 0), (-1, -1), 0.25, colors.lightgrey),
+    ]))
+
+    elementos.append(tabela)
 
     doc.build(elementos)
     buffer_pdf.seek(0)
-
     return buffer_pdf
+

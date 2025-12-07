@@ -417,7 +417,7 @@ def registrar_entrada(movimento: Movimento, request: Request, db: sqlite3.Connec
     f"Fornecedor: {fornecedor['nome']} | "
     f"Data: {movimento.data.isoformat()}"
 )
-    registrar_log(db, usuario_uuid, "Entrada de estoque", detalhes)
+    registrar_log(db, usuario_uuid, "Entrada de Estoque", detalhes)
 
     return movimento
 
@@ -485,7 +485,7 @@ def registrar_saida(movimento: Movimento, request: Request, db: sqlite3.Connecti
         f"Quantidade: -{movimento.quantidade} unidades | "
         f"Data: {movimento.data.isoformat()}"
     )
-    registrar_log(db, usuario_uuid, "Saída de estoque", detalhes)
+    registrar_log(db, usuario_uuid, "Saída de Estoque", detalhes)
 
     return movimento
 
@@ -559,7 +559,7 @@ def cadastrar_produto(request: Request, produto: Produto, db: sqlite3.Connection
         f"Fornecedor: {fornecedor['nome']} | "
         f"Data de validade: {produto.data_validade.isoformat()}"
     )
-    registrar_log(db, usuario_uuid, "Novo Produto cadastrado", detalhes)
+    registrar_log(db, usuario_uuid, "Novo Produto Cadastrado", detalhes)
     return produto
 
 
@@ -597,7 +597,7 @@ def cadastrar_fornecedor(request:Request, fornecedor: Fornecedor, db: sqlite3.Co
         f"UUID: {fornecedor.uuid} | "
         f"Nome: {fornecedor.nome} | "
     )
-    registrar_log(db, usuario_uuid, "Novo fornecedor cadastrado", detalhes)
+    registrar_log(db, usuario_uuid, "Novo Fornecedor Cadastrado", detalhes)
     return fornecedor
 
 @app.get("/fornecedores_admin", response_class=HTMLResponse)
@@ -659,7 +659,7 @@ def deletar_produto(request:Request, uuid: str, db: sqlite3.Connection = Depends
         f"UUID: {produto["uuid"]} | "
         f"Nome: {produto["nome"]} | "
     )
-    registrar_log(db, usuario_uuid, "Produto deletado", detalhes)
+    registrar_log(db, usuario_uuid, "Produto Deletado", detalhes)
     return {"message": "Produto deletado com sucesso"}
 
 @app.get("/fornecedores/", response_model=List[Fornecedor])
@@ -701,10 +701,12 @@ def atualizar_fornecedor(uuid: str, fornecedor: Fornecedor, db: sqlite3.Connecti
     return fornecedor
 
 @app.delete("/fornecedores/{uuid}", response_model=dict)
-def deletar_fornecedor(uuid: str, db: sqlite3.Connection = Depends(get_db)):
+def deletar_fornecedor(request:Request, uuid: str, db: sqlite3.Connection = Depends(get_db)):
     cursor = db.cursor()
     cursor.execute("SELECT * FROM fornecedores WHERE uuid = ?", (uuid,))
-    if not cursor.fetchone():
+    fornecedor = cursor.fetchone()
+    usuario_uuid = request.session["user"]["uuid"]
+    if not fornecedor:
         raise HTTPException(status_code=404, detail="Fornecedor não encontrado")
    
     cursor.execute("SELECT * FROM produtos WHERE fornecedor_uuid = ?", (uuid,))
@@ -713,6 +715,12 @@ def deletar_fornecedor(uuid: str, db: sqlite3.Connection = Depends(get_db)):
     
     cursor.execute("DELETE FROM fornecedores WHERE uuid = ?", (uuid,))
     db.commit()
+    # Registrar log
+    detalhes = (
+        f"UUID: {fornecedor["uuid"]} | "
+        f"Nome: {fornecedor["nome"]} | "
+    )
+    registrar_log(db, usuario_uuid, "Fornecedor Deletado", detalhes)
     return {"message": "Fornecedor deletado com sucesso"}
 
 
