@@ -667,13 +667,69 @@ def deletar_produto(request:Request, uuid: str, db: sqlite3.Connection = Depends
     registrar_log(db, usuario_uuid, "Produto Deletado", detalhes)
     return {"message": "Produto deletado com sucesso"}
 
+# @app.get("/fornecedores/", response_model=List[Fornecedor])
+# def listar_fornecedores(request:Request, db: sqlite3.Connection = Depends(get_db)):
+#     cursor = db.cursor()
+#     usuario_uuid = request.session["user"]["uuid"] 
+#     cursor.execute("SELECT * FROM fornecedores WHERE usuario_uuid = ?", (usuario_uuid,))
+#     fornecedores = [Fornecedor(**dict(row)) for row in cursor.fetchall()]
+#     return fornecedores
+
 @app.get("/fornecedores/", response_model=List[Fornecedor])
-def listar_fornecedores(request:Request, db: sqlite3.Connection = Depends(get_db)):
+def listar_fornecedores(request: Request, db: sqlite3.Connection = Depends(get_db)):
     cursor = db.cursor()
     usuario_uuid = request.session["user"]["uuid"] 
-    cursor.execute("SELECT * FROM fornecedores WHERE usuario_uuid = ?", (usuario_uuid,))
-    fornecedores = [Fornecedor(**dict(row)) for row in cursor.fetchall()]
-    return fornecedores
+    
+    # Query aprimorada para incluir estatísticas detalhadas
+    cursor.execute("""
+        SELECT 
+            f.*,
+            COUNT(DISTINCT p.uuid) as produtos_count,
+            COUNT(DISTINCT m.uuid) as entradas_count,
+            COUNT(DISTINCT CASE WHEN m.tipo = 'entrada' THEN m.uuid END) as total_entradas,
+            COUNT(DISTINCT CASE WHEN m.tipo = 'saida' THEN m.uuid END) as total_saidas,
+            COALESCE(SUM(CASE WHEN m.tipo = 'entrada' THEN m.quantidade ELSE 0 END), 0) as quantidade_total_entradas,
+            COALESCE(SUM(CASE WHEN m.tipo = 'saida' THEN m.quantidade ELSE 0 END), 0) as quantidade_total_saidas
+        FROM fornecedores f
+        LEFT JOIN produtos p ON f.uuid = p.fornecedor_uuid AND p.usuario_uuid = f.usuario_uuid
+        LEFT JOIN movimentos m ON f.uuid = m.fornecedor_uuid AND m.usuario_uuid = f.usuario_uuid
+        WHERE f.usuario_uuid = ?
+        GROUP BY f.uuid
+        ORDER BY f.nome
+    """, (usuario_uuid,))
+    
+    fornecedores_com_stats = []
+    for row in cursor.fetchall():
+        fornecedor_dict = dict(row)
+        
+        # Obter lista de produtos deste fornecedor
+        cursor.execute("""
+            SELECT uuid, nome, quantidade, status, data_validade, lote
+            FROM produtos 
+            WHERE fornecedor_uuid = ? AND usuario_uuid = ?
+            ORDER BY nome
+        """, (fornecedor_dict["uuid"], usuario_uuid))
+        produtos = cursor.fetchall()
+        
+        # Obter lista de movimentos deste fornecedor
+        cursor.execute("""
+            SELECT m.uuid, m.tipo, m.quantidade, m.data, p.nome as produto_nome
+            FROM movimentos m
+            LEFT JOIN produtos p ON m.produto_uuid = p.uuid
+            WHERE m.fornecedor_uuid = ? AND m.usuario_uuid = ?
+            ORDER BY m.data DESC
+            LIMIT 10
+        """, (fornecedor_dict["uuid"], usuario_uuid))
+        movimentos = cursor.fetchall()
+        
+        # Adicionar dados detalhados
+        fornecedor_dict["produtos_detalhados"] = [dict(produto) for produto in produtos]
+        fornecedor_dict["movimentos_detalhados"] = [dict(movimento) for movimento in movimentos]
+        fornecedor_dict["quantidade_produtos"] = len(produtos)
+        
+        fornecedores_com_stats.append(fornecedor_dict)
+    
+    return fornecedores_com_stats
 
 
 @app.get("/fornecedores", response_class=HTMLResponse)
@@ -1771,3 +1827,4 @@ def listar_fornecedores_detalhados_admin(
     fornecedores = cursor.fetchall()
     
     return [dict(fornecedor) for fornecedor in fornecedores]
+
