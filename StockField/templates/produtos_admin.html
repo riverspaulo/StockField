@@ -1200,13 +1200,23 @@
 
         async function carregarEstatisticas() {
             try {
-                const response = await fetch('/api/admin/produtos/estatisticas');
+                console.log('Carregando estatísticas...');
+                const response = await fetch('/api/admin/produtos/estatisticas', {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include'  // ADICIONE ESTA LINHA
+                });
+                
                 if (response.ok) {
                     const data = await response.json();
+                    console.log('Estatísticas carregadas:', data);
                     document.getElementById('total-produtos').textContent = data.total_produtos || 0;
                     document.getElementById('produtos-a-vencer').textContent = data.produtos_a_vencer || 0;
                     document.getElementById('produtos-vencidos').textContent = data.produtos_vencidos || 0;
                     document.getElementById('produtos-esgotados').textContent = data.produtos_esgotados || 0;
+                } else {
+                    console.error('Erro ao carregar estatísticas:', response.status);
                 }
             } catch (error) {
                 console.error('Erro ao carregar estatísticas:', error);
@@ -1216,10 +1226,23 @@
 
         async function carregarProdutos() {
             try {
-                const response = await fetch('/api/admin/produtos');
-                produtos = await response.json();
-                produtosFiltrados = [...produtos];
-                renderizarProdutos(produtos);
+                console.log('Carregando produtos...');
+                const response = await fetch('/api/admin/produtos', {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include'  // ADICIONE ESTA LINHA
+                });
+                
+                if (response.ok) {
+                    produtos = await response.json();
+                    console.log('Produtos carregados:', produtos.length);
+                    produtosFiltrados = [...produtos];
+                    renderizarProdutos(produtos);
+                } else {
+                    console.error('Erro ao carregar produtos:', response.status);
+                    mostrarMensagem('Erro ao carregar produtos', 'error');
+                }
             } catch (error) {
                 console.error('Erro ao carregar produtos:', error);
                 document.getElementById('produtos-container').innerHTML = `
@@ -1324,7 +1347,12 @@
 
         async function verDetalhes(uuid) {
             try {
-                const response = await fetch(`/api/admin/produtos/${uuid}`);
+                const response = await fetch(`/api/admin/produtos/${uuid}`,{
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include'  // ADICIONE ESTA LINHA
+                });
                 if (response.ok) {
                     const produto = await response.json();
                     const validade = produto.data_validade ? 
@@ -1448,7 +1476,11 @@
         function excluirProduto(uuid, nome) {
             if (confirm(`Tem certeza que deseja excluir o produto "${nome}"?`)) {
                 fetch(`/api/admin/produtos/${uuid}`, {
-                    method: 'DELETE'
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include'  // ADICIONE ESTA LINHA
                 })
                 .then(response => {
                     if (response.ok) {
