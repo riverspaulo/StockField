@@ -1,85 +1,118 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" href="/static/css/log_cad.css">
-    <title>Login</title>
+    <title>Login - StockField</title>
+    <style>
+        .password-wrapper {
+            position: relative;
+            width: 100%;
+            display: flex;
+            align-items: center;
+        }
+        
+        .password-wrapper input {
+            width: 100%;
+            padding-right: 40px;
+        }
+        
+        .password-wrapper i {
+            position: absolute;
+            right: 12px;
+            cursor: pointer;
+            color: #666;
+            font-size: 16px;
+            background: transparent;
+            z-index: 10;
+        }
+        
+        .btn-entrar {
+            background-color: #96bd3e;
+            color: #fff;
+            font-size: 12px;
+            padding: 10px 30px;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-top: 10px;
+            cursor: pointer;
+            width: auto;
+            min-width: 120px;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .btn-entrar:hover {
+            background-color: #d6db9f;
+        }
+    </style>
 </head>
 
 <body>
-     <div class="container" id="container">
+    <div class="container" id="container">
         <div class="form-container sign-in">
             <form action="{{ url_for('login') }}" method="post">
                 <h1 class="title-h1">Login</h1>
                 <br>
                 <span style="margin-bottom: 15px;">Insira os dados solicitados</span>
                 
-               {% if messages %}
-                    <div class="flash-messages" style="font-family: sans-serif; font-size: 11px; color: #96bd3e;">
-                        {% for msg in messages %}
-                            <div class="flash-message flash-{{ msg.category }}">
-                                 {{ msg.message }}
-                            </div>
-                        {% endfor %}
-                     </div>
-                {% endif %}
-                <br>
-                <input type="text" name="cnpj" placeholder="CNPJ" style="margin-bottom: 10.5px;" required>
-                <div class="password-wrapper">
-                        <input type="password" id="senha" name="senha" placeholder="Senha" required>
-                        <i class="fa-solid fa-eye-slash" id="toggleSenha"></i>
+                {% if messages %}
+                <div class="flash-messages" style="font-family: sans-serif; font-size: 11px; color: #96bd3e;">
+                    {% for msg in messages %}
+                    <div class="flash-message flash-{{ msg.category }}">
+                        {{ msg.message }}
+                    </div>
+                    {% endfor %}
                 </div>
-                <br>
-                <button style="margin-bottom: 10px;">Entrar</button>
+                {% endif %}
                 
-                <a href="{{ url_for('index') }}" style="text-decoration: underline;">Voltar para tela inicial</a>
+                <br>
+                <input type="text" name="cnpj" placeholder="CNPJ" style="margin-bottom: 15px; width: 100%;" required>
+                
+                <div class="password-wrapper" style="width: 100%; margin-bottom: 20px;">
+                    <input type="password" id="senha" name="senha" placeholder="Senha" required style="width: 100%;">
+                    <i class="fa-solid fa-eye-slash" id="toggleSenha"></i>
+                </div>
+                
+                <button type="submit" class="btn-entrar" style="margin-bottom: 15px;">Entrar</button>
+                
+                <a href="{{ url_for('index') }}" style="text-decoration: underline; display: block; text-align: center; margin-top: 15px;">Voltar para tela inicial</a>
             </form>
         </div>
+        
         <div class="toggle-container">
             <div class="toggle">
                 <div class="toggle-panel toggle-right">
                     <div style="margin-top: 90px;">
                         <h1>Olá, bem vindo!</h1>
-                        <p style="color:black;">StockField - Um estoque eficiente </p>
-                    </div> 
-                   <img class="image-index-list" src="/static/images/ezgif.com-animated-gif-maker.gif" alt="Imagem" style="margin-bottom:20px; width:550px; height: auto;">
+                        <p style="color: black; margin-top: 10px;">StockField - Um estoque eficiente</p>
+                    </div>
+                    <img class="image-index-list" src="/static/images/ezgif.com-animated-gif-maker.gif" alt="Imagem" style="margin-bottom: 20px; width: 100%; max-width: 550px; height: auto;">
                 </div>
             </div>
         </div>
     </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Toggle senha no login
             const toggleSenha = document.getElementById('toggleSenha');
             const senhaInput = document.getElementById('senha');
             
             if (toggleSenha && senhaInput) {
                 toggleSenha.addEventListener('click', function() {
                     if (this.classList.contains('fa-eye-slash')) {
-                        senhaInput.setAttribute('type', 'text');
+                        senhaInput.type = 'text';
                         this.classList.remove('fa-eye-slash');
                         this.classList.add('fa-eye');
                     } else {
-                        senhaInput.setAttribute('type', 'password');
-                        this.classList.remove('fa-eye');
-                        this.classList.add('fa-eye-slash');
-                    }
-                });
-            }
-            
-            const toggleConfirmarSenha = document.getElementById('toggleConfirmarSenha');
-            const confirmarSenhaInput = document.getElementById('confirmar_senha');
-            
-            if (toggleConfirmarSenha && confirmarSenhaInput) {
-                toggleConfirmarSenha.addEventListener('click', function() {
-                    if (this.classList.contains('fa-eye-slash')) {
-                        confirmarSenhaInput.setAttribute('type', 'text');
-                        this.classList.remove('fa-eye-slash');
-                        this.classList.add('fa-eye');
-                    } else {
-                        confirmarSenhaInput.setAttribute('type', 'password');
+                        senhaInput.type = 'password';
                         this.classList.remove('fa-eye');
                         this.classList.add('fa-eye-slash');
                     }
@@ -87,7 +120,6 @@
             }
         });
     </script>
-    <script src="/static/js/script.js"></script>
 </body>
 
 </html>
