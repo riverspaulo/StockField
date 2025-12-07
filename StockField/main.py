@@ -1369,6 +1369,7 @@ def logout(request: Request):
     url = request.url_for("login")
     return RedirectResponse(url=url, status_code=303)
 
+
 @app.get("/api/admin/fornecedores")
 def listar_todos_fornecedores_admin(
     request: Request,
@@ -1383,7 +1384,20 @@ def listar_todos_fornecedores_admin(
         raise HTTPException(status_code=403, detail="Acesso restrito a administradores")
     
     cursor = db.cursor()
-    cursor.execute("SELECT * FROM fornecedores ORDER BY nome")
+    
+    # Query atualizada para incluir contagem de produtos
+    cursor.execute("""
+        SELECT 
+            f.*,
+            u.nome as usuario_nome,
+            COUNT(p.uuid) as produtos_count
+        FROM fornecedores f
+        LEFT JOIN usuarios u ON f.usuario_uuid = u.uuid
+        LEFT JOIN produtos p ON f.uuid = p.fornecedor_uuid
+        GROUP BY f.uuid
+        ORDER BY f.nome
+    """)
+    
     fornecedores = cursor.fetchall()
     
     return [dict(fornecedor) for fornecedor in fornecedores]
@@ -1642,3 +1656,118 @@ def debug_estatisticas(db: sqlite3.Connection = Depends(get_db)):
         "total_produtos": total_produtos,
         "debug": "API funcionando"
     }
+
+@app.get("/api/admin/estatisticas")
+def obter_estatisticas_admin(
+    request: Request,
+    db: sqlite3.Connection = Depends(get_db)
+):
+    """Obtém estatísticas gerais do sistema (apenas para administradores)"""
+    if "user" not in request.session:
+        raise HTTPException(status_code=401, detail="Não autorizado")
+    
+    user = request.session["user"]
+    if user.get("tipo") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso restrito a administradores")
+    
+    cursor = db.cursor()
+    
+    # 1. Total de fornecedores
+    cursor.execute("SELECT COUNT(*) as total FROM fornecedores")
+    total_fornecedores = cursor.fetchone()["total"]
+    
+    # 2. Total de produtos fornecidos (todos os produtos do sistema)
+    cursor.execute("SELECT COUNT(*) as total FROM produtos")
+    total_produtos = cursor.fetchone()["total"]
+    
+    # 3. Total de entradas registradas (movimentos do tipo 'entrada')
+    cursor.execute("SELECT COUNT(*) as total FROM movimentos WHERE tipo = 'entrada'")
+    total_entradas = cursor.fetchone()["total"]
+    
+    # 4. Fornecedores ativos (fornecedores que têm produtos vinculados)
+    cursor.execute("""
+        SELECT COUNT(DISTINCT f.uuid) as total 
+        FROM fornecedores f
+        INNER JOIN produtos p ON f.uuid = p.fornecedor_uuid
+    """)
+    fornecedores_ativos = cursor.fetchone()["total"]
+    
+    # Estatísticas adicionais para o frontend
+    # Total de produtos por fornecedor (média)
+    cursor.execute("""
+        SELECT 
+            COUNT(DISTINCT f.uuid) as fornecedores_com_produtos,
+            COUNT(p.uuid) as total_produtos_vinculados
+        FROM fornecedores f
+        LEFT JOIN produtos p ON f.uuid = p.fornecedor_uuid
+    """)
+    stats_produtos = cursor.fetchone()
+    
+    # Total de movimentos por fornecedor
+    cursor.execute("""
+        SELECT 
+            COUNT(DISTINCT f.uuid) as fornecedores_com_movimentos,
+            COUNT(m.uuid) as total_movimentos_vinculados
+        FROM fornecedores f
+        LEFT JOIN produtos p ON f.uuid = p.fornecedor_uuid
+        LEFT JOIN movimentos m ON p.uuid = m.produto_uuid
+        WHERE m.tipo = 'entrada'
+    """)
+    stats_movimentos = cursor.fetchone()
+    
+    return {
+        "total_fornecedores": total_fornecedores,
+        "total_produtos": total_produtos,
+        "total_entradas": total_entradas,
+        "fornecedores_ativos": fornecedores_ativos,
+        "estatisticas_adicionais": {
+            "media_produtos_por_fornecedor": round(
+                stats_produtos["total_produtos_vinculados"] / max(stats_produtos["fornecedores_com_produtos"], 1), 
+                1
+            ) if stats_produtos else 0,
+            "media_movimentos_por_fornecedor": round(
+                stats_movimentos["total_movimentos_vinculados"] / max(stats_movimentos["fornecedores_com_movimentos"], 1), 
+                1
+            ) if stats_movimentos else 0
+        }
+    }
+
+@app.get("/api/admin/fornecedores/detalhados")
+def listar_fornecedores_detalhados_admin(
+    request: Request,
+    db: sqlite3.Connection = Depends(get_db)
+):
+    """Lista todos os fornecedores com estatísticas detalhadas (apenas para administradores)"""
+    if "user" not in request.session:
+        raise HTTPException(status_code=401, detail="Não autorizado")
+    
+    user = request.session["user"]
+    if user.get("tipo") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso restrito a administradores")
+    
+    cursor = db.cursor()
+    
+    # Query para obter fornecedores com contagem de produtos e movimentos
+    cursor.execute("""
+        SELECT 
+            f.uuid,
+            f.nome,
+            f.telefone,
+            f.email,
+            f.usuario_uuid,
+            u.nome as usuario_nome,
+            COUNT(DISTINCT p.uuid) as produtos_count,
+            COUNT(DISTINCT CASE WHEN m.tipo = 'entrada' THEN m.uuid END) as entradas_count,
+            COUNT(DISTINCT CASE WHEN m.tipo = 'saida' THEN m.uuid END) as saidas_count,
+            COUNT(DISTINCT p.usuario_uuid) as usuarios_count
+        FROM fornecedores f
+        LEFT JOIN usuarios u ON f.usuario_uuid = u.uuid
+        LEFT JOIN produtos p ON f.uuid = p.fornecedor_uuid
+        LEFT JOIN movimentos m ON p.uuid = m.produto_uuid
+        GROUP BY f.uuid
+        ORDER BY f.nome
+    """)
+    
+    fornecedores = cursor.fetchall()
+    
+    return [dict(fornecedor) for fornecedor in fornecedores]

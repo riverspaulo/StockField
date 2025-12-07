@@ -1344,7 +1344,6 @@
             }
         }
 
-        // Carregar estatísticas de fornecedores
         async function carregarEstatisticas() {
             try {
                 const response = await fetch('/api/admin/estatisticas', {
@@ -1357,20 +1356,30 @@
                 if (response.ok) {
                     const data = await response.json();
                     
+                    // Atualizar os valores na interface
                     document.getElementById('totalFornecedores').textContent = data.total_fornecedores || 0;
                     document.getElementById('totalProdutos').textContent = data.total_produtos || 0;
                     document.getElementById('totalEntradas').textContent = data.total_entradas || 0;
                     document.getElementById('fornecedoresAtivos').textContent = data.fornecedores_ativos || 0;
                 } else if (response.status === 401) {
                     window.location.href = '/login';
+                } else if (response.status === 403) {
+                    mostrarMensagem('Acesso restrito a administradores', 'error');
                 }
             } catch (error) {
                 console.error('Erro ao carregar estatísticas:', error);
                 mostrarMensagem('Erro ao carregar estatísticas', 'error');
+                
+                // Valores padrão em caso de erro
+                document.getElementById('totalFornecedores').textContent = '0';
+                document.getElementById('totalProdutos').textContent = '0';
+                document.getElementById('totalEntradas').textContent = '0';
+                document.getElementById('fornecedoresAtivos').textContent = '0';
             }
         }
 
-        // Carregar todos os fornecedores
+
+        // Carregar todos os fornecedores com estatísticas
         async function carregarFornecedores() {
             const container = document.getElementById('fornecedoresContainer');
             container.innerHTML = `
@@ -1381,7 +1390,7 @@
             `;
             
             try {
-                const response = await fetch('/api/admin/fornecedores', {
+                const response = await fetch('/api/admin/fornecedores/detalhados', {
                     headers: {
                         'Content-Type': 'application/json'
                     },
@@ -1394,6 +1403,15 @@
                     renderizarFornecedores(fornecedores);
                 } else if (response.status === 401) {
                     window.location.href = '/login';
+                } else if (response.status === 403) {
+                    mostrarMensagem('Acesso restrito a administradores', 'error');
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <h3>Acesso Negado</h3>
+                            <p>Você não tem permissão para acessar esta página.</p>
+                        </div>
+                    `;
                 }
             } catch (error) {
                 console.error('Erro ao carregar fornecedores:', error);
@@ -1407,7 +1425,7 @@
             }
         }
 
-        // Renderizar fornecedores em cards
+ 
         function renderizarFornecedores(fornecedores) {
             const container = document.getElementById('fornecedoresContainer');
             
@@ -1459,6 +1477,12 @@
                             <i class="fas fa-envelope"></i>
                             <span><strong>Email:</strong> ${fornecedor.email}</span>
                         </div>
+                        ${fornecedor.usuario_nome ? `
+                        <div class="info-item">
+                            <i class="fas fa-user"></i>
+                            <span><strong>Criado por:</strong> ${fornecedor.usuario_nome}</span>
+                        </div>
+                        ` : ''}
                     </div>
                     <div class="fornecedor-stats">
                         <div class="stat">
@@ -1470,7 +1494,11 @@
                             <div class="stat-label">Entradas</div>
                         </div>
                         <div class="stat">
-                            <div class="stat-number">${fornecedor.usuarios_count || 0}</div>
+                            <div class="stat-number">${fornecedor.saidas_count || 0}</div>
+                            <div class="stat-label">Saídas</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">${fornecedor.usuarios_count || 1}</div>
                             <div class="stat-label">Usuários</div>
                         </div>
                     </div>
