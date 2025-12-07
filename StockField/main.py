@@ -331,6 +331,10 @@ def pagina_movimentacoes(request: Request):
 
 @app.get("/movimentos/", response_model=List[Movimento])
 def listar_movimentos(request: Request, db: sqlite3.Connection = Depends(get_db)):
+    if "user" not in request.session:
+        flash(request, "Você precisa fazer login para acessar esta página.", "error")
+        url = request.url_for("login")
+        return RedirectResponse(url=url, status_code=303)
     cursor = db.cursor()
     usuario_uuid = request.session["user"]["uuid"]  
     cursor.execute("""
@@ -353,7 +357,11 @@ def listar_movimentos(request: Request, db: sqlite3.Connection = Depends(get_db)
     return movimentos
 
 @app.get("/produtos/{uuid}", response_model=Produto)
-def obter_produto_por_uuid(uuid: str, db: sqlite3.Connection = Depends(get_db)):
+def obter_produto_por_uuid(request:Request, uuid: str, db: sqlite3.Connection = Depends(get_db)):
+    if "user" not in request.session:
+        flash(request, "Você precisa fazer login para acessar esta página.", "error")
+        url = request.url_for("login")
+        return RedirectResponse(url=url, status_code=303)
     cursor = db.cursor()
     cursor.execute("SELECT * FROM produtos WHERE uuid = ?", (uuid,))
     produto = cursor.fetchone()
@@ -368,6 +376,10 @@ def obter_produto_por_uuid(uuid: str, db: sqlite3.Connection = Depends(get_db)):
 #MAIS UMA MATEUSSSSSSSSSS
 @app.post("/movimentos/entrada", response_model=Movimento)
 def registrar_entrada(movimento: Movimento, request: Request, db: sqlite3.Connection = Depends(get_db)):
+    if "user" not in request.session:
+        flash(request, "Você precisa fazer login para acessar esta página.", "error")
+        url = request.url_for("login")
+        return RedirectResponse(url=url, status_code=303)
     cursor = db.cursor()
     usuario_uuid = str(request.session["user"]["uuid"])
     movimento.usuario_uuid = usuario_uuid
@@ -407,7 +419,6 @@ def registrar_entrada(movimento: Movimento, request: Request, db: sqlite3.Connec
     )
 
     from models import verificar_estoque_baixo
-    usuario_uuid = request.session["user"]["uuid"]
     alertas_estoque = verificar_estoque_baixo(db, usuario_uuid)
     
     if alertas_estoque:
@@ -433,6 +444,10 @@ def registrar_entrada(movimento: Movimento, request: Request, db: sqlite3.Connec
 #MATEUSSSSSSSSSSSSSSSSSSSS
 @app.post("/movimentos/saida", response_model=Movimento)
 def registrar_saida(movimento: Movimento, request: Request, db: sqlite3.Connection = Depends(get_db)):
+    if "user" not in request.session:
+        flash(request, "Você precisa fazer login para acessar esta página.", "error")
+        url = request.url_for("login")
+        return RedirectResponse(url=url, status_code=303)
     cursor = db.cursor()
     usuario_uuid = str(request.session["user"]["uuid"])
     cursor.execute("SELECT * FROM produtos WHERE uuid = ? AND usuario_uuid = ?", (movimento.produto_uuid, usuario_uuid))
@@ -474,7 +489,6 @@ def registrar_saida(movimento: Movimento, request: Request, db: sqlite3.Connecti
     )
 
     from models import verificar_estoque_baixo
-    usuario_uuid = request.session["user"]["uuid"]
     alertas_estoque = verificar_estoque_baixo(db, usuario_uuid)
     
     if alertas_estoque:
@@ -511,6 +525,10 @@ def cadastrar_usuario(usuario: Usuario, db: sqlite3.Connection = Depends(get_db)
 
 @app.post("/produtos/", response_model=Produto)
 def cadastrar_produto(request: Request, produto: Produto, db: sqlite3.Connection = Depends(get_db)):
+    if "user" not in request.session:
+        flash(request, "Você precisa fazer login para acessar esta página.", "error")
+        url = request.url_for("login")
+        return RedirectResponse(url=url, status_code=303)
     cursor = db.cursor()
     produto.uuid = str(uuid.uuid4())
     usuario_uuid = request.session["user"]["uuid"]
@@ -589,6 +607,10 @@ def pagina_produtos_admin(request: Request):
 
 @app.post("/fornecedores/", response_model=Fornecedor)
 def cadastrar_fornecedor(request:Request, fornecedor: Fornecedor, db: sqlite3.Connection = Depends(get_db)):
+    if "user" not in request.session:
+        flash(request, "Você precisa fazer login para acessar esta página.", "error")
+        url = request.url_for("login")
+        return RedirectResponse(url=url, status_code=303)
     cursor = db.cursor()
     usuario_uuid = request.session["user"]["uuid"]
     fornecedor.uuid = str(uuid.uuid4())
@@ -626,6 +648,10 @@ def pagina_fornecedores_admin(request: Request):
 
 @app.get("/produtos/", response_model=List[Produto])
 def listar_produtos(request: Request, db: sqlite3.Connection = Depends(get_db)):
+    if "user" not in request.session:
+        flash(request, "Você precisa fazer login para acessar esta página.", "error")
+        url = request.url_for("login")
+        return RedirectResponse(url=url, status_code=303)
     cursor = db.cursor()
     usuario_uuid = request.session["user"]["uuid"] 
     cursor.execute("SELECT * FROM produtos WHERE usuario_uuid = ?", (usuario_uuid,))
@@ -638,7 +664,11 @@ def listar_produtos(request: Request, db: sqlite3.Connection = Depends(get_db)):
     return produtos
 
 @app.get("/produtos/{nome}", response_model=Produto)
-def obter_produto(nome: str, db: sqlite3.Connection = Depends(get_db)):
+def obter_produto(request:Request, nome: str, db: sqlite3.Connection = Depends(get_db)):
+    if "user" not in request.session:
+        flash(request, "Você precisa fazer login para acessar esta página.", "error")
+        url = request.url_for("login")
+        return RedirectResponse(url=url, status_code=303)
     cursor = db.cursor()
     cursor.execute("SELECT * FROM produtos WHERE nome = ?", (nome,))
     produto = cursor.fetchone()
@@ -651,6 +681,10 @@ def obter_produto(nome: str, db: sqlite3.Connection = Depends(get_db)):
 
 @app.delete("/produtos/{uuid}", response_model=dict)
 def deletar_produto(request:Request, uuid: str, db: sqlite3.Connection = Depends(get_db)):
+    if "user" not in request.session:
+        flash(request, "Você precisa fazer login para acessar esta página.", "error")
+        url = request.url_for("login")
+        return RedirectResponse(url=url, status_code=303)
     cursor = db.cursor()
     cursor.execute("SELECT * FROM produtos WHERE uuid = ?", (uuid,))
     produto = cursor.fetchone()
@@ -677,6 +711,10 @@ def deletar_produto(request:Request, uuid: str, db: sqlite3.Connection = Depends
 
 @app.get("/fornecedores/", response_model=List[Fornecedor])
 def listar_fornecedores(request: Request, db: sqlite3.Connection = Depends(get_db)):
+    if "user" not in request.session:
+        flash(request, "Você precisa fazer login para acessar esta página.", "error")
+        url = request.url_for("login")
+        return RedirectResponse(url=url, status_code=303)
     cursor = db.cursor()
     usuario_uuid = request.session["user"]["uuid"] 
     
@@ -746,7 +784,11 @@ def pagina_fornecedores(request: Request):
     })
 
 @app.put("/fornecedores/{uuid}", response_model=Fornecedor)
-def atualizar_fornecedor(uuid: str, fornecedor: Fornecedor, db: sqlite3.Connection = Depends(get_db)):
+def atualizar_fornecedor(request:Request, uuid: str, fornecedor: Fornecedor, db: sqlite3.Connection = Depends(get_db)):
+    if "user" not in request.session:
+        flash(request, "Você precisa fazer login para acessar esta página.", "error")
+        url = request.url_for("login")
+        return RedirectResponse(url=url, status_code=303)
     cursor = db.cursor()
     cursor.execute("SELECT * FROM fornecedores WHERE uuid = ?", (uuid,))
     if not cursor.fetchone():
@@ -763,6 +805,10 @@ def atualizar_fornecedor(uuid: str, fornecedor: Fornecedor, db: sqlite3.Connecti
 
 @app.delete("/fornecedores/{uuid}", response_model=dict)
 def deletar_fornecedor(request:Request, uuid: str, db: sqlite3.Connection = Depends(get_db)):
+    if "user" not in request.session:
+        flash(request, "Você precisa fazer login para acessar esta página.", "error")
+        url = request.url_for("login")
+        return RedirectResponse(url=url, status_code=303)
     cursor = db.cursor()
     cursor.execute("SELECT * FROM fornecedores WHERE uuid = ?", (uuid,))
     fornecedor = cursor.fetchone()
@@ -803,6 +849,10 @@ def pagina_produtos(request: Request):
 #MEXI AQUI TAMBÉM MICKA
 @app.put("/produtos/{uuid}", response_model=Produto)
 def atualizar_produto(uuid: str, produto: Produto, request: Request, db: sqlite3.Connection = Depends(get_db)):
+    if "user" not in request.session:
+        flash(request, "Você precisa fazer login para acessar esta página.", "error")
+        url = request.url_for("login")
+        return RedirectResponse(url=url, status_code=303)
     cursor = db.cursor()
     cursor.execute("SELECT * FROM produtos WHERE uuid = ?", (uuid,))
     produto_existente = cursor.fetchone()
@@ -872,7 +922,11 @@ def forcar_verificacao_alertas(
     }
 
 @app.get("/produtos/editar/{uuid}", response_model=Produto)
-def obter_produto_edicao(uuid: str, db: sqlite3.Connection = Depends(get_db)):
+def obter_produto_edicao(request:Request, uuid: str, db: sqlite3.Connection = Depends(get_db)):
+    if "user" not in request.session:
+        flash(request, "Você precisa fazer login para acessar esta página.", "error")
+        url = request.url_for("login")
+        return RedirectResponse(url=url, status_code=303)
     cursor = db.cursor()
     cursor.execute("SELECT * FROM produtos WHERE uuid = ?", (uuid,))
     produto = cursor.fetchone()
@@ -998,29 +1052,6 @@ def obter_estatisticas_usuarios(
         "total_produtos": total_produtos
     }
 
-@app.get("/api/admin/usuarios/recentes")
-def obter_usuarios_recentes(
-    request: Request,
-    db: sqlite3.Connection = Depends(get_db)
-):
-    """Obtém os últimos usuários cadastrados (apenas para administradores)"""
-    if "user" not in request.session:
-        raise HTTPException(status_code=401, detail="Não autorizado")
-    
-    user = request.session["user"]
-    if user.get("tipo") != "admin":
-        raise HTTPException(status_code=403, detail="Acesso restrito a administradores")
-    
-    cursor = db.cursor()
-    cursor.execute("""
-        SELECT uuid, cnpj, nome, email, tipo 
-        FROM usuarios 
-        ORDER BY rowid DESC 
-        LIMIT 5
-    """)
-    usuarios = cursor.fetchall()
-    
-    return [dict(usuario) for usuario in usuarios]
 
 @app.post("/api/admin/usuarios")
 def criar_usuario_admin(
@@ -1176,26 +1207,16 @@ def deletar_usuario_admin(
     
     return {"message": "Usuário excluído com sucesso"}
 
+
+
 @app.get("/logout")
 def logout(request: Request):
     request.session.clear()
+    response = RedirectResponse(url="/login", status_code=303)
+    response.delete_cookie("access_token")
     flash(request, "Você saiu do sistema.", "info")
-    url = request.url_for("login")
-    return RedirectResponse(url=url, status_code=303)
-
-
-@app.post("/logout")
-async def logout(request: Request):
-    response = RedirectResponse(url="/login", status_code=302)
-    response.delete_cookie(key="access_token")
     return response
 
-
-@app.api_route("/logout", methods=["GET", "POST"])
-async def logout(request: Request):
-    response = RedirectResponse(url="/login", status_code=302)
-    response.delete_cookie(key="access_token")
-    return response
 
 
 @app.get("/api/admin/usuarios")
@@ -1401,7 +1422,6 @@ def deletar_usuario_admin(
     usuario = cursor.fetchone()
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
-    
 
     cursor.execute("SELECT COUNT(*) as total FROM produtos WHERE usuario_uuid = ?", (uuid,))
     total_produtos = cursor.fetchone()["total"]
@@ -1417,13 +1437,6 @@ def deletar_usuario_admin(
     
     return {"message": "Usuário excluído com sucesso"}
 
-
-@app.get("/logout")
-def logout(request: Request):
-    request.session.clear()
-    flash(request, "Você saiu do sistema.", "info")
-    url = request.url_for("login")
-    return RedirectResponse(url=url, status_code=303)
 
 
 @app.get("/api/admin/fornecedores")
@@ -1668,29 +1681,35 @@ def relatorio_logs_pdf_admin(usuario_uuid: str, request: Request, db: sqlite3.Co
     )
 
 
-@app.get("/relatorios", response_class=HTMLResponse)
-def pagina_relatorios(request: Request, db: sqlite3.Connection = Depends(get_db)):
-    if "user" not in request.session:
-        return RedirectResponse("/login")
+# @app.get("/relatorios", response_class=HTMLResponse)
+# def pagina_relatorios(request: Request, db: sqlite3.Connection = Depends(get_db)):
+#     if "user" not in request.session:
+#         return RedirectResponse("/login")
 
-    usuario_uuid = request.session["user"]["uuid"]
+#     usuario_uuid = request.session["user"]["uuid"]
 
-    cursor = db.cursor()
-    cursor.execute("""
-        SELECT logs.data, logs.acao, logs.detalhes, usuarios.nome AS usuario_nome
-        FROM logs
-        JOIN usuarios ON logs.usuario_uuid = usuarios.uuid
-        WHERE logs.usuario_uuid = ?
-        ORDER BY logs.data DESC
-    """, (usuario_uuid,))
+#     cursor = db.cursor()
+#     cursor.execute("""
+#         SELECT logs.data, logs.acao, logs.detalhes, usuarios.nome AS usuario_nome
+#         FROM logs
+#         JOIN usuarios ON logs.usuario_uuid = usuarios.uuid
+#         WHERE logs.usuario_uuid = ?
+#         ORDER BY logs.data DESC
+#     """, (usuario_uuid,))
 
-    logs = cursor.fetchall()
+#     logs = cursor.fetchall()
 
-    return templates.TemplateResponse("relatorios.html", {"request": request, "logs": logs})
+#     return templates.TemplateResponse("relatorios.html", {"request": request, "logs": logs})
 
 
 @app.get("/api/debug/estatisticas")
-def debug_estatisticas(db: sqlite3.Connection = Depends(get_db)):
+def debug_estatisticas(request:Request, db: sqlite3.Connection = Depends(get_db)):
+    if "user" not in request.session:
+        raise HTTPException(status_code=401, detail="Não autorizado")
+    
+    user = request.session["user"]
+    if user.get("tipo") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso restrito a administradores")
     cursor = db.cursor()
     
     cursor.execute("SELECT COUNT(*) as total FROM usuarios")
