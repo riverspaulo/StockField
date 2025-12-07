@@ -23,6 +23,15 @@ init_db()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
+@app.middleware("http")
+async def add_cors_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Allow-Origin"] = request.headers.get("origin", "*")
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+    return response
+
 ALERTA_DIAS = 7
 
 def flash(request: Request, message: str, category: str = "info"):
@@ -893,29 +902,6 @@ def listar_todos_usuarios(
     
     return [dict(usuario) for usuario in usuarios]
 
-@app.get("/api/admin/usuarios/{uuid}")
-def obter_usuario_admin(
-    uuid: str,
-    request: Request,
-    db: sqlite3.Connection = Depends(get_db)
-):
-    """Obtém um usuário específico (apenas para administradores)"""
-    if "user" not in request.session:
-        raise HTTPException(status_code=401, detail="Não autorizado")
-    
-    user = request.session["user"]
-    if user.get("tipo") != "admin":
-        raise HTTPException(status_code=403, detail="Acesso restrito a administradores")
-    
-    cursor = db.cursor()
-    cursor.execute("SELECT uuid, cnpj, nome, email, tipo FROM usuarios WHERE uuid = ?", (uuid,))
-    usuario = cursor.fetchone()
-    
-    if not usuario:
-        raise HTTPException(status_code=404, detail="Usuário não encontrado")
-    
-    return dict(usuario)
-
 @app.get("/api/admin/usuarios/estatisticas")
 def obter_estatisticas_usuarios(
     request: Request,
@@ -943,10 +929,17 @@ def obter_estatisticas_usuarios(
     cursor.execute("SELECT COUNT(*) as total FROM usuarios WHERE tipo = 'admin'")
     total_admins = cursor.fetchone()["total"]
     
+    # Total de produtos
+    cursor.execute("SELECT COUNT(*) as total FROM produtos")
+    total_produtos = cursor.fetchone()["total"]
+    
+    print(f"DEBUG - Estatísticas: usuarios={total_usuarios}, agricultores={total_agricultores}, admins={total_admins}, produtos={total_produtos}")  # Para debug
+    
     return {
         "total_usuarios": total_usuarios,
         "total_agricultores": total_agricultores,
-        "total_admins": total_admins
+        "total_admins": total_admins,
+        "total_produtos": total_produtos
     }
 
 @app.get("/api/admin/usuarios/recentes")
@@ -1191,39 +1184,6 @@ def obter_usuario_admin(
     
     return dict(usuario)
 
-@app.get("/api/admin/usuarios/estatisticas")
-def obter_estatisticas_usuarios(
-    request: Request,
-    db: sqlite3.Connection = Depends(get_db)
-):
-    """Obtém estatísticas dos usuários (apenas para administradores)"""
-    if "user" not in request.session:
-        raise HTTPException(status_code=401, detail="Não autorizado")
-    
-    user = request.session["user"]
-    if user.get("tipo") != "admin":
-        raise HTTPException(status_code=403, detail="Acesso restrito a administradores")
-    
-    cursor = db.cursor()
-    
-    # Total de usuários
-    cursor.execute("SELECT COUNT(*) as total FROM usuarios")
-    total_usuarios = cursor.fetchone()["total"]
-    
-    # Total de agricultores
-    cursor.execute("SELECT COUNT(*) as total FROM usuarios WHERE tipo = 'agricultor'")
-    total_agricultores = cursor.fetchone()["total"]
-    
-    # Total de administradores
-    cursor.execute("SELECT COUNT(*) as total FROM usuarios WHERE tipo = 'admin'")
-    total_admins = cursor.fetchone()["total"]
-    
-    return {
-        "total_usuarios": total_usuarios,
-        "total_agricultores": total_agricultores,
-        "total_admins": total_admins
-    }
-
 @app.get("/api/admin/usuarios/recentes")
 def obter_usuarios_recentes(
     request: Request,
@@ -1460,6 +1420,7 @@ def listar_todos_produtos_admin(
     
     return produtos_formatados
 
+
 @app.get("/api/admin/produtos/estatisticas")
 def obter_estatisticas_produtos_admin(
     request: Request,
@@ -1479,41 +1440,58 @@ def obter_estatisticas_produtos_admin(
     cursor.execute("SELECT COUNT(*) as total FROM produtos")
     total_produtos = cursor.fetchone()["total"]
     
+    # Produtos a vencer (próximos 7 dias)
+    cursor.execute("SELECT COUNT(*) as total FROM produtos WHERE status = 'a_vencer'")
+    produtos_a_vencer = cursor.fetchone()["total"]
+    
     # Produtos vencidos
     cursor.execute("SELECT COUNT(*) as total FROM produtos WHERE status = 'vencido'")
     produtos_vencidos = cursor.fetchone()["total"]
-    
-    # Produtos a vencer
-    cursor.execute("SELECT COUNT(*) as total FROM produtos WHERE status = 'a_vencer'")
-    produtos_a_vencer = cursor.fetchone()["total"]
     
     # Produtos esgotados
     cursor.execute("SELECT COUNT(*) as total FROM produtos WHERE status = 'esgotado'")
     produtos_esgotados = cursor.fetchone()["total"]
     
-    # Tipos de produtos
-    cursor.execute("SELECT tipo_produto, COUNT(*) as total FROM produtos GROUP BY tipo_produto")
-    tipos_produtos = cursor.fetchall()
-    
-    # Usuários com mais produtos
-    cursor.execute("""
-        SELECT u.nome, COUNT(p.uuid) as total_produtos
-        FROM produtos p
-        LEFT JOIN usuarios u ON p.usuario_uuid = u.uuid
-        GROUP BY p.usuario_uuid
-        ORDER BY total_produtos DESC
-        LIMIT 5
-    """)
-    top_usuarios = cursor.fetchall()
-    
     return {
         "total_produtos": total_produtos,
-        "produtos_vencidos": produtos_vencidos,
         "produtos_a_vencer": produtos_a_vencer,
-        "produtos_esgotados": produtos_esgotados,
-        "tipos_produtos": [dict(tipo) for tipo in tipos_produtos],
-        "top_usuarios": [dict(usuario) for usuario in top_usuarios]
+        "produtos_vencidos": produtos_vencidos,
+        "produtos_esgotados": produtos_esgotados
     }
+
+@app.delete("/api/admin/produtos/{uuid}")
+def deletar_produto_admin(
+    uuid: str,
+    request: Request,
+    db: sqlite3.Connection = Depends(get_db)
+):
+    """Deleta um produto (apenas para administradores)"""
+    if "user" not in request.session:
+        raise HTTPException(status_code=401, detail="Não autorizado")
+    
+    user = request.session["user"]
+    if user.get("tipo") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso restrito a administradores")
+    
+    cursor = db.cursor()
+    
+    # Verificar se o produto existe
+    cursor.execute("SELECT * FROM produtos WHERE uuid = ?", (uuid,))
+    produto = cursor.fetchone()
+    
+    if not produto:
+        raise HTTPException(status_code=404, detail="Produto não encontrado")
+    
+    # Deletar o produto
+    cursor.execute("DELETE FROM produtos WHERE uuid = ?", (uuid,))
+    db.commit()
+    
+    # Registrar log
+    usuario_uuid = request.session["user"]["uuid"]
+    detalhes = f"Produto excluído: {produto['nome']} (UUID: {uuid})"
+    registrar_log(db, usuario_uuid, "Exclusão de Produto", detalhes)
+    
+    return {"message": "Produto excluído com sucesso"}
 
 @app.get("/api/admin/produtos/{uuid}")
 def obter_produto_admin(
@@ -1639,3 +1617,28 @@ def pagina_relatorios(request: Request, db: sqlite3.Connection = Depends(get_db)
     logs = cursor.fetchall()
 
     return templates.TemplateResponse("relatorios.html", {"request": request, "logs": logs})
+
+
+@app.get("/api/debug/estatisticas")
+def debug_estatisticas(db: sqlite3.Connection = Depends(get_db)):
+    cursor = db.cursor()
+    
+    cursor.execute("SELECT COUNT(*) as total FROM usuarios")
+    total_usuarios = cursor.fetchone()["total"]
+    
+    cursor.execute("SELECT COUNT(*) as total FROM usuarios WHERE tipo = 'agricultor'")
+    total_agricultores = cursor.fetchone()["total"]
+    
+    cursor.execute("SELECT COUNT(*) as total FROM usuarios WHERE tipo = 'admin'")
+    total_admins = cursor.fetchone()["total"]
+    
+    cursor.execute("SELECT COUNT(*) as total FROM produtos")
+    total_produtos = cursor.fetchone()["total"]
+    
+    return {
+        "total_usuarios": total_usuarios,
+        "total_agricultores": total_agricultores,
+        "total_admins": total_admins,
+        "total_produtos": total_produtos,
+        "debug": "API funcionando"
+    }
