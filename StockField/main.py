@@ -893,29 +893,46 @@ def listar_todos_usuarios(
     
     return [dict(usuario) for usuario in usuarios]
 
-@app.get("/api/admin/usuarios/{uuid}")
-def obter_usuario_admin(
-    uuid: str,
-    request: Request,
-    db: sqlite3.Connection = Depends(get_db)
-):
-    """Obtém um usuário específico (apenas para administradores)"""
-    if "user" not in request.session:
-        raise HTTPException(status_code=401, detail="Não autorizado")
-    
-    user = request.session["user"]
-    if user.get("tipo") != "admin":
-        raise HTTPException(status_code=403, detail="Acesso restrito a administradores")
-    
-    cursor = db.cursor()
-    cursor.execute("SELECT uuid, cnpj, nome, email, tipo FROM usuarios WHERE uuid = ?", (uuid,))
-    usuario = cursor.fetchone()
-    
-    if not usuario:
-        raise HTTPException(status_code=404, detail="Usuário não encontrado")
-    
-    return dict(usuario)
 
+#essa é a certa
+# @app.get("/api/admin/usuarios/estatisticas")
+# def obter_estatisticas_usuarios(
+#     request: Request,
+#     db: sqlite3.Connection = Depends(get_db)
+# ):
+#     """Obtém estatísticas dos usuários (apenas para administradores)"""
+#     if "user" not in request.session:
+#         raise HTTPException(status_code=401, detail="Não autorizado")
+    
+    
+#     user = request.session["user"]
+#     if user.get("tipo") != "admin":
+#         raise HTTPException(status_code=403, detail="Acesso restrito a administradores")
+    
+#     cursor = db.cursor()
+    
+#     # Total de usuários
+#     cursor.execute("SELECT COUNT(*) as total FROM usuarios")
+#     total_usuarios = cursor.fetchone()["total"]
+    
+#     # Total de agricultores
+#     cursor.execute("SELECT COUNT(*) as total FROM usuarios WHERE tipo = 'agricultor'")
+#     total_agricultores = cursor.fetchone()["total"]
+    
+#     # Total de administradores
+#     cursor.execute("SELECT COUNT(*) as total FROM usuarios WHERE tipo = 'admin'")
+#     total_admins = cursor.fetchone()["total"]
+
+#     # Total de produtos
+#     cursor.execute("SELECT COUNT(*) as total FROM produtos")
+#     total_produtos = cursor.fetchone()["total"]
+    
+#     return {
+#         "total_usuarios": total_usuarios,
+#         "total_agricultores": total_agricultores,
+#         "total_admins": total_admins,
+#         "total_produtos": total_produtos
+#     }
 @app.get("/api/admin/usuarios/estatisticas")
 def obter_estatisticas_usuarios(
     request: Request,
@@ -943,10 +960,17 @@ def obter_estatisticas_usuarios(
     cursor.execute("SELECT COUNT(*) as total FROM usuarios WHERE tipo = 'admin'")
     total_admins = cursor.fetchone()["total"]
     
+    # Total de produtos
+    cursor.execute("SELECT COUNT(*) as total FROM produtos")
+    total_produtos = cursor.fetchone()["total"]
+    
+    print(f"DEBUG - Estatísticas: usuarios={total_usuarios}, agricultores={total_agricultores}, admins={total_admins}, produtos={total_produtos}")  # Para debug
+    
     return {
         "total_usuarios": total_usuarios,
         "total_agricultores": total_agricultores,
-        "total_admins": total_admins
+        "total_admins": total_admins,
+        "total_produtos": total_produtos
     }
 
 @app.get("/api/admin/usuarios/recentes")
@@ -1190,39 +1214,6 @@ def obter_usuario_admin(
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
     
     return dict(usuario)
-
-@app.get("/api/admin/usuarios/estatisticas")
-def obter_estatisticas_usuarios(
-    request: Request,
-    db: sqlite3.Connection = Depends(get_db)
-):
-    """Obtém estatísticas dos usuários (apenas para administradores)"""
-    if "user" not in request.session:
-        raise HTTPException(status_code=401, detail="Não autorizado")
-    
-    user = request.session["user"]
-    if user.get("tipo") != "admin":
-        raise HTTPException(status_code=403, detail="Acesso restrito a administradores")
-    
-    cursor = db.cursor()
-    
-    # Total de usuários
-    cursor.execute("SELECT COUNT(*) as total FROM usuarios")
-    total_usuarios = cursor.fetchone()["total"]
-    
-    # Total de agricultores
-    cursor.execute("SELECT COUNT(*) as total FROM usuarios WHERE tipo = 'agricultor'")
-    total_agricultores = cursor.fetchone()["total"]
-    
-    # Total de administradores
-    cursor.execute("SELECT COUNT(*) as total FROM usuarios WHERE tipo = 'admin'")
-    total_admins = cursor.fetchone()["total"]
-    
-    return {
-        "total_usuarios": total_usuarios,
-        "total_agricultores": total_agricultores,
-        "total_admins": total_admins
-    }
 
 @app.get("/api/admin/usuarios/recentes")
 def obter_usuarios_recentes(
@@ -1639,3 +1630,28 @@ def pagina_relatorios(request: Request, db: sqlite3.Connection = Depends(get_db)
     logs = cursor.fetchall()
 
     return templates.TemplateResponse("relatorios.html", {"request": request, "logs": logs})
+
+
+@app.get("/api/debug/estatisticas")
+def debug_estatisticas(db: sqlite3.Connection = Depends(get_db)):
+    cursor = db.cursor()
+    
+    cursor.execute("SELECT COUNT(*) as total FROM usuarios")
+    total_usuarios = cursor.fetchone()["total"]
+    
+    cursor.execute("SELECT COUNT(*) as total FROM usuarios WHERE tipo = 'agricultor'")
+    total_agricultores = cursor.fetchone()["total"]
+    
+    cursor.execute("SELECT COUNT(*) as total FROM usuarios WHERE tipo = 'admin'")
+    total_admins = cursor.fetchone()["total"]
+    
+    cursor.execute("SELECT COUNT(*) as total FROM produtos")
+    total_produtos = cursor.fetchone()["total"]
+    
+    return {
+        "total_usuarios": total_usuarios,
+        "total_agricultores": total_agricultores,
+        "total_admins": total_admins,
+        "total_produtos": total_produtos,
+        "debug": "API funcionando"
+    }
