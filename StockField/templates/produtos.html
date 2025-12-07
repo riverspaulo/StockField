@@ -1,158 +1,453 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br"> 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Produtos - StockField</title>
-    <link rel="stylesheet" href="/static/css/profile.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="icon" type="image/png" href="" style="width: 100%;">
+    <title>Produtos</title>
     <style>
-        .container {
-            display: flex;
-            min-height: calc(100vh - 60px);
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
         }
 
-        .sidebar {
-            width: 80px;
-            background: #2c3e50;
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: #e6e7d1;
+            padding-left: 82px;
+            color: #0d2329;
+            overflow: hidden;
+        }
+
+        header {
+            background-color: #e6e7d1;
+            width: 100%;
+            padding: 24px;
+            padding-left: 100px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 998;
+            max-height: 96px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 4px 10px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-logo {
+            height: 200px;
+            width: 200px;
+            object-fit: contain;
+        }
+
+        main {
+            margin-top: 114px;
+            margin-left: 18px;
+            margin-right: 18px;
+            margin-bottom: 18px;
+            border-radius: 25px;
+            width: calc(100% - 36px);
+            padding: 30px;
+            background-color: #e9e9e9;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 997;
+            opacity: 95%;
+            color: black;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            padding: 20px 0;
-        }
-
-        .sidebar i {
-            color: #ecf0f1;
-            font-size: 24px;
-            margin: 20px 0;
-            cursor: pointer;
-            transition: color 0.3s;
-        }
-
-        .sidebar i:hover {
-            color: #3498db;
-        }
-
-        .sidebar i.active {
-            color: #3498db;
+            height: calc(100vh - 132px);
+            overflow: hidden;
         }
 
         .main-content {
+            display: flex;
+            flex-direction: column;
             flex: 1;
-            padding: 20px;
-            background: #ecf0f1;
+            overflow: hidden;
+        }
+
+        #sidebar {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background-color: #e6e7d1;
+            height: 100vh;
+            width: 82px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 999;
+            transition: all .5s;
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #sidebar_content {
+            padding: 12px;
+        }
+
+        #logo_avatar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 24px;
+            margin-top: 8px;
+        }
+
+        #logo_avatar_avatar {
+            min-width: 55px;
+            min-height: 55px;
+            object-fit: cover;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        #sidebar.open-sidebar #logo_avatar_avatar {
+            width: 180px !important;
+            height: 55px !important;
+            object-fit: cover !important;
+            margin: 5px 0 !important;
+        }
+
+        #logo_avatar_infos {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #logo_avatar_infos span:last-child {
+            color: #afa8a8;
+            font-size: 12px;
+        }
+
+        #side_items {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            list-style: none;
+        }
+
+        .side-item {
+            border-radius: 8px;
+            padding: 14px;
+            cursor: pointer;
+        }
+
+        .side-item.active {
+            background-color: #66802e;
+        }
+
+        .side-item:hover:not(.active),
+        #logout_btn:hover {
+            background-color: #e9e9e9;
+        }
+
+        .side-item a {
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #66802e;
+        }
+
+        .side-item.active a {
+            background-color: transparent;
+            color: #e9e9e9;
+            border: none;
+        }
+
+        .side-item a i {
+            background: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            color: inherit;
+        }
+
+        #logout {
+            border-top: 1px solid #e3e9f7;
+            padding: 12px;
+        }
+
+        #logout_btn {
+            border: none;
+            gap: 20px;
+            padding: 12px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            cursor: pointer;
+            background-color: transparent;
+        }
+
+        #close-sidebar {
+            display: none;
+        }
+
+        #open_btn {
+            position: absolute;
+            top: 38px;
+            right: -10px;
+            background-color: #66802e;
+            color: #e3e9f7;
+            border-radius: 100%;
+            width: 20px;
+            height: 20px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .hamburger-btn {
+            display: none;
+            font-size: 2rem;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            position: fixed;
+            top: 15px;
+            left: 10px;
+            margin-right: 60px;
+            z-index: 1001;
+            color: #66802e;
+        }
+
+        #open_btn_icon {
+            transition: transform .3s ease;
+        }
+
+        .open-sidebar #open_btn_icon {
+            transform: rotate(180deg);
+        }
+
+        .item-description {
+            width: 0px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            font-size: 14px;
+            transition: width .6s;
+            height: 0px;
+        }
+
+        #sidebar.open-sidebar {
+            width: 250px;
+        }
+
+        #sidebar.open-sidebar .item-description {
+            width: 150px;
+            height: auto;
+        }
+
+        #sidebar.open-sidebar .side-item a {
+            justify-content: flex-start;
+            gap: 14px;
         }
 
         .content-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
+            flex-shrink: 0;
         }
 
         .content-title {
-            color: #2c3e50;
+            color: #96bd3e;
             font-size: 28px;
             font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .content-title i {
+            font-size: 30px;
+            color: #96bd3e;
+            background: white;
+            padding: 16px;
+            border-radius: 16px;
+            box-shadow: 0 6px 20px rgba(150, 189, 62, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .content-title i:hover {
+            transform: scale(1.05) rotate(5deg);
+            box-shadow: 0 8px 25px rgba(150, 189, 62, 0.3);
         }
 
         .btn-primary {
-            background: #3498db;
+            background: linear-gradient(135deg, #7fa531 0%, #96bd3e 100%);
             color: white;
             border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
+            padding: 16px 32px;
+            border-radius: 12px;
             cursor: pointer;
             font-size: 16px;
+            font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 8px;
-            transition: background 0.3s;
+            gap: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(127, 165, 49, 0.3),
+                        0 2px 8px rgba(0, 0, 0, 0.1);
+            letter-spacing: 0.3px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
         }
 
         .btn-primary:hover {
-            background: #2980b9;
+            transform: translateY(-3px);
+            box-shadow: 0 12px 28px rgba(127, 165, 49, 0.4),
+                        0 4px 12px rgba(0, 0, 0, 0.12);
+            background: linear-gradient(135deg, #96bd3e 0%, #7fa531 100%);
         }
 
-        /* Adicione estes estilos ao seu CSS existente */
+        .btn-primary:hover::before {
+            left: 100%;
+        }
 
-        .modal-body-scroll {
+        .btn-primary i {
+            font-size: 18px;
+            transition: transform 0.3s ease;
+        }
+
+        .btn-primary:hover i {
+            transform: scale(1.1);
+        }
+
+        .btn-edit-small {
+            background: #7fa531;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            transition: background 0.3s;
+            height: 24px;
+            line-height: 1;
+        }
+
+        .btn-edit-small:hover {
+            background: #66802e;
+        }
+
+        .btn-edit-small i {
+            font-size: 9px;
+        }
+
+        .search-and-produtos {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .produtos-container-wrapper {
+            flex: 1;
             overflow-y: auto;
-            max-height: 70vh;
-            padding: 20px;
+            padding-right: 5px;
+            margin-top: 10px;
         }
 
-        /* Estilização da barra de rolagem para o modal */
-        .modal-body::-webkit-scrollbar {
+        .produtos-container-wrapper::-webkit-scrollbar {
             width: 8px;
         }
 
-        .modal-body::-webkit-scrollbar-track {
+        .produtos-container-wrapper::-webkit-scrollbar-track {
             background: #f1f1f1;
-            border-radius: 4px;
-            margin: 4px 0;
+            border-radius: 10px;
         }
 
-        .modal-body::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
-            border-radius: 4px;
+        .produtos-container-wrapper::-webkit-scrollbar-thumb {
+            background: #96bd3e;
+            border-radius: 10px;
         }
 
-        .modal-body::-webkit-scrollbar-thumb:hover {
-            background: #a8a8a8;
-        }
-
-        /* Para Firefox */
-        .modal-body {
-            scrollbar-width: thin;
-            scrollbar-color: #c1c1c1 #f1f1f1;
+        .produtos-container-wrapper::-webkit-scrollbar-thumb:hover {
+            background: #7fa531;
         }
 
         .produtos-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 20px;
-            margin-bottom: 30px;
+            margin-bottom: 10px;
         }
 
         .produto-card {
             background: white;
             border-radius: 12px;
-            padding: 20px;
+            padding: 18px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             transition: transform 0.3s, box-shadow 0.3s;
             border-left: 4px solid #27ae60;
+            position: relative;
         }
 
         .produto-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
         }
 
         .produto-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
 
         .produto-nome {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: bold;
             color: #2c3e50;
             margin: 0;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
         }
 
         .produto-actions {
             display: flex;
-            gap: 8px;
+            gap: 6px;
         }
 
         .btn-action {
             background: none;
             border: none;
             cursor: pointer;
-            padding: 6px;
+            padding: 5px;
             border-radius: 4px;
             transition: background 0.3s;
         }
@@ -170,26 +465,27 @@
         }
 
         .produto-info {
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
 
         .info-item {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 8px;
+            gap: 8px;
+            margin-bottom: 6px;
             color: #555;
+            font-size: 14px;
         }
 
         .info-item i {
-            width: 16px;
+            width: 14px;
             color: #7f8c8d;
         }
 
         .produto-stats {
             display: flex;
-            gap: 15px;
-            padding-top: 15px;
+            gap: 12px;
+            padding-top: 12px;
             border-top: 1px solid #ecf0f1;
         }
 
@@ -199,329 +495,17 @@
         }
 
         .stat-number {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             color: #2c3e50;
         }
 
         .stat-label {
-            font-size: 12px;
+            font-size: 11px;
             color: #7f8c8d;
         }
 
-        .status-badge {
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .status-disponivel {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .status-esgotado {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .status-vencido {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-        }
-
-        .modal-content {
-            background-color: white;
-            margin: 2% auto; /* Reduzi a margem superior para dar mais espaço */
-            padding: 0; /* Removemos o padding do content para aplicar no body */
-            border-radius: 12px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 90vh; /* Altura máxima da modal */
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0;
-            padding: 20px 30px;
-            border-bottom: 1px solid #ecf0f1;
-            flex-shrink: 0; /* Impede que o header diminua */
-        }
-
-        .modal-title {
-            font-size: 24px;
-            color: #2c3e50;
-            margin: 0;
-        }
-
-        .close {
-            color: #aaa;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .close:hover {
-            color: #000;
-        }
-
-        .modal-body {
-            padding: 30px;
-            overflow-y: auto; /* Adiciona rolagem vertical */
-            flex-grow: 1; /* Ocupa o espaço restante */
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #bdc3c7;
-            border-radius: 6px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: #3498db;
-        }
-
-        .form-row {
-            display: flex;
-            gap: 15px;
-        }
-
-        .form-row .form-group {
-            flex: 1;
-        }
-
-        .modal-footer {
-            padding: 20px 30px;
-            border-top: 1px solid #ecf0f1;
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-            flex-shrink: 0; /* Impede que o footer diminua */
-        }
-
-        .btn-secondary {
-            background: #95a5a6;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-
-        .btn-secondary:hover {
-            background: #7f8c8d;
-        }
-
-        .btn-success {
-            background: #27ae60;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-
-        .btn-success:hover {
-            background: #219a52;
-        }
-
-        .search-container {
-            margin-bottom: 20px;
-        }
-
-        .search-box {
-            display: flex;
-            max-width: 400px;
-        }
-
-        .search-input {
-            flex: 1;
-            padding: 12px;
-            border: 2px solid #bdc3c7;
-            border-right: none;
-            border-radius: 6px 0 0 6px;
-            font-size: 16px;
-        }
-
-        .search-btn {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 0 6px 6px 0;
-            cursor: pointer;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #7f8c8d;
-        }
-
-        .empty-state i {
-            font-size: 64px;
-            margin-bottom: 20px;
-            color: #bdc3c7;
-        }
-
-        .empty-state h3 {
-            margin-bottom: 10px;
-            color: #2c3e50;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #7f8c8d;
-        }
-
-        .flash-messages {
-            margin-bottom: 20px;
-        }
-
-        .flash-message {
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 10px;
-        }
-
-        .flash-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .flash-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .flash-info {
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
-        }
-
-            /* Estilos para produtos com alertas */
-        .produto-card.vencido {
-            border-left: 4px solid #e74c3c;
-            background: linear-gradient(135deg, #ffffff 0%, #fff5f5 100%);
-        }
-
-        .produto-card.a-vencer {
-            border-left: 4px solid #f39c12;
-            background: linear-gradient(135deg, #ffffff 0%, #fffbf0 100%);
-        }
-
-        .status-vencido {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .status-a_vencer {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .alerta-badge {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background: #e74c3c;
-            color: white;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: bold;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-
-        .produto-header {
-            position: relative;
-        }
-
-        .dias-restantes {
-            font-size: 12px;
-            padding: 2px 8px;
-            border-radius: 10px;
-            margin-left: 8px;
-            font-weight: bold;
-        }
-
-        .dias-negativo {
-            background: #e74c3c;
-            color: white;
-        }
-
-        .dias-baixo {
-            background: #f39c12;
-            color: white;
-        }
-
-        .dias-normal {
-            background: #27ae60;
-            color: white;
-        }
-
-        .produto-card.estoque-baixo {
-            border-left: 4px solid #f39c12;
-            background: linear-gradient(135deg, #ffffff 0%, #fffbf0 100%);
-        }
-
-        .estoque-baixo-badge {
-            background: #f39c12;
-            color: white;
-        }
-
-        .estoque-critico {
-            background: #e74c3c;
-            color: white;
-        }
-
-        /* Barra de alertas de estoque */
-        .alertas-bar.estoque {
-            background: linear-gradient(135deg, #f39c12 0%, #d35400 100%);
-        }
-
-        /* Barra de alertas no topo */
+        /* Alertas */
         .alertas-bar {
             background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
             color: white;
@@ -532,6 +516,10 @@
             justify-content: space-between;
             align-items: center;
             animation: pulse 2s infinite;
+        }
+
+        .alertas-bar.estoque {
+            background: linear-gradient(135deg, #f39c12 0%, #d35400 100%);
         }
 
         @keyframes pulse {
@@ -555,6 +543,10 @@
             font-size: 14px;
         }
 
+        .alertas-bar.estoque .alerta-count {
+            color: #f39c12;
+        }
+
         .btn-ver-alertas {
             background: white;
             color: #e74c3c;
@@ -574,39 +566,340 @@
             transform: translateY(-2px);
         }
 
-        /* Personalização da barra de rolagem */
-        .modal-body::-webkit-scrollbar {
-            width: 8px;
+        .alertas-bar.estoque .btn-ver-alertas {
+            color: #f39c12;
         }
 
-        .modal-body::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
+        /* Produtos com alertas */
+        .produto-card.vencido {
+            border-left: 4px solid #e74c3c;
+            background: linear-gradient(135deg, #ffffff 0%, #fff5f5 100%);
         }
 
-        .modal-body::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
-            border-radius: 4px;
+        .produto-card.a-vencer {
+            border-left: 4px solid #f39c12;
+            background: linear-gradient(135deg, #ffffff 0%, #fffbf0 100%);
         }
 
-        .modal-body::-webkit-scrollbar-thumb:hover {
-            background: #a8a8a8;
-        }
-
-        /* Estilos para defensivos agrícolas */
-        .defensivo-badge {
-            background: #e74c3c;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: bold;
-            margin-left: 8px;
+        .produto-card.estoque-baixo {
+            border-left: 4px solid #f39c12;
+            background: linear-gradient(135deg, #ffffff 0%, #fffbf0 100%);
         }
 
         .produto-card.defensivo {
             border-left: 4px solid #e74c3c;
             background: linear-gradient(135deg, #ffffff 0%, #fff5f5 100%);
+        }
+
+        /* Badges */
+        .alerta-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .defensivo-badge {
+            background: #e74c3c;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .dias-restantes {
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+
+        .dias-negativo {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .dias-baixo {
+            background: #f39c12;
+            color: white;
+        }
+
+        .dias-normal {
+            background: #27ae60;
+            color: white;
+        }
+
+        .estoque-baixo-badge {
+            background: #f39c12;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .estoque-critico {
+            background: #e74c3c;
+            color: white;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: #e9e9e9;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 2px solid #96bd3e;
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0;
+            padding: 20px 30px;
+            border-bottom: 2px solid #96bd3e;
+            flex-shrink: 0;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            color: #66802e;
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .close {
+            color: #96bd3e;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close:hover {
+            color: #66802e;
+        }
+
+        .modal-body-scroll {
+            overflow-y: auto;
+            max-height: 60vh;
+            padding: 30px;
+            flex-grow: 1;
+        }
+
+        .modal-body-scroll::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-body-scroll::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .modal-body-scroll::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        .modal-body-scroll::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #66802e;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #96bd3e;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            background-color: white;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #66802e;
+            box-shadow: 0 0 0 3px rgba(150, 189, 62, 0.2);
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 0;
+            padding: 20px 30px;
+            border-top: 1px solid #ddd;
+            flex-shrink: 0;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background: #66802e;
+        }
+
+        .btn-success {
+            background: #7fa531;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-success:hover {
+            background: #66802e;
+        }
+
+        .search-container {
+            margin-bottom: 20px;
+            flex-shrink: 0;
+        }
+
+        .search-box {
+            display: flex;
+            max-width: 400px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #96bd3e;
+            border-right: none;
+            border-radius: 6px 0 0 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            background-color: white;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #66802e;
+        }
+
+        .search-btn {
+            background: #7fa531;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 0 6px 6px 0;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .search-btn:hover {
+            background: #66802e;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #7f8c8d;
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: #bdc3c7;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 10px;
+            color: #66802e;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+
+        .flash-messages {
+            margin-bottom: 20px;
+            flex-shrink: 0;
+        }
+
+        .flash-message {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border-left: 4px solid;
+        }
+
+        .flash-success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-left-color: #96bd3e;
+        }
+
+        .flash-error {
+            background: #ffebee;
+            color: #c62828;
+            border-left-color: #e74c3c;
+        }
+
+        .flash-info {
+            background: #e3f2fd;
+            color: #1565c0;
+            border-left-color: #3498db;
         }
 
         .secao-defensivos {
@@ -631,33 +924,247 @@
         .info-item.warning i {
             color: #e74c3c;
         }
+
+        /* Responsividade */
+        @media (max-width: 1200px) {
+            .produtos-grid {
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            }
+        }
+
+        @media (max-width: 992px) {
+            header {
+                left: 0;
+                padding-left: 100px;
+            }
+            
+            main {
+                margin-left: 18px;
+                width: calc(100% - 36px);
+            }
+            
+            #sidebar {
+                transform: translateX(-100%);
+            }
+            
+            #sidebar.open-sidebar {
+                transform: translateX(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            header {
+                padding: 15px 20px 15px 90px;
+            }
+            
+            .hamburger-btn {
+                display: block;
+            }
+            
+            #close-sidebar {
+                display: block;
+                background: transparent;
+                border: none;
+                color: #66802e;
+                font-size: 2rem;
+                cursor: pointer;
+                position: absolute;
+                top: 20px;
+                right: 15px;
+            }
+            
+            #open_btn {
+                display: none;
+            }
+            
+            #sidebar {
+                transform: translateX(-100%);
+                width: 250px;
+                transition: transform 0.3s ease;
+            }
+            
+            #sidebar.open-sidebar {
+                transform: translateX(0);
+            }
+            
+            .header-logo {
+                height: 40px;
+            }
+            
+            main {
+                margin-top: 86px;
+                padding: 20px;
+                height: calc(100vh - 106px);
+            }
+            
+            .content-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .produtos-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-content {
+                margin: 10% auto;
+                width: 95%;
+                padding: 0;
+            }
+            
+            .modal-header,
+            .modal-body-scroll,
+            .form-actions {
+                padding: 15px;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+
+        @media (max-width: 576px) {
+            header {
+                padding-left: 70px;
+            }
+            
+            .content-title {
+                font-size: 1.5rem;
+            }
+            
+            .btn-primary {
+                padding: 10px 18px;
+                font-size: 14px;
+            }
+            
+            .header-logo {
+                height: 30px;
+            }
+            
+            .modal-content {
+                padding: 0;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .btn-secondary,
+            .btn-success {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 400px) {
+            header {
+                padding: 12px 15px 12px 65px;
+            }
+            
+            main {
+                margin-top: 80px;
+                margin-left: 10px;
+                margin-right: 10px;
+                width: calc(100% - 20px);
+                padding: 15px;
+                height: calc(100vh - 95px);
+            }
+            
+            .header-logo {
+                height: 25px;
+            }
+            
+            .produto-card {
+                padding: 15px;
+            }
+            
+            .produto-nome {
+                font-size: 16px;
+            }
+        }
     </style>
 </head>
+
 <body>
-    <header class="top-bar">
-        <div class="logo">
-            <img id="stockfield-logo" src="/static/images/logo_colorida.png" alt="StockField">
-        </div>
-        <div class="user-info">
-            <span>Bem-vindo, {{ user.nome }}</span>
-            <div class="user-icon">
-                <i class="fa-solid fa-user"></i>
+    <nav id="sidebar">
+        <div id="sidebar_content">
+            <button id="close-sidebar" aria-label="Fechar menu">&times;</button>
+            <div id="logo_avatar">
+                <img src="/static/images/ezgif.com-animated-gif-maker.gif" 
+                     id="logo_avatar_avatar" 
+                     alt="StockField Logo"
+                     style="width: 55px; height: 55px; object-fit: cover; border-radius: 20px;">
             </div>
+
+            <ul id="side_items">
+                <li class="side-item">
+                    <a href="/profile">
+                        <i class="fa-solid fa-house"></i>
+                        <span class="item-description">Perfil</span>
+                    </a>
+                </li>
+                
+                <li class="side-item active">
+                    <a href="/produtos">
+                        <i class="fa-solid fa-box"></i>
+                        <span class="item-description">Produtos</span>
+                    </a>
+                </li>
+
+                <li class="side-item">
+                    <a href="/fornecedores">
+                        <i class="fa-solid fa-truck"></i>
+                        <span class="item-description">Fornecedores</span>
+                    </a>
+                </li>
+
+                <li class="side-item">
+                    <a href="/estoque_critico">
+                        <i class="fa-solid fa-warehouse"></i>
+                        <span class="item-description">Estoque</span>
+                    </a>
+                </li>
+                
+                <li class="side-item">
+                    <a href="/movimentacoes">
+                        <i class="fa fa-exchange" aria-hidden="true"></i>
+                        <span class="item-description">Movimentações</span>
+                    </a>
+                </li>
+
+                <li class="side-item">
+                    <a href="#">
+                        <i class="fa-solid fa-chart-bar"></i>
+                        <span class="item-description">Relatórios</span>
+                    </a>
+                </li>
+            </ul>
+
+            <button id="open_btn">
+                <i id="open_btn_icon" class="fa-solid fa-chevron-right"></i>
+            </button>
+        </div>
+
+        <div id="logout">
+            <form action="/logout" method="POST">
+                <button id="logout_btn" type="submit">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span class="item-description" style="color: black;">Sair</span>
+                </button>
+            </form>
+        </div>                   
+    </nav>
+
+    <header>
+        <button class="hamburger-btn" id="open_btn2">&#9776;</button>
+        <div class="header-logo-container">
+            <img src="/static/images/logo_colorida.png" alt="StockField Logo" class="header-logo" id="header-logo">
         </div>
     </header>
-
-    <div class="container">
-         <aside class="sidebar">
-                <i class="fa-solid fa-house" onclick="window.location.href='/profile'" title="Perfil"></i>
-                <i class="fa-solid fa-box" onclick="window.location.href='/produtos'" title="Produtos"></i>
-                <i class="fa-solid fa-truck" onclick="window.location.href='/fornecedores'" title="Fornecedores"></i>
-                <i class="fa-solid fa-exchange-alt active" onclick="window.location.href='/movimentacoes'" title="Movimentações"></i>
-                <i class="fa-solid fa-chart-bar" onclick="window.location.href='/relatorios'" title="Relatórios"></i>
-                <i class="fa-solid fa-exclamation-triangle active" onclick="window.location.href='/estoque-critico'" title="Estoque"></i>
-        </aside>
-
-
-        <main class="main-content">
+    
+    <main class="fade-in">
+        <div class="main-content">
             <div class="content-header">
                 <h1 class="content-title">
                     <i class="fa-solid fa-box"></i>
@@ -669,17 +1176,10 @@
                 </button>
             </div>
 
-            {% if messages %}
-            <div class="flash-messages">
-                {% for msg in messages %}
-                    <div class="flash-message flash-{{ msg.category }}">
-                        {{ msg.message }}
-                    </div>
-                {% endfor %}
+            <div id="flash-messages" class="flash-messages">
             </div>
-            {% endif %}
 
-            <!--adicionada-->
+            <!-- Barra de alertas de vencimento -->
             <div id="alertasContainer" class="alertas-bar" style="display: none;">
                 <div class="alertas-info">
                     <i class="fa-solid fa-exclamation-triangle"></i>
@@ -692,64 +1192,40 @@
                 </button>
             </div>
 
-
-            <div class="search-container">
-                <div class="search-box">
-                    <input type="text" class="search-input" id="searchInput" placeholder="Buscar produtos...">
-                    <button class="search-btn" onclick="filtrarProdutos()">
-                        <i class="fa-solid fa-search"></i>
-                    </button>
-                </div>
-            </div>
-
-            <div id="produtos-container" class="produtos-grid">
-                <div class="loading">
-                    <i class="fa-solid fa-spinner fa-spin"></i>
-                    <p>Carregando produtos...</p>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <!-- Adicione este modal para detalhes dos alertas -->
-    <div id="alertasModal" class="modal">
-        <div class="modal-content" style="max-width: 800px;">
-            <div class="modal-header">
-                <h2 class="modal-title">
-                    <i class="fa-solid fa-bell"></i>
-                    Alertas de Vencimento
-                </h2>
-                <span class="close" onclick="fecharModalAlertas()">&times;</span>
-            </div>
             <!-- Barra de alertas de estoque baixo -->
-            <div id="estoqueContainer" class="alertas-bar" style="display: none; background: linear-gradient(135deg, #f39c12 0%, #d35400 100%);">
+            <div id="estoqueContainer" class="alertas-bar estoque" style="display: none;">
                 <div class="alertas-info">
                     <i class="fa-solid fa-boxes"></i>
                     <span id="estoqueTexto">Você tem <span id="estoqueCount">0</span> produto(s) com estoque baixo</span>
-                    <span class="alerta-count" id="estoqueDetalhes" style="color: #f39c12;">0 críticos • 0 baixos</span>
+                    <span class="alerta-count" id="estoqueDetalhes">0 críticos • 0 baixos</span>
                 </div>
-                <button class="btn-ver-alertas" onclick="filtrarEstoqueBaixo()" style="color: #f39c12;">
+                <button class="btn-ver-alertas" onclick="filtrarEstoqueBaixo()">
                     <i class="fa-solid fa-filter"></i>
                     Ver Estoque Crítico
                 </button>
             </div>
 
+            <div class="search-and-produtos">
+                <div class="search-container">
+                    <div class="search-box">
+                        <input type="text" class="search-input" id="searchInput" placeholder="Buscar produtos...">
+                        <button class="search-btn" onclick="filtrarProdutos()">
+                            <i class="fa-solid fa-search"></i>
+                        </button>
+                    </div>
+                </div>
 
-            <div class="modal-body">
-                <div id="alertasLista" class="alertas-lista">
-                    <!-- Lista de alertas será preenchida aqui -->
+                <div class="produtos-container-wrapper">
+                    <div id="produtos-container" class="produtos-grid">
+                        <div class="loading">
+                            <i class="fa-solid fa-spinner fa-spin"></i>
+                            <p>Carregando produtos...</p>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn-secondary" onclick="fecharModalAlertas()">Fechar</button>
-                <button type="button" class="btn-success" onclick="forcarVerificacao()">
-                    <i class="fa-solid fa-sync"></i>
-                    Verificar Novamente
-                </button>
-            </div>
         </div>
-    </div>
-
+    </main>
 
     <!-- Modal para Cadastro/Edição -->
     <div id="produtoModal" class="modal">
@@ -758,19 +1234,17 @@
                 <h2 class="modal-title" id="modalTitle">Novo Produto</h2>
                 <span class="close" onclick="fecharModal()">&times;</span>
             </div>
-            <div class="modal-body">
-                <form id="produtoForm">
+            <form id="produtoForm">
+                <div class="modal-body-scroll">
                     <input type="hidden" id="produtoUuid">
                     
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="tipoProduto">Tipo de Produto *</label>
-                            <select class="form-control" id="tipoProduto" required onchange="toggleCamposDefensivo()">
-                                <option value="alimento">Alimento/Grão</option>
-                                <option value="defensivo">Defensivo Agrícola</option>
-                                <option value="outros">Outros</option>
-                            </select>
-                        </div>
+                    <div class="form-group">
+                        <label for="tipoProduto">Tipo de Produto *</label>
+                        <select class="form-control" id="tipoProduto" required onchange="toggleCamposDefensivo()">
+                            <option value="alimento">Alimento/Grão</option>
+                            <option value="defensivo">Defensivo Agrícola</option>
+                            <option value="outros">Outros</option>
+                        </select>
                     </div>
 
                     <div class="form-row">
@@ -778,16 +1252,11 @@
                             <label for="nome">Nome do Produto *</label>
                             <input type="text" class="form-control" id="nome" required>
                         </div>
-
-                        <div class="form-group">
-                            <label for="categoria">Categoria *</label>
-                            <input type="text" class="form-control" id="categoria" required>
-                        </div>
                     </div>
 
-                    <!-- SEÇÃO DE DEFENSIVOS AGRÍCOLAS (APARECE APENAS QUANDO TIPO = DEFENSIVO) -->
+                    <!-- Seção de Defensivos Agrícolas -->
                     <div id="secaoDefensivos" class="secao-defensivos" style="display: none;">
-                        <h4 style="margin-top: 0; color: #2c3e50; margin-bottom: 15px;">
+                        <h4>
                             <i class="fa-solid fa-flask-vial"></i> Informações do Defensivo Agrícola
                         </h4>
                         
@@ -796,7 +1265,6 @@
                                 <label for="numeroAnvisa">Nº Registro ANVISA *</label>
                                 <input type="text" class="form-control" id="numeroAnvisa" placeholder="Ex: 123456789">
                             </div>
-                            
                             <div class="form-group">
                                 <label for="tipoToxico">Tipo de Tóxico *</label>
                                 <select class="form-control" id="tipoToxico">
@@ -814,7 +1282,7 @@
                         <div class="form-group">
                             <label for="cuidadosArmazenamento">Cuidados de Armazenamento *</label>
                             <textarea class="form-control" id="cuidadosArmazenamento" rows="3" placeholder="Ex: Manter em local fresco e arejado, longe de alimentos..."></textarea>
-                            <small style="color: #7f8c8d;">Informe as precauções necessárias para armazenamento seguro</small>
+                            <small>Informe as precauções necessárias para armazenamento seguro</small>
                         </div>
                     </div>
 
@@ -828,11 +1296,10 @@
                             <label for="quantidade">Quantidade *</label>
                             <input type="number" class="form-control" id="quantidade" value="0" min="0" required>
                         </div>
-
                         <div class="form-group">
                             <label for="estoqueMinimo">Estoque Mínimo</label>
                             <input type="number" class="form-control" id="estoqueMinimo" value="0" min="0">
-                            <small style="color: #7f8c8d;">Defina 0 para não monitorar</small>
+                            <small>Defina 0 para não monitorar</small>
                         </div>
                     </div>
 
@@ -841,7 +1308,6 @@
                             <label for="preco">Preço Unitário</label>
                             <input type="number" step="0.01" class="form-control" id="preco">
                         </div>
-
                         <div class="form-group">
                             <label for="localizacao">Localização</label>
                             <input type="text" class="form-control" id="localizacao" placeholder="Ex: Prateleira A3, Estante 1">
@@ -876,199 +1342,74 @@
                             </select>
                         </div>
                     </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn-secondary" onclick="fecharModal()">Cancelar</button>
-                <button type="submit" class="btn-success" id="submitBtn" form="produtoForm">
-                    <i class="fa-solid fa-save"></i>
-                    Salvar
-                </button>
-            </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="fecharModal()">Cancelar</button>
+                    <button type="submit" class="btn-success" id="submitBtn">
+                        <i class="fa-solid fa-save"></i>
+                        Salvar
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
-
     <script>
-
-        console.log('Script produtos.js carregado');
-        console.log('Elemento alertasContainer:', document.getElementById('alertasContainer'));
-        console.log('Elemento alertasTexto:', document.getElementById('alertasTexto'));
-        console.log('Elemento alertasCount:', document.getElementById('alertasCount'));
-        console.log('Elemento alertasDetalhes:', document.getElementById('alertasDetalhes'));
+        const LOGO_FECHADO = "/static/images/ezgif.com-animated-gif-maker.gif";
+        const LOGO_ABERTO = "/static/images/logo_colorida.png";
+        const HEADER_LOGO = "/static/images/logo_colorida.png";
 
         let produtos = [];
         let produtoEditando = null;
         let fornecedores = [];
         let alertasAtivos = [];
-        let mostrarApenasAlertas = false;
         let alertasEstoque = [];
+        let mostrarApenasAlertas = false;
         let mostrarApenasEstoqueBaixo = false;
 
-
-        function garantirElementosAlertas() {
-            let container = document.getElementById('alertasContainer');
-            
-            // Se não existir, cria o container
-            if (!container) {
-                container = document.createElement('div');
-                container.id = 'alertasContainer';
-                container.className = 'alertas-bar';
-                container.style.display = 'none';
-                
-                const alertasInfo = document.createElement('div');
-                alertasInfo.className = 'alertas-info';
-                
-                const icon = document.createElement('i');
-                icon.className = 'fa-solid fa-exclamation-triangle';
-                
-                const texto = document.createElement('span');
-                texto.id = 'alertasTexto';
-                texto.innerHTML = 'Você tem <span id="alertasCount">0</span> produto(s) com alerta de vencimento';
-                
-                const detalhes = document.createElement('span');
-                detalhes.className = 'alerta-count';
-                detalhes.id = 'alertasDetalhes';
-                detalhes.textContent = '0 vencidos • 0 a vencer';
-                
-                const btn = document.createElement('button');
-                btn.className = 'btn-ver-alertas';
-                btn.onclick = filtrarAlertas;
-                btn.innerHTML = '<i class="fa-solid fa-filter"></i> Ver Alertas';
-                
-                // Monta a estrutura
-                alertasInfo.appendChild(icon);
-                alertasInfo.appendChild(texto);
-                alertasInfo.appendChild(detalhes);
-                
-                container.appendChild(alertasInfo);
-                container.appendChild(btn);
-                
-                // Insere depois do flash-messages ou no início do main-content
-                const flashMessages = document.querySelector('.flash-messages');
-                const mainContent = document.querySelector('.main-content');
-                
-                if (flashMessages) {
-                    flashMessages.after(container);
-                } else if (mainContent) {
-                    mainContent.insertBefore(container, mainContent.firstChild);
-                } else {
-                    document.body.appendChild(container);
-                }
-                
-                console.log('Elementos de alerta criados dinamicamente');
-            }
-        }
-
-        // Função para mostrar/ocultar campos de defensivo
-        function toggleCamposDefensivo() {
-            const tipoProduto = document.getElementById('tipoProduto').value;
-            const secaoDefensivos = document.getElementById('secaoDefensivos');
-            
-            if (tipoProduto === 'defensivo') {
-                secaoDefensivos.style.display = 'block';
-                // Torna os campos obrigatórios
-                document.getElementById('numeroAnvisa').required = true;
-                document.getElementById('tipoToxico').required = true;
-                document.getElementById('cuidadosArmazenamento').required = true;
-            } else {
-                secaoDefensivos.style.display = 'none';
-                // Remove a obrigatoriedade
-                document.getElementById('numeroAnvisa').required = false;
-                document.getElementById('tipoToxico').required = false;
-                document.getElementById('cuidadosArmazenamento').required = false;
-                // Limpa os campos
-                document.getElementById('numeroAnvisa').value = '';
-                document.getElementById('tipoToxico').value = '';
-                document.getElementById('cuidadosArmazenamento').value = '';
-            }
-        }
-
-        async function carregarAlertasEstoque() {
-            try {
-                const response = await fetch('/api/alertas/estoque');
-                const data = await response.json();
-                alertasEstoque = data.alertas;
-                
-                // Atualizar barra de alertas de estoque
-                atualizarBarraEstoque(data);
-                
-                return data;
-            } catch (error) {
-                console.error('Erro ao carregar alertas de estoque:', error);
-                return { alertas: [], total: 0 };
-            }
-        }
-
-        function atualizarBarraEstoque(data) {
-            const container = document.getElementById('estoqueContainer');
-            const texto = document.getElementById('estoqueTexto');
-            const count = document.getElementById('estoqueCount');
-            const detalhes = document.getElementById('estoqueDetalhes');
-            
-            // VERIFICAÇÃO CRÍTICA
-            if (!container || !texto || !count || !detalhes) {
-                console.error('Elementos da barra de estoque não encontrados no DOM');
-                return;
-            }
-            
-            if (data.total > 0) {
-                container.style.display = 'flex';
-                count.textContent = data.total;
-                
-                const criticos = data.alertas.filter(a => a.severidade === 'critico').length;
-                const baixos = data.alertas.filter(a => a.severidade === 'baixo').length;
-                
-                detalhes.textContent = `${criticos} crítico(s) • ${baixos} baixo(s)`;
-                
-                if (criticos > 0) {
-                    texto.innerHTML = `<i class="fa-solid fa-exclamation-triangle"></i> ATENÇÃO! Você tem ${criticos} produto(s) ESGOTADOS`;
-                    container.style.background = 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
-                } else {
-                    texto.innerHTML = `<i class="fa-solid fa-exclamation-circle"></i> Atenção! Você tem ${data.total} produto(s) com estoque baixo`;
-                    container.style.background = 'linear-gradient(135deg, #f39c12 0%, #d35400 100%)';
-                }
-            } else {
-                container.style.display = 'none';
-            }
-        }
-
-        function filtrarEstoqueBaixo() {
-            mostrarApenasEstoqueBaixo = !mostrarApenasEstoqueBaixo;
-            
-            if (mostrarApenasEstoqueBaixo && alertasEstoque.length > 0) {
-                const uuidsComEstoqueBaixo = alertasEstoque.map(a => a.uuid);
-                const produtosFiltrados = produtos.filter(p => uuidsComEstoqueBaixo.includes(p.uuid));
-                renderizarProdutos(produtosFiltrados);
-                
-                document.querySelector('[onclick="filtrarEstoqueBaixo()"]').innerHTML = `
-                    <i class="fa-solid fa-times"></i>
-                    Mostrar Todos
-                `;
-            } else {
-                renderizarProdutos(produtos);
-                mostrarApenasEstoqueBaixo = false;
-                document.querySelector('[onclick="filtrarEstoqueBaixo()"]').innerHTML = `
-                    <i class="fa-solid fa-filter"></i>
-                    Ver Estoque Crítico
-                `;
-            }
-        }
-
-
+        // Funções do Sidebar
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM carregado, inicializando...');
+            const sidebar = document.getElementById('sidebar');
+            const logo = document.getElementById('logo_avatar_avatar');
+            const openBtn = document.getElementById('open_btn');
+            const openBtn2 = document.getElementById('open_btn2');
+            const closeSidebarBtn = document.getElementById('close-sidebar');
+            const headerLogo = document.getElementById('header-logo');
             
-            // Primeiro, garante que os elementos básicos existam
-            garantirElementosAlertas();
+            // Carregar dados iniciais
+            carregarProdutos();
+            carregarFornecedores();
             
-            // Depois carrega os dados
-            setTimeout(() => {
-                carregarProdutos();
-                carregarFornecedores();
-                carregarAlertasEstoque();
-            }, 200);
+            if (headerLogo) {
+                headerLogo.src = HEADER_LOGO;
+                headerLogo.style.height = "200px";
+            }
             
-            // Intervalo para atualizações
+            logo.style.width = "55px";
+            logo.style.height = "55px";
+            logo.style.objectFit = "cover";
+            logo.style.transition = "all 0.3s ease";
+
+            openBtn.addEventListener('click', function() {
+                toggleSidebar(sidebar, logo);
+            });
+
+            openBtn2.addEventListener('click', function() {
+                toggleSidebar(sidebar, logo);
+            });
+
+            closeSidebarBtn.addEventListener('click', function() {
+                sidebar.classList.remove('open-sidebar');
+                logo.src = LOGO_FECHADO;
+                logo.style.width = "55px";
+                logo.style.height = "55px";
+                logo.style.objectFit = "cover";
+                logo.style.margin = "0";
+            });
+
+            document.getElementById('searchInput').addEventListener('input', filtrarProdutos);
+            document.getElementById('produtoForm').addEventListener('submit', salvarProduto);
+            
+            // Configurar intervalo para atualizações automáticas
             setInterval(async () => {
                 try {
                     await carregarAlertas();
@@ -1079,13 +1420,84 @@
             }, 5 * 60 * 1000);
         });
 
+        function toggleSidebar(sidebar, logo) {
+            const isOpening = !sidebar.classList.contains('open-sidebar');
+            sidebar.classList.toggle('open-sidebar');
+
+            if (sidebar.classList.contains('open-sidebar')) {
+                logo.src = LOGO_ABERTO;
+                logo.style.width = "180px";
+                logo.style.height = "55px";
+                logo.style.objectFit = "cover";
+                logo.style.margin = "5px 0";
+            } else {
+                logo.src = LOGO_FECHADO;
+                logo.style.width = "55px";
+                logo.style.height = "55px";
+                logo.style.objectFit = "cover";
+                logo.style.margin = "0";
+            }
+        }
+
+        // Função para mostrar/ocultar campos de defensivo
+        function toggleCamposDefensivo() {
+            const tipoProduto = document.getElementById('tipoProduto').value;
+            const secaoDefensivos = document.getElementById('secaoDefensivos');
+            
+            if (tipoProduto === 'defensivo') {
+                secaoDefensivos.style.display = 'block';
+                document.getElementById('numeroAnvisa').required = true;
+                document.getElementById('tipoToxico').required = true;
+                document.getElementById('cuidadosArmazenamento').required = true;
+            } else {
+                secaoDefensivos.style.display = 'none';
+                document.getElementById('numeroAnvisa').required = false;
+                document.getElementById('tipoToxico').required = false;
+                document.getElementById('cuidadosArmazenamento').required = false;
+                document.getElementById('numeroAnvisa').value = '';
+                document.getElementById('tipoToxico').value = '';
+                document.getElementById('cuidadosArmazenamento').value = '';
+            }
+        }
+
+        // Carregar produtos
+        async function carregarProdutos() {
+            try {
+                const [produtosResponse, alertasResponse, estoqueResponse] = await Promise.all([
+                    fetch('/produtos/'),
+                    fetch('/api/alertas/vencimento'),
+                    fetch('/api/alertas/estoque')
+                ]);
+                
+                produtos = await produtosResponse.json();
+                const alertasData = await alertasResponse.json();
+                const estoqueData = await estoqueResponse.json();
+                
+                alertasAtivos = alertasData.alertas || [];
+                alertasEstoque = estoqueData.alertas || [];
+                
+                atualizarBarraAlertas(alertasData);
+                atualizarBarraEstoque(estoqueData);
+                renderizarProdutos(produtos);
+            } catch (error) {
+                console.error('Erro ao carregar produtos:', error);
+                document.getElementById('produtos-container').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-exclamation-triangle"></i>
+                        <h3>Erro ao carregar produtos</h3>
+                        <p>Tente recarregar a página.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Carregar alertas
         async function carregarAlertas() {
             try {
                 const response = await fetch('/api/alertas/vencimento');
                 const data = await response.json();
-                alertasAtivos = data.alertas;
+                alertasAtivos = data.alertas || [];
                 atualizarBarraAlertas(data);
-                
                 return data;
             } catch (error) {
                 console.error('Erro ao carregar alertas:', error);
@@ -1093,21 +1505,26 @@
             }
         }
 
+        // Carregar alertas de estoque
+        async function carregarAlertasEstoque() {
+            try {
+                const response = await fetch('/api/alertas/estoque');
+                const data = await response.json();
+                alertasEstoque = data.alertas || [];
+                atualizarBarraEstoque(data);
+                return data;
+            } catch (error) {
+                console.error('Erro ao carregar alertas de estoque:', error);
+                return { alertas: [], total: 0 };
+            }
+        }
 
+        // Atualizar barra de alertas
         function atualizarBarraAlertas(data) {
-            // Garante que os elementos existam
-            garantirElementosAlertas();
-            
             const container = document.getElementById('alertasContainer');
             const texto = document.getElementById('alertasTexto');
             const count = document.getElementById('alertasCount');
             const detalhes = document.getElementById('alertasDetalhes');
-            
-            // VERIFICAÇÃO FINAL
-            if (!container || !texto || !count || !detalhes) {
-                console.error('Elementos da barra de alertas não encontrados mesmo após criação');
-                return;
-            }
             
             if (data && data.total > 0) {
                 container.style.display = 'flex';
@@ -1120,16 +1537,41 @@
                 
                 if (vencidos > 0) {
                     texto.innerHTML = `<i class="fa-solid fa-skull-crossbones"></i> ATENÇÃO! Você tem ${data.total} produto(s) com alerta de vencimento`;
-                    container.style.background = 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
                 } else {
                     texto.innerHTML = `<i class="fa-solid fa-exclamation-triangle"></i> Atenção! Você tem ${data.total} produto(s) próximo(s) do vencimento`;
-                    container.style.background = 'linear-gradient(135deg, #f39c12 0%, #d35400 100%)';
                 }
             } else {
                 container.style.display = 'none';
             }
         }
 
+        // Atualizar barra de estoque
+        function atualizarBarraEstoque(data) {
+            const container = document.getElementById('estoqueContainer');
+            const texto = document.getElementById('estoqueTexto');
+            const count = document.getElementById('estoqueCount');
+            const detalhes = document.getElementById('estoqueDetalhes');
+            
+            if (data && data.total > 0) {
+                container.style.display = 'flex';
+                count.textContent = data.total;
+                
+                const criticos = data.alertas.filter(a => a.severidade === 'critico').length;
+                const baixos = data.alertas.filter(a => a.severidade === 'baixo').length;
+                
+                detalhes.textContent = `${criticos} crítico(s) • ${baixos} baixo(s)`;
+                
+                if (criticos > 0) {
+                    texto.innerHTML = `<i class="fa-solid fa-exclamation-triangle"></i> ATENÇÃO! Você tem ${criticos} produto(s) ESGOTADOS`;
+                } else {
+                    texto.innerHTML = `<i class="fa-solid fa-exclamation-circle"></i> Atenção! Você tem ${data.total} produto(s) com estoque baixo`;
+                }
+            } else {
+                container.style.display = 'none';
+            }
+        }
+
+        // Renderizar produtos
         function renderizarProdutos(listaProdutos) {
             const container = document.getElementById('produtos-container');
             
@@ -1151,13 +1593,22 @@
                     cardClass += ' defensivo';
                 }
 
-                // Verificar se produto tem alerta de vencimento
-                const alerta = alertasAtivos.find(a => a.uuid === produto.uuid);
-                let diasBadge = '';
-
-                // Verificar alerta de estoque
+                // Verificar alertas
+                const alertaVencimento = alertasAtivos.find(a => a.uuid === produto.uuid);
                 const alertaEstoque = alertasEstoque.find(a => a.uuid === produto.uuid);
+                
+                let diasBadge = '';
                 let estoqueBadge = '';
+                
+                if (alertaVencimento) {
+                    cardClass += alertaVencimento.severidade === 'vencido' ? ' vencido' : ' a-vencer';
+                    
+                    if (produto.data_validade) {
+                        const dias = alertaVencimento.dias_restantes;
+                        const diasClass = dias < 0 ? 'dias-negativo' : (dias <= 3 ? 'dias-baixo' : 'dias-normal');
+                        diasBadge = `<span class="dias-restantes ${diasClass}">${dias < 0 ? 'Vencido' : `${dias} dias`}</span>`;
+                    }
+                }
                 
                 if (alertaEstoque) {
                     cardClass += ' estoque-baixo';
@@ -1168,20 +1619,14 @@
                         estoqueBadge = `<span class="dias-restantes ${estoqueClass}">${nivel}</span>`;
                     }
                 }
-                
-                if (alerta) {
-                    cardClass += alerta.severidade === 'vencido' ? ' vencido' : ' a-vencer';
-                    
-                    if (produto.data_validade) {
-                        const dias = alerta.dias_restantes;
-                        const diasClass = dias < 0 ? 'dias-negativo' : (dias <= 3 ? 'dias-baixo' : 'dias-normal');
-                        diasBadge = `<span class="dias-restantes ${diasClass}">${dias < 0 ? 'Vencido' : `${dias} dias`}</span>`;
-                    }
-                }
 
-                // Badge para defensivos
+                // Badges
                 const tipoBadge = produto.tipo_produto === 'defensivo' 
                     ? `<span class="defensivo-badge">DEFENSIVO</span>`
+                    : '';
+
+                const alertaBadge = alertaVencimento || alertaEstoque 
+                    ? '<span class="alerta-badge"><i class="fa-solid fa-exclamation"></i></span>' 
                     : '';
 
                 // Informações específicas para defensivos
@@ -1194,16 +1639,7 @@
                         <i class="fa-solid fa-skull-crossbones"></i>
                         <span>Tóxico: ${produto.tipo_toxico || 'Não classificado'}</span>
                     </div>
-                    <div class="info-item">
-                        <i class="fa-solid fa-triangle-exclamation"></i>
-                        <span>Cuidados: ${produto.cuidados_armazenamento ? produto.cuidados_armazenamento.substring(0, 50) + (produto.cuidados_armazenamento.length > 50 ? '...' : '') : 'Não informados'}</span>
-                    </div>
                 ` : '';
-
-                // Determinar texto do tipo
-                let tipoTexto = 'Alimento';
-                if (produto.tipo_produto === 'defensivo') tipoTexto = 'Defensivo Agrícola';
-                if (produto.tipo_produto === 'outros') tipoTexto = 'Outros';
 
                 return `
                     <div class="${cardClass}">
@@ -1214,7 +1650,7 @@
                                 ${diasBadge}
                                 ${estoqueBadge}
                             </h3>
-                            ${alerta ? '<span class="alerta-badge"><i class="fa-solid fa-exclamation"></i></span>' : ''}
+                            ${alertaBadge}
                             <div class="produto-actions">
                                 <button class="btn-action btn-edit" onclick="editarProduto('${produto.uuid}')">
                                     <i class="fa-solid fa-edit"></i>
@@ -1227,13 +1663,9 @@
                         <div class="produto-info">
                             <div class="info-item">
                                 <i class="fa-solid fa-tag"></i>
-                                <span>Tipo: ${tipoTexto}</span>
+                                <span>${produto.categoria}</span>
                             </div>
                             ${infoDefensivo}
-                            <div class="info-item">
-                                <i class="fa-solid fa-tags"></i>
-                                <span>Categoria: ${produto.categoria}</span>
-                            </div>
                             <div class="info-item">
                                 <i class="fa-solid fa-align-left"></i>
                                 <span>${produto.descricao || 'Sem descrição'}</span>
@@ -1245,10 +1677,6 @@
                             <div class="info-item">
                                 <i class="fa-solid fa-calendar"></i>
                                 <span>Validade: ${produto.data_validade || 'Não informada'}</span>
-                            </div>
-                            <div class="info-item">
-                                <i class="fa-solid fa-barcode"></i>
-                                <span>Lote: ${produto.lote || 'Não informado'}</span>
                             </div>
                         </div>
                         <div class="produto-stats">
@@ -1270,145 +1698,71 @@
             }).join('');
         }
 
+        // Filtrar produtos
+        function filtrarProdutos() {
+            const termo = document.getElementById('searchInput').value.toLowerCase();
+            const produtosFiltrados = produtos.filter(produto =>
+                produto.nome.toLowerCase().includes(termo) ||
+                produto.categoria.toLowerCase().includes(termo) ||
+                produto.descricao?.toLowerCase().includes(termo) ||
+                produto.localizacao?.toLowerCase().includes(termo)
+            );
+            renderizarProdutos(produtosFiltrados);
+        }
+
+        // Filtrar alertas
         function filtrarAlertas() {
             mostrarApenasAlertas = !mostrarApenasAlertas;
             
             if (mostrarApenasAlertas && alertasAtivos.length > 0) {
-                // Filtrar apenas produtos com alerta
                 const uuidsComAlerta = alertasAtivos.map(a => a.uuid);
                 const produtosFiltrados = produtos.filter(p => uuidsComAlerta.includes(p.uuid));
                 renderizarProdutos(produtosFiltrados);
                 
-                // Atualizar botão
-                document.querySelector('.btn-ver-alertas').innerHTML = `
+                document.querySelector('#alertasContainer .btn-ver-alertas').innerHTML = `
                     <i class="fa-solid fa-times"></i>
                     Mostrar Todos
                 `;
             } else {
-                // Mostrar todos os produtos
                 renderizarProdutos(produtos);
                 mostrarApenasAlertas = false;
                 
-                // Atualizar botão
-                document.querySelector('.btn-ver-alertas').innerHTML = `
+                document.querySelector('#alertasContainer .btn-ver-alertas').innerHTML = `
                     <i class="fa-solid fa-filter"></i>
                     Ver Alertas
                 `;
             }
         }
 
-        function abrirModalAlertas() {
-            const modal = document.getElementById('alertasModal');
-            const lista = document.getElementById('alertasLista');
+        // Filtrar estoque baixo
+        function filtrarEstoqueBaixo() {
+            mostrarApenasEstoqueBaixo = !mostrarApenasEstoqueBaixo;
             
-            if (alertasAtivos.length === 0) {
-                lista.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fa-solid fa-check-circle"></i>
-                        <h3>Nenhum alerta ativo</h3>
-                        <p>Todos os produtos estão com a validade em dia!</p>
-                    </div>
+            if (mostrarApenasEstoqueBaixo && alertasEstoque.length > 0) {
+                const uuidsComEstoqueBaixo = alertasEstoque.map(a => a.uuid);
+                const produtosFiltrados = produtos.filter(p => uuidsComEstoqueBaixo.includes(p.uuid));
+                renderizarProdutos(produtosFiltrados);
+                
+                document.querySelector('#estoqueContainer .btn-ver-alertas').innerHTML = `
+                    <i class="fa-solid fa-times"></i>
+                    Mostrar Todos
                 `;
             } else {
-                lista.innerHTML = alertasAtivos.map(alerta => `
-                    <div class="alerta-item ${alerta.severidade}">
-                        <div class="alerta-header">
-                            <h4>${alerta.nome}</h4>
-                            <span class="alerta-severidade ${alerta.severidade}">
-                                ${alerta.severidade === 'vencido' ? 'VENCIDO' : 'A VENCER'}
-                            </span>
-                        </div>
-                        <div class="alerta-info">
-                            <p><i class="fa-solid fa-calendar"></i> Validade: ${alerta.data_validade}</p>
-                            <p><i class="fa-solid fa-clock"></i> Dias restantes: <strong>${alerta.dias_restantes}</strong> dias</p>
-                            <p><i class="fa-solid fa-box"></i> Quantidade: ${alerta.quantidade}</p>
-                            <p><i class="fa-solid fa-barcode"></i> Lote: ${alerta.lote || 'Não informado'}</p>
-                        </div>
-                        <div class="alerta-actions">
-                            <button class="btn-action" onclick="editarProduto('${alerta.uuid}')">
-                                <i class="fa-solid fa-edit"></i> Editar
-                            </button>
-                            <button class="btn-action" onclick="verDetalhesProduto('${alerta.uuid}')">
-                                <i class="fa-solid fa-eye"></i> Detalhes
-                            </button>
-                        </div>
-                    </div>
-                `).join('');
-            }
-            
-            modal.style.display = 'block';
-        }
-
-        function fecharModalAlertas() {
-            document.getElementById('alertasModal').style.display = 'none';
-        }
-
-        async function forcarVerificacao() {
-            try {
-                const response = await fetch('/api/alertas/verificar', {
-                    method: 'POST'
-                });
-                
-                const data = await response.json();
-                
-                // Recarregar alertas e produtos
-                await Promise.all([
-                    carregarAlertas(),
-                    carregarProdutos()
-                ]);
-                
-                alert(`Verificação concluída!\n${data.mensagem}`);
-                
-            } catch (error) {
-                console.error('Erro na verificação:', error);
-                alert('Erro ao verificar alertas');
-            }
-        }
-
-        function verDetalhesProduto(uuid) {
-            // Implementar visualização detalhada do produto
-            alert('Função de detalhes do produto será implementada');
-        }
-
-        // Atualize a função carregarProdutos para também carregar alertas
-        async function carregarProdutos() {
-            try {
-                const [produtosResponse, alertasResponse] = await Promise.all([
-                    fetch('/produtos/'),
-                    fetch('/api/alertas/vencimento')
-                ]);
-                
-                produtos = await produtosResponse.json();
-                const alertasData = await alertasResponse.json();
-                alertasAtivos = alertasData.alertas;
-                
-                atualizarBarraAlertas(alertasData);
                 renderizarProdutos(produtos);
-            } catch (error) {
-                console.error('Erro ao carregar produtos:', error);
-                document.getElementById('produtos-container').innerHTML = `
-                    <div class="empty-state">
-                        <i class="fa-solid fa-exclamation-triangle"></i>
-                        <h3>Erro ao carregar produtos</h3>
-                        <p>Tente recarregar a página.</p>
-                    </div>
+                mostrarApenasEstoqueBaixo = false;
+                
+                document.querySelector('#estoqueContainer .btn-ver-alertas').innerHTML = `
+                    <i class="fa-solid fa-filter"></i>
+                    Ver Estoque Crítico
                 `;
             }
         }
 
+        // Carregar fornecedores
         async function carregarFornecedores() {
             try {
-                console.log('Carregando fornecedores...');
                 const response = await fetch('/fornecedores/');
-                
-                if (!response.ok) {
-                    throw new Error(`Erro HTTP: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                console.log('Fornecedores carregados:', data);
-                
-                fornecedores = data;
+                fornecedores = await response.json();
                 const select = document.getElementById('fornecedorUuid');
                 
                 select.innerHTML = '<option value="">Selecione um fornecedor...</option>';
@@ -1422,47 +1776,22 @@
                 
                 return fornecedores;
             } catch (error) {
-                console.error('Erro detalhado ao carregar fornecedores:', error);
-                const select = document.getElementById('fornecedorUuid');
-                select.innerHTML = '<option value="">Erro ao carregar fornecedores</option>';
+                console.error('Erro ao carregar fornecedores:', error);
                 mostrarMensagem('Erro ao carregar lista de fornecedores', 'error');
                 throw error;
             }
         }
 
-        function filtrarProdutos() {
-            const termo = document.getElementById('searchInput').value.toLowerCase();
-            const produtosFiltrados = produtos.filter(produto =>
-                produto.nome.toLowerCase().includes(termo) ||
-                produto.categoria.toLowerCase().includes(termo) ||
-                produto.descricao?.toLowerCase().includes(termo) ||
-                produto.localizacao?.toLowerCase().includes(termo) ||
-                produto.tipo_produto?.toLowerCase().includes(termo) ||
-                (produto.tipo_produto === 'defensivo' && 
-                 (produto.numero_anvisa?.toLowerCase().includes(termo) ||
-                  produto.tipo_toxico?.toLowerCase().includes(termo) ||
-                  produto.cuidados_armazenamento?.toLowerCase().includes(termo)))
-            );
-            renderizarProdutos(produtosFiltrados);
-        }
-
-        async function abrirModalCadastro() {
+        // Modal functions
+        function abrirModalCadastro() {
             produtoEditando = null;
             document.getElementById('modalTitle').textContent = 'Novo Produto';
             document.getElementById('produtoForm').reset();
             document.getElementById('produtoUuid').value = '';
-            
-            // Definir tipo padrão
             document.getElementById('tipoProduto').value = 'alimento';
-            toggleCamposDefensivo(); // Esconde campos de defensivo por padrão
+            toggleCamposDefensivo();
             
-            try {
-                await carregarFornecedores();
-                document.getElementById('produtoModal').style.display = 'block';
-            } catch (error) {
-                console.error('Erro ao preparar modal:', error);
-                document.getElementById('produtoModal').style.display = 'block';
-            }
+            document.getElementById('produtoModal').style.display = 'block';
         }
 
         function fecharModal() {
@@ -1470,10 +1799,12 @@
             produtoEditando = null;
         }
 
+        // Editar produto
         async function editarProduto(uuid) {
             try {
                 await carregarFornecedores();
                 const response = await fetch(`/produtos/editar/${uuid}`);
+                
                 if (!response.ok) {
                     throw new Error('Produto não encontrado');
                 }
@@ -1496,16 +1827,12 @@
                 document.getElementById('localizacao').value = produto.localizacao || '';
                 document.getElementById('status').value = produto.status;
                 document.getElementById('estoqueMinimo').value = produto.estoque_minimo || 0;
-                
-                // NOVOS CAMPOS
                 document.getElementById('tipoProduto').value = produto.tipo_produto || 'alimento';
                 document.getElementById('numeroAnvisa').value = produto.numero_anvisa || '';
                 document.getElementById('tipoToxico').value = produto.tipo_toxico || '';
                 document.getElementById('cuidadosArmazenamento').value = produto.cuidados_armazenamento || '';
                 
-                // Atualiza a exibição dos campos de defensivo
                 toggleCamposDefensivo();
-                
                 document.getElementById('produtoModal').style.display = 'block';
             } catch (error) {
                 console.error('Erro ao carregar produto para edição:', error);
@@ -1513,8 +1840,8 @@
             }
         }
 
-        // Form submission
-        document.getElementById('produtoForm').addEventListener('submit', async (e) => {
+        // Salvar produto
+        async function salvarProduto(e) {
             e.preventDefault();
             
             const produtoData = {
@@ -1529,8 +1856,6 @@
                 fornecedor_uuid: document.getElementById('fornecedorUuid').value,
                 localizacao: document.getElementById('localizacao').value,
                 status: document.getElementById('status').value,
-                
-                // NOVOS CAMPOS
                 tipo_produto: document.getElementById('tipoProduto').value,
                 numero_anvisa: document.getElementById('numeroAnvisa').value || null,
                 tipo_toxico: document.getElementById('tipoToxico').value || null,
@@ -1542,17 +1867,13 @@
                 if (produtoEditando) {
                     response = await fetch(`/produtos/${produtoEditando.uuid}`, {
                         method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(produtoData)
                     });
                 } else {
                     response = await fetch('/produtos/', {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(produtoData)
                     });
                 }
@@ -1572,8 +1893,9 @@
                 console.error('Erro ao salvar produto:', error);
                 mostrarMensagem(`Erro: ${error.message}`, 'error');
             }
-        });
+        }
 
+        // Excluir produto
         function confirmarExclusao(uuid, nome) {
             if (confirm(`Tem certeza que deseja excluir o produto "${nome}"?`)) {
                 excluirProduto(uuid);
@@ -1599,10 +1921,26 @@
             }
         }
 
+        // Mostrar mensagem
         function mostrarMensagem(mensagem, tipo) {
-            alert(mensagem);
+            const flashContainer = document.getElementById('flash-messages');
+            const flashClass = tipo === 'success' ? 'flash-success' : 
+                            tipo === 'error' ? 'flash-error' : 'flash-info';
+            
+            const flashDiv = document.createElement('div');
+            flashDiv.className = `flash-message ${flashClass}`;
+            flashDiv.textContent = mensagem;
+            
+            flashContainer.appendChild(flashDiv);
+            
+            setTimeout(() => {
+                if (flashDiv.parentNode === flashContainer) {
+                    flashDiv.remove();
+                }
+            }, 5000);
         }
 
+        // Event listeners
         window.onclick = function(event) {
             const modal = document.getElementById('produtoModal');
             if (event.target === modal) {
@@ -1610,13 +1948,15 @@
             }
         }
 
-        document.getElementById('searchInput').addEventListener('input', filtrarProdutos);
-
-        document.addEventListener('DOMContentLoaded', function() {
-            carregarProdutos();
-            carregarFornecedores();
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const modal = document.getElementById('produtoModal');
+                if (modal.style.display === 'block') {
+                    fecharModal();
+                }
+            }
         });
-    
+
     </script>
 </body>
 </html>
