@@ -421,8 +421,6 @@ def registrar_entrada(movimento: Movimento, request: Request, db: sqlite3.Connec
 
     return movimento
 
-
-
 #MATEUSSSSSSSSSSSSSSSSSSSS
 @app.post("/movimentos/saida", response_model=Movimento)
 def registrar_saida(movimento: Movimento, request: Request, db: sqlite3.Connection = Depends(get_db)):
@@ -478,7 +476,6 @@ def registrar_saida(movimento: Movimento, request: Request, db: sqlite3.Connecti
     
     db.commit()
 
-    # Registrar log da saída
     detalhes = (
         f"Movimento UUID: {movimento.uuid} | "
         f"Produto: {produto['nome']} | "
@@ -528,30 +525,29 @@ def cadastrar_produto(request: Request, produto: Produto, db: sqlite3.Connection
     fornecedor = cursor.fetchone()
     
     cursor.execute(
-        "INSERT INTO produtos VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",  
+        "INSERT INTO produtos VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",  
         (
-            produto.uuid,                    # 1
-            produto.nome,                    # 2
-            produto.descricao,               # 3
-            produto.categoria,               # 4
-            produto.tipo_produto.value,      # 5
-            produto.numero_anvisa,           # 6
-            produto.cuidados_armazenamento,  # 7
-            produto.tipo_toxico,             # 8
-            produto.quantidade,              # 9
-            produto.estoque_minimo,          # 10
-            produto.preco_unitario,          # 11
-            produto.data_validade.isoformat() if produto.data_validade else None,  # 12
-            produto.lote,                    # 13
-            produto.fornecedor_uuid,         # 14
-            produto.localizacao,             # 15
-            produto.status.value,            # 16
-            usuario_uuid,                    # 17
-            dias_para_vencer,                # 18 
+            produto.uuid,                    
+            produto.nome,                    
+            produto.descricao,               
+            produto.categoria,               
+            produto.numero_anvisa,           
+            produto.cuidados_armazenamento,  
+            produto.tipo_toxico,             
+            produto.quantidade,              
+            produto.estoque_minimo,          
+            produto.preco_unitario,          
+            produto.data_validade.isoformat() if produto.data_validade else None, 
+            produto.lote,                    
+            produto.fornecedor_uuid,         
+            produto.localizacao,             
+            produto.status.value,            
+            usuario_uuid,                    
+            dias_para_vencer,                 
         )
     )
     db.commit()
-    # Registrar log do cadastro
+    
     detalhes = (
         f"UUID: {produto.uuid} | "
         f"Produto: {produto.nome}| "
@@ -592,7 +588,7 @@ def cadastrar_fornecedor(request:Request, fornecedor: Fornecedor, db: sqlite3.Co
         (fornecedor.uuid, fornecedor.nome, fornecedor.telefone, fornecedor.email, usuario_uuid)
     )
     db.commit()
-    # Registrar log do cadastro
+
     detalhes = (
         f"UUID: {fornecedor.uuid} | "
         f"Nome: {fornecedor.nome} | "
@@ -761,7 +757,7 @@ def atualizar_produto(uuid: str, produto: Produto, request: Request, db: sqlite3
     
     cursor.execute(
         """UPDATE produtos SET 
-            nome = ?, descricao = ?, categoria = ?, tipo_produto = ?,
+            nome = ?, descricao = ?, categoria = ?,
             numero_anvisa = ?, cuidados_armazenamento = ?, tipo_toxico = ?,
             quantidade = ?, estoque_minimo = ?, preco_unitario = ?, data_validade = ?, lote = ?, 
             fornecedor_uuid = ?, localizacao = ?, status = ? 
@@ -770,7 +766,6 @@ def atualizar_produto(uuid: str, produto: Produto, request: Request, db: sqlite3
             produto.nome,
             produto.descricao,
             produto.categoria,
-            produto.tipo_produto.value,
             produto.numero_anvisa,
             produto.cuidados_armazenamento,
             produto.tipo_toxico,
@@ -1623,8 +1618,6 @@ def relatorio_logs_pdf_admin(usuario_uuid: str, request: Request, db: sqlite3.Co
             "Content-Disposition": f"attachment; filename=Relatorio_{usuario_nome}.pdf"
         }
     )
-
-
 
 
 @app.get("/relatorios", response_class=HTMLResponse)
