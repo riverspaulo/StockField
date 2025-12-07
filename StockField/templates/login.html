@@ -10,7 +10,7 @@
 </head>
 
 <body>
-    <div class="container" id="container">
+     <div class="container" id="container">
         <div class="form-container sign-in">
             <form action="{{ url_for('login') }}" method="post">
                 <h1 class="title-h1">Login</h1>
@@ -28,7 +28,10 @@
                 {% endif %}
                 <br>
                 <input type="text" name="cnpj" placeholder="CNPJ" style="margin-bottom: 10.5px;" required>
-                <input type="password" name="senha" placeholder="Senha" required>
+                <div class="password-wrapper">
+                        <input type="password" id="senha" name="senha" placeholder="Senha" required>
+                        <i class="fa-solid fa-eye-slash" id="toggleSenha"></i>
+                </div>
                 <br>
                 <button style="margin-bottom: 10px;">Entrar</button>
                 
@@ -47,7 +50,43 @@
             </div>
         </div>
     </div>
-
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleSenha = document.getElementById('toggleSenha');
+            const senhaInput = document.getElementById('senha');
+            
+            if (toggleSenha && senhaInput) {
+                toggleSenha.addEventListener('click', function() {
+                    if (this.classList.contains('fa-eye-slash')) {
+                        senhaInput.setAttribute('type', 'text');
+                        this.classList.remove('fa-eye-slash');
+                        this.classList.add('fa-eye');
+                    } else {
+                        senhaInput.setAttribute('type', 'password');
+                        this.classList.remove('fa-eye');
+                        this.classList.add('fa-eye-slash');
+                    }
+                });
+            }
+            
+            const toggleConfirmarSenha = document.getElementById('toggleConfirmarSenha');
+            const confirmarSenhaInput = document.getElementById('confirmar_senha');
+            
+            if (toggleConfirmarSenha && confirmarSenhaInput) {
+                toggleConfirmarSenha.addEventListener('click', function() {
+                    if (this.classList.contains('fa-eye-slash')) {
+                        confirmarSenhaInput.setAttribute('type', 'text');
+                        this.classList.remove('fa-eye-slash');
+                        this.classList.add('fa-eye');
+                    } else {
+                        confirmarSenhaInput.setAttribute('type', 'password');
+                        this.classList.remove('fa-eye');
+                        this.classList.add('fa-eye-slash');
+                    }
+                });
+            }
+        });
+    </script>
     <script src="/static/js/script.js"></script>
 </body>
 
