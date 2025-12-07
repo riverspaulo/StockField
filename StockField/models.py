@@ -38,8 +38,7 @@ class Usuario(BaseModel):
     senha: str
     tipo: TipoUsuario
 
-
-class TipoProduto(str, Enum):
+class Categoria(str, Enum):
     alimento = "alimento"
     defensivo = "defensivo"
     outros = "outros"  
@@ -48,8 +47,7 @@ class Produto(BaseModel):
     uuid: Optional[str] = None
     nome: str
     descricao: Optional[str] = None
-    categoria: str
-    tipo_produto: TipoProduto = TipoProduto.alimento  
+    categoria: Categoria = Categoria.alimento  
     numero_anvisa: Optional[str] = None  
     cuidados_armazenamento: Optional[str] = None  
     tipo_toxico: Optional[str] = None  
@@ -130,7 +128,6 @@ def init_db():
             nome TEXT NOT NULL,
             descricao TEXT NOT NULL,
             categoria TEXT NOT NULL,
-            tipo_produto TEXT NOT NULL DEFAULT 'alimento',
             numero_anvisa TEXT, 
             cuidados_armazenamento TEXT,
             tipo_toxico TEXT, 
@@ -457,7 +454,6 @@ def obter_resumo_estoque(db: sqlite3.Connection, usuario_uuid: str):
         "total_alertas": estoque_baixo
     }
 
-
 def registrar_log(db, usuario_uuid: str, acao: str, detalhes: str = None):
     cursor = db.cursor()
     log_id = str(uuid.uuid4())
@@ -469,7 +465,6 @@ def registrar_log(db, usuario_uuid: str, acao: str, detalhes: str = None):
     """, (log_id, usuario_uuid, acao, detalhes, data))
 
     db.commit()
-
 
 # Função para recortar a imagem da logo
 def cortar_logo(caminho_logo):
@@ -488,8 +483,6 @@ def cortar_logo(caminho_logo):
     except Exception as e:
         print("Erro ao recortar logo:", e)
         return caminho_logo
-
-
 
 def gerar_pdf_logs(logs, usuario_nome):
     buffer_pdf = BytesIO()
@@ -632,4 +625,3 @@ def gerar_pdf_logs(logs, usuario_nome):
     doc.build(elementos)
     buffer_pdf.seek(0)
     return buffer_pdf
-
