@@ -783,6 +783,25 @@ def pagina_fornecedores(request: Request):
         "user": request.session["user"]
     })
 
+@app.get("/fornecedores/{uuid}", response_model=Fornecedor)
+def obter_fornecedor_por_uuid(
+    request: Request,
+    uuid: str, 
+    db: sqlite3.Connection = Depends(get_db)
+):
+    """Obtém um fornecedor específico por UUID"""
+    if "user" not in request.session:
+        raise HTTPException(status_code=401, detail="Não autorizado")
+    
+    cursor = db.cursor()
+    cursor.execute("SELECT * FROM fornecedores WHERE uuid = ?", (uuid,))
+    fornecedor = cursor.fetchone()
+    
+    if not fornecedor:
+        raise HTTPException(status_code=404, detail="Fornecedor não encontrado")
+    
+    return Fornecedor(**dict(fornecedor))
+
 @app.put("/fornecedores/{uuid}", response_model=Fornecedor)
 def atualizar_fornecedor(request:Request, uuid: str, fornecedor: Fornecedor, db: sqlite3.Connection = Depends(get_db)):
     if "user" not in request.session:
