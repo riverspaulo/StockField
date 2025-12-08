@@ -264,12 +264,27 @@
             gap: 14px;
         }
 
-        /* Estatísticas no estilo de cards */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        .layout-container {
+            display: flex;
+            gap: 20px;
+            flex: 1;
+            overflow: hidden;
+            margin-top: -13px;
+        }
+
+        .left-column {
+            flex: 0 0 280px;
+            display: flex;
+            flex-direction: column;
             gap: 15px;
-            margin-bottom: 20px;
+            background-color: #e9e9e9;
+            margin-top: -3px;
+        }
+
+        .stats-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
 
         .stat-card {
@@ -305,15 +320,15 @@
         }
 
         .stat-icon.produtos {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            background: linear-gradient(135deg, #7fa531 0%, #96bd3e 100%);
         }
 
         .stat-icon.entradas {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            background: linear-gradient(135deg, #7fa531 0%, #96bd3e 100%);
         }
 
         .stat-icon.ativos {
-            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            background: linear-gradient(135deg, #7fa531 0%, #96bd3e 100%);
         }
 
         .stat-info h3 {
@@ -325,6 +340,219 @@
         .stat-info p {
             color: #666;
             font-size: 12px;
+        }
+
+        .right-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: #e9e9e9;
+            overflow: hidden;
+            margin-top: -13px;
+        }
+
+        .fornecedores-main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: #e9e9e9;
+            overflow: hidden;
+            padding: 0 5px;
+        }
+
+        .search-container {
+            margin-bottom: 15px;
+            flex-shrink: 0;
+        }
+
+        .search-box {
+            display: flex;
+            width: 100%;
+            margin-top:14px;
+            max-width: 500px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 10px 12px;
+            border: 2px solid #96bd3e;
+            border-right: none;
+            border-radius: 6px 0 0 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            background-color: white;
+            width: 100%;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #66802e;
+        }
+
+        .search-btn {
+            background: #7fa531;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 0 6px 6px 0;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .search-btn:hover {
+            background: #66802e;
+        }
+
+        .fornecedores-container-wrapper {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 8px;
+            padding-top: 5px;
+            max-height: calc(100vh - 250px);
+        }
+
+        .fornecedores-container-wrapper::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .fornecedores-container-wrapper::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .fornecedores-container-wrapper::-webkit-scrollbar-thumb {
+            background: #96bd3e;
+            border-radius: 10px;
+        }
+
+        .fornecedores-container-wrapper::-webkit-scrollbar-thumb:hover {
+            background: #7fa531;
+        }
+
+        .fornecedores-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 12px;
+            padding-bottom: 20px;
+            margin-bottom: 10px;
+        }
+
+        .fornecedor-card {
+            background: white;
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-left: 4px solid #96bd3e;
+            min-height: 160px;
+            height: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .fornecedor-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .fornecedor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .fornecedor-nome {
+            font-size: 15px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 0;
+            line-height: 1.3;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .fornecedor-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .btn-action {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+
+        .btn-edit {
+            color: #f39c12;
+        }
+
+        .btn-delete {
+            color: #e74c3c;
+        }
+
+        .btn-action:hover {
+            background: #f8f9fa;
+        }
+
+        .fornecedor-info {
+            margin-bottom: 8px;
+            flex: 1;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+            margin-bottom: 4px;
+            color: #555;
+            font-size: 12px;
+            line-height: 1.4;
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .info-item i {
+            width: 12px;
+            color: #7f8c8d;
+            flex-shrink: 0;
+            margin-top: 1px;
+            font-size: 11px;
+        }
+
+        .info-item span {
+            word-break: break-word;
+            overflow-wrap: break-word;
+            flex: 1;
+            font-size: 12px;
+        }
+
+        .fornecedor-stats {
+            display: flex;
+            gap: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #ecf0f1;
+            flex-shrink: 0;
+        }
+
+        .stat {
+            text-align: center;
+            flex: 1;
+        }
+
+        .stat-number {
+            font-size: 13px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .stat-label {
+            font-size: 9px;
+            color: #7f8c8d;
         }
 
         .content-header {
@@ -452,15 +680,15 @@
             background: #7fa531;
             color: white;
             border: none;
-            padding: 4px 8px;
+            padding: 3px 6px;
             border-radius: 3px;
             cursor: pointer;
-            font-size: 10px;
+            font-size: 9px;
             display: flex;
             align-items: center;
-            gap: 3px;
+            gap: 2px;
             transition: background 0.3s;
-            height: 24px;
+            height: 20px;
             line-height: 1;
         }
 
@@ -469,141 +697,7 @@
         }
 
         .btn-edit-small i {
-            font-size: 9px;
-        }
-
-        .search-and-fornecedores {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            overflow: hidden;
-        }
-
-        .fornecedores-container-wrapper {
-            flex: 1;
-            overflow-y: auto;
-            padding-right: 5px;
-            margin-top: 10px;
-        }
-
-        .fornecedores-container-wrapper::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .fornecedores-container-wrapper::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-
-        .fornecedores-container-wrapper::-webkit-scrollbar-thumb {
-            background: #96bd3e;
-            border-radius: 10px;
-        }
-
-        .fornecedores-container-wrapper::-webkit-scrollbar-thumb:hover {
-            background: #7fa531;
-        }
-
-        .fornecedores-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 15px;
-            margin-bottom: 10px;
-        }
-
-        .fornecedor-card {
-            background: white;
-            border-radius: 12px;
-            padding: 18px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
-            border-left: 4px solid #96bd3e;
-        }
-
-        .fornecedor-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-        }
-
-        .fornecedor-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 12px;
-        }
-
-        .fornecedor-nome {
-            font-size: 18px;
-            font-weight: bold;
-            color: #2c3e50;
-            margin: 0;
-        }
-
-        .fornecedor-actions {
-            display: flex;
-            gap: 6px;
-        }
-
-        .btn-action {
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 5px;
-            border-radius: 4px;
-            transition: background 0.3s;
-        }
-
-        .btn-edit {
-            color: #f39c12;
-        }
-
-        .btn-delete {
-            color: #e74c3c;
-        }
-
-        .btn-action:hover {
-            background: #f8f9fa;
-        }
-
-        .fornecedor-info {
-            margin-bottom: 12px;
-        }
-
-        .info-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 6px;
-            color: #555;
-            font-size: 14px;
-        }
-
-        .info-item i {
-            width: 14px;
-            color: #7f8c8d;
-        }
-
-        .fornecedor-stats {
-            display: flex;
-            gap: 12px;
-            padding-top: 12px;
-            border-top: 1px solid #ecf0f1;
-        }
-
-        .stat {
-            text-align: center;
-            flex: 1;
-        }
-
-        .stat-number {
-            font-size: 16px;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-
-        .stat-label {
-            font-size: 11px;
-            color: #7f8c8d;
+            font-size: 8px;
         }
 
         .modal {
@@ -701,50 +795,11 @@
             border-top: 1px solid #ddd;
         }
 
-        .search-container {
-            margin-bottom: 20px;
-            flex-shrink: 0;
-        }
-
-        .search-box {
-            display: flex;
-            max-width: 400px;
-        }
-
-        .search-input {
-            flex: 1;
-            padding: 12px;
-            border: 2px solid #96bd3e;
-            border-right: none;
-            border-radius: 6px 0 0 6px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-            background-color: white;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: #66802e;
-        }
-
-        .search-btn {
-            background: #7fa531;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 0 6px 6px 0;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        .search-btn:hover {
-            background: #66802e;
-        }
-
         .empty-state {
             text-align: center;
             padding: 40px 20px;
             color: #7f8c8d;
+            grid-column: 1 / -1;
         }
 
         .empty-state i {
@@ -762,6 +817,7 @@
             text-align: center;
             padding: 40px;
             color: #7f8c8d;
+            grid-column: 1 / -1;
         }
 
         .flash-messages {
@@ -835,8 +891,8 @@
         }
 
         .fornecedor-avatar-initial {
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             background: linear-gradient(135deg, #7fa531 0%, #96bd3e 100%);
             border-radius: 50%;
             display: flex;
@@ -844,7 +900,19 @@
             justify-content: center;
             color: white;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+        .user-info-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #66802e;
+            font-weight: 600;
+        }
+
+        .user-info-header i {
+            font-size: 24px;
         }
 
         @media (max-width: 768px) {
@@ -929,11 +997,43 @@
             .stats-grid {
                 grid-template-columns: 1fr;
             }
+            
+            .right-column {
+                margin-top: 0;
+            }
+            
+            .search-box {
+                width: 100%;
+                max-width: 100%;
+            }
+            
+            .fornecedor-header > div > div > div {
+                white-space: normal;
+                word-break: break-word;
+            }
+            
+            .layout-container {
+                margin-top: 0;
+            }
         }
 
         @media (max-width: 1200px) {
             .fornecedores-grid {
                 grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            }
+            
+            .layout-container {
+                flex-direction: column;
+                margin-top: 0;
+            }
+            
+            .left-column {
+                flex: 0 0 auto;
+                margin-top: 0;
+            }
+            
+            .right-column {
+                margin-top: 0;
             }
         }
 
@@ -1011,6 +1111,10 @@
                 flex-direction: column;
                 gap: 0;
             }
+            
+            .fornecedores-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         @media (max-width: 400px) {
@@ -1032,11 +1136,18 @@
             }
             
             .fornecedor-card {
-                padding: 15px;
+                padding: 10px;
+                min-height: 150px;
             }
             
             .fornecedor-nome {
-                font-size: 16px;
+                font-size: 14px;
+            }
+            
+            .fornecedor-avatar-initial {
+                width: 28px;
+                height: 28px;
+                font-size: 11px;
             }
         }
     </style>
@@ -1053,7 +1164,7 @@
             </div>
 
             <ul id="side_items">
-               <li class="side-item active">
+               <li class="side-item">
                     <a href="/profile_admin">
                         <i class="fa-solid fa-house"></i>
                         <span class="item-description">
@@ -1071,7 +1182,7 @@
                     </a>
                 </li>
 
-                <li class="side-item">
+                <li class="side-item active">
                     <a href="/fornecedores_admin">
                         <i class="fa-solid fa-truck"></i>
                         <span class="item-description">
@@ -1101,6 +1212,10 @@
         <div class="header-logo-container">
             <img src="/static/images/logo_colorida.png" alt="StockField Logo" class="header-logo" id="header-logo">
         </div>
+        <div class="user-info-header">
+            <i class="fas fa-user-circle"></i>
+            <span>{{ user.nome }}</span>
+        </div>
     </header>
     
     <main class="fade-in">
@@ -1119,65 +1234,74 @@
             <div id="flash-messages" class="flash-messages">
             </div>
 
-            <!-- Estatísticas -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon fornecedores">
-                        <i class="fas fa-truck"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3 id="totalFornecedores">0</h3>
-                        <p>Total de Fornecedores</p>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon produtos">
-                        <i class="fas fa-box"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3 id="totalProdutos">0</h3>
-                        <p>Produtos Fornecidos</p>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon entradas">
-                        <i class="fas fa-sign-in-alt"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3 id="totalEntradas">0</h3>
-                        <p>Entradas Registradas</p>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon ativos">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3 id="fornecedoresAtivos">0</h3>
-                        <p>Fornecedores Ativos</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="search-and-fornecedores">
-                <div class="search-container">
-                    <div class="search-box">
-                        <input type="text" class="search-input" id="searchInput" placeholder="Buscar fornecedores por nome, telefone ou email..." 
-                               onkeyup="buscarFornecedores()">
-                        <button class="search-btn" onclick="buscarFornecedores()">
-                            <i class="fa-solid fa-search"></i>
-                        </button>
+            <div class="layout-container">
+             
+                <div class="left-column">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon fornecedores">
+                                <i class="fas fa-truck"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="totalFornecedores">0</h3>
+                                <p>Total de Fornecedores</p>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon produtos">
+                                <i class="fas fa-box"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="totalProdutos">0</h3>
+                                <p>Produtos Fornecidos</p>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon entradas">
+                                <i class="fas fa-sign-in-alt"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="totalEntradas">0</h3>
+                                <p>Entradas Registradas</p>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon ativos">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="fornecedoresAtivos">0</h3>
+                                <p>Fornecedores Ativos</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="fornecedores-container-wrapper">
-                    <div id="fornecedoresContainer" class="fornecedores-grid">
-                        <div class="loading">
-                            <i class="fa-solid fa-spinner fa-spin"></i>
-                            <p>Carregando fornecedores...</p>
+                <!-- COLUNA DA DIREITA - PESQUISA E FORNECEDORES -->
+                <div class="right-column">
+                    <div class="fornecedores-main-container">
+                        <div class="search-container">
+                            <div class="search-box">
+                                <input type="text" class="search-input" id="searchInput" 
+                                       placeholder="Buscar fornecedores por nome, telefone ou email..." 
+                                       onkeyup="buscarFornecedores()"
+                                       style="width: 100%;">
+                                <button class="search-btn" onclick="buscarFornecedores()">
+                                    <i class="fa-solid fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="fornecedores-container-wrapper">
+                            <div id="fornecedoresContainer" class="fornecedores-grid">
+                                <div class="loading">
+                                    <i class="fa-solid fa-spinner fa-spin"></i>
+                                    <p>Carregando fornecedores...</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1185,7 +1309,6 @@
         </div>
     </main>
 
-    <!-- Modal para Cadastro/Edição -->
     <div id="fornecedorModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -1225,9 +1348,7 @@
             </form>
         </div>
     </div>
-
     <script>
-        // Variáveis globais
         const LOGO_FECHADO = "/static/images/ezgif.com-animated-gif-maker.gif";
         const LOGO_ABERTO = "/static/images/logo_colorida.png";
         const HEADER_LOGO = "/static/images/logo_colorida.png";
@@ -1242,19 +1363,21 @@
             aberto: null
         };
 
-        // Carregar dados iniciais
         document.addEventListener('DOMContentLoaded', () => {
             preloadImages();
             setupSidebar();
             carregarEstatisticas();
             carregarFornecedores();
             
-            // Configurar evento de tecla Enter na pesquisa
+            
             document.getElementById('searchInput').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
                     buscarFornecedores();
                 }
             });
+            
+            
+            adicionarEventListeners();
         });
 
         function preloadImages() {
@@ -1370,14 +1493,12 @@
                 console.error('Erro ao carregar estatísticas:', error);
                 mostrarMensagem('Erro ao carregar estatísticas', 'error');
                 
-                // Valores padrão em caso de erro
                 document.getElementById('totalFornecedores').textContent = '0';
                 document.getElementById('totalProdutos').textContent = '0';
                 document.getElementById('totalEntradas').textContent = '0';
                 document.getElementById('fornecedoresAtivos').textContent = '0';
             }
         }
-
 
         // Carregar todos os fornecedores com estatísticas
         async function carregarFornecedores() {
@@ -1425,7 +1546,6 @@
             }
         }
 
- 
         function renderizarFornecedores(fornecedores) {
             const container = document.getElementById('fornecedoresContainer');
             
@@ -1445,30 +1565,36 @@
             fornecedores.forEach(fornecedor => {
                 const card = document.createElement('div');
                 card.className = 'fornecedor-card';
+                card.style.minHeight = '160px';
+                card.setAttribute('data-uuid', fornecedor.uuid);
+                card.setAttribute('data-nome', fornecedor.nome);
+                
                 card.innerHTML = `
                     <div class="fornecedor-header">
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <div class="fornecedor-avatar-initial">
+                        <div style="display: flex; align-items: flex-start; gap: 10px; width: 100%;">
+                            <div class="fornecedor-avatar-initial" style="flex-shrink: 0;">
                                 ${fornecedor.nome.charAt(0).toUpperCase()}
                             </div>
-                            <div>
-                                <h3 class="fornecedor-nome">${fornecedor.nome}</h3>
-                                <div style="font-size: 12px; color: #666;">
+                            <div style="flex: 1; min-width: 0;">
+                                <h3 class="fornecedor-nome" style="overflow: hidden; text-overflow: ellipsis;">
+                                    ${fornecedor.nome}
+                                </h3>
+                                <div style="font-size: 11px; color: #666; word-break: break-word;">
                                     ${fornecedor.email}
                                 </div>
                             </div>
                         </div>
-                        <div class="fornecedor-actions">
-                            <button class="btn-edit-small" onclick="editarFornecedor('${fornecedor.uuid}')">
+                        <div class="fornecedor-actions" style="flex-shrink: 0;">
+                            <button class="btn-edit-small" data-action="editar" data-uuid="${fornecedor.uuid}">
                                 <i class="fas fa-edit"></i>
                                 Editar
                             </button>
-                            <button class="btn-action btn-delete" onclick="excluirFornecedor('${fornecedor.uuid}', '${fornecedor.nome}')" title="Excluir">
+                            <button class="btn-action btn-delete" data-action="excluir" data-uuid="${fornecedor.uuid}" data-nome="${fornecedor.nome}" title="Excluir">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
                     </div>
-                    <div class="fornecedor-info">
+                    <div class="fornecedor-info" style="flex: 1;">
                         <div class="info-item">
                             <i class="fas fa-phone"></i>
                             <span><strong>Telefone:</strong> ${fornecedor.telefone || 'Não informado'}</span>
@@ -1505,9 +1631,41 @@
                 `;
                 container.appendChild(card);
             });
+            
+            // Não precisamos chamar adicionarEventListeners() aqui porque
+            // já chamamos no DOMContentLoaded e a delegação de eventos
+            // funciona globalmente
         }
 
-        // Buscar fornecedores
+        function adicionarEventListeners() {
+            // Usar event delegation para os botões
+            // O listener já está ativo globalmente desde o DOMContentLoaded
+        }
+
+        // Adicionar o event delegation uma vez, globalmente
+        document.addEventListener('click', function(e) {
+            const target = e.target;
+            
+            // Encontrar o botão de editar (ou seu ícone)
+            const editBtn = target.closest('[data-action="editar"]');
+            const deleteBtn = target.closest('[data-action="excluir"]');
+            
+            if (editBtn) {
+                const uuid = editBtn.getAttribute('data-uuid');
+                if (uuid) {
+                    editarFornecedor(uuid);
+                }
+            }
+            
+            if (deleteBtn) {
+                const uuid = deleteBtn.getAttribute('data-uuid');
+                const nome = deleteBtn.getAttribute('data-nome');
+                if (uuid && nome) {
+                    excluirFornecedor(uuid, nome);
+                }
+            }
+        });
+
         function buscarFornecedores() {
             const termo = document.getElementById('searchInput').value.toLowerCase();
             
@@ -1539,6 +1697,7 @@
 
         // Editar fornecedor
         async function editarFornecedor(uuid) {
+            console.log('Editando fornecedor:', uuid); // Debug
             try {
                 const response = await fetch(`/fornecedores/${uuid}`, {
                     headers: {
@@ -1549,6 +1708,7 @@
                 
                 if (response.ok) {
                     const fornecedor = await response.json();
+                    console.log('Dados recebidos:', fornecedor); // Debug
                     
                     document.getElementById('modalTitle').textContent = 'Editar Fornecedor';
                     document.getElementById('fornecedorId').value = fornecedor.uuid;
@@ -1557,6 +1717,9 @@
                     document.getElementById('email').value = fornecedor.email;
                     
                     document.getElementById('fornecedorModal').style.display = 'block';
+                } else {
+                    console.error('Erro na resposta:', response.status); // Debug
+                    mostrarMensagem('Erro ao carregar dados do fornecedor', 'error');
                 }
             } catch (error) {
                 console.error('Erro ao carregar fornecedor para edição:', error);
@@ -1677,7 +1840,6 @@
             }, 5000);
         }
 
-        // Fechar modais ao clicar fora
         window.onclick = (event) => {
             const modal = document.getElementById('fornecedorModal');
             if (event.target === modal) {

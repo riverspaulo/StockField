@@ -712,6 +712,18 @@
             color: #c62828;
             border-left-color: #e74c3c;
         }
+        
+        .user-info-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #66802e;
+            font-weight: 600;
+        }
+
+        .user-info-header i {
+            font-size: 24px;
+        }
 
         .flash-info {
             background: #e3f2fd;
@@ -976,6 +988,10 @@
         <button class="hamburger-btn" id="open_btn2">&#9776;</button>
         <div class="header-logo-container">
             <img src="/static/images/logo_colorida.png" alt="StockField Logo" class="header-logo" id="header-logo">
+        </div>
+        <div class="user-info-header">
+                <i class="fas fa-user-circle"></i>
+                <span>{{ user.nome }}</span>
         </div>
     </header>
     
