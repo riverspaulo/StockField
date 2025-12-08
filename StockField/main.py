@@ -646,38 +646,6 @@ def pagina_fornecedores_admin(request: Request):
         "user": user
     })
 
-# @app.get("/produtos/", response_model=List[Produto])
-# def listar_produtos(request: Request, db: sqlite3.Connection = Depends(get_db)):
-#     if "user" not in request.session:
-#         flash(request, "Você precisa fazer login para acessar esta página.", "error")
-#         url = request.url_for("login")
-#         return RedirectResponse(url=url, status_code=303)
-#     cursor = db.cursor()
-#     usuario_uuid = request.session["user"]["uuid"] 
-#     cursor.execute("SELECT * FROM produtos WHERE usuario_uuid = ?", (usuario_uuid,))
-#     produtos = []
-#     for row in cursor.fetchall():
-#         produto_dict = dict(row)
-#         if produto_dict["data_validade"]:
-#             produto_dict["data_validade"] = date.fromisoformat(produto_dict["data_validade"])
-#         produtos.append(Produto(**produto_dict))
-#     return produtos
-
-# @app.get("/produtos/{nome}", response_model=Produto)
-# def obter_produto(request:Request, nome: str, db: sqlite3.Connection = Depends(get_db)):
-#     if "user" not in request.session:
-#         flash(request, "Você precisa fazer login para acessar esta página.", "error")
-#         url = request.url_for("login")
-#         return RedirectResponse(url=url, status_code=303)
-#     cursor = db.cursor()
-#     cursor.execute("SELECT * FROM produtos WHERE nome = ?", (nome,))
-#     produto = cursor.fetchone()
-#     if not produto:
-#         raise HTTPException(status_code=404, detail="Produto não encontrado")
-#     produto_dict = dict(produto)
-#     if produto_dict["data_validade"]:
-#         produto_dict["data_validade"] = date.fromisoformat(produto_dict["data_validade"])
-#     return Produto(**produto_dict)
 
 @app.get("/produtos/", response_model=List[Produto])
 def listar_produtos(request: Request, db: sqlite3.Connection = Depends(get_db)):
@@ -688,7 +656,6 @@ def listar_produtos(request: Request, db: sqlite3.Connection = Depends(get_db)):
     cursor = db.cursor()
     usuario_uuid = request.session["user"]["uuid"] 
     
-    # Query modificada para incluir JOIN com fornecedores
     cursor.execute("""
         SELECT p.*, f.nome as fornecedor_nome 
         FROM produtos p
@@ -1485,8 +1452,6 @@ def listar_todos_fornecedores_admin(
         raise HTTPException(status_code=403, detail="Acesso restrito a administradores")
     
     cursor = db.cursor()
-    
-    # Query atualizada para incluir contagem de produtos
     cursor.execute("""
         SELECT 
             f.*,
@@ -1589,19 +1554,16 @@ def deletar_produto_admin(
         raise HTTPException(status_code=403, detail="Acesso restrito a administradores")
     
     cursor = db.cursor()
-    
-    # Verificar se o produto existe
     cursor.execute("SELECT * FROM produtos WHERE uuid = ?", (uuid,))
     produto = cursor.fetchone()
     
     if not produto:
         raise HTTPException(status_code=404, detail="Produto não encontrado")
     
-    # Deletar o produto
+
     cursor.execute("DELETE FROM produtos WHERE uuid = ?", (uuid,))
     db.commit()
     
-    # Registrar log
     usuario_uuid = request.session["user"]["uuid"]
     detalhes = f"Produto excluído: {produto['nome']} (UUID: {uuid})"
     registrar_log(db, usuario_uuid, "Exclusão de Produto", detalhes)
@@ -1683,8 +1645,6 @@ def relatorio_logs_pdf_admin(usuario_uuid: str, request: Request, db: sqlite3.Co
         raise HTTPException(status_code=403, detail="Apenas administradores podem acessar este relatório.")
 
     cursor = db.cursor()
-
-    # Buscar todos os logs do usuário escolhido
     cursor.execute("""
         SELECT logs.data, logs.acao, logs.detalhes, usuarios.nome AS usuario_nome
         FROM logs
@@ -1759,19 +1719,14 @@ def obter_estatisticas_admin(
     
     cursor = db.cursor()
     
-    # 1. Total de fornecedores
     cursor.execute("SELECT COUNT(*) as total FROM fornecedores")
     total_fornecedores = cursor.fetchone()["total"]
     
-    # 2. Total de produtos fornecidos (todos os produtos do sistema)
     cursor.execute("SELECT COUNT(*) as total FROM produtos")
     total_produtos = cursor.fetchone()["total"]
     
-    # 3. Total de entradas registradas (movimentos do tipo 'entrada')
     cursor.execute("SELECT COUNT(*) as total FROM movimentos WHERE tipo = 'entrada'")
     total_entradas = cursor.fetchone()["total"]
-    
-    # 4. Fornecedores ativos (fornecedores que têm produtos vinculados)
     cursor.execute("""
         SELECT COUNT(DISTINCT f.uuid) as total 
         FROM fornecedores f
@@ -1779,8 +1734,6 @@ def obter_estatisticas_admin(
     """)
     fornecedores_ativos = cursor.fetchone()["total"]
     
-    # Estatísticas adicionais para o frontend
-    # Total de produtos por fornecedor (média)
     cursor.execute("""
         SELECT 
             COUNT(DISTINCT f.uuid) as fornecedores_com_produtos,
@@ -1789,8 +1742,6 @@ def obter_estatisticas_admin(
         LEFT JOIN produtos p ON f.uuid = p.fornecedor_uuid
     """)
     stats_produtos = cursor.fetchone()
-    
-    # Total de movimentos por fornecedor
     cursor.execute("""
         SELECT 
             COUNT(DISTINCT f.uuid) as fornecedores_com_movimentos,
@@ -1833,8 +1784,6 @@ def listar_fornecedores_detalhados_admin(
         raise HTTPException(status_code=403, detail="Acesso restrito a administradores")
     
     cursor = db.cursor()
-    
-    # Query para obter fornecedores com contagem de produtos e movimentos
     cursor.execute("""
         SELECT 
             f.uuid,
