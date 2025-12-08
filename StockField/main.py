@@ -646,6 +646,39 @@ def pagina_fornecedores_admin(request: Request):
         "user": user
     })
 
+# @app.get("/produtos/", response_model=List[Produto])
+# def listar_produtos(request: Request, db: sqlite3.Connection = Depends(get_db)):
+#     if "user" not in request.session:
+#         flash(request, "Você precisa fazer login para acessar esta página.", "error")
+#         url = request.url_for("login")
+#         return RedirectResponse(url=url, status_code=303)
+#     cursor = db.cursor()
+#     usuario_uuid = request.session["user"]["uuid"] 
+#     cursor.execute("SELECT * FROM produtos WHERE usuario_uuid = ?", (usuario_uuid,))
+#     produtos = []
+#     for row in cursor.fetchall():
+#         produto_dict = dict(row)
+#         if produto_dict["data_validade"]:
+#             produto_dict["data_validade"] = date.fromisoformat(produto_dict["data_validade"])
+#         produtos.append(Produto(**produto_dict))
+#     return produtos
+
+# @app.get("/produtos/{nome}", response_model=Produto)
+# def obter_produto(request:Request, nome: str, db: sqlite3.Connection = Depends(get_db)):
+#     if "user" not in request.session:
+#         flash(request, "Você precisa fazer login para acessar esta página.", "error")
+#         url = request.url_for("login")
+#         return RedirectResponse(url=url, status_code=303)
+#     cursor = db.cursor()
+#     cursor.execute("SELECT * FROM produtos WHERE nome = ?", (nome,))
+#     produto = cursor.fetchone()
+#     if not produto:
+#         raise HTTPException(status_code=404, detail="Produto não encontrado")
+#     produto_dict = dict(produto)
+#     if produto_dict["data_validade"]:
+#         produto_dict["data_validade"] = date.fromisoformat(produto_dict["data_validade"])
+#     return Produto(**produto_dict)
+
 @app.get("/produtos/", response_model=List[Produto])
 def listar_produtos(request: Request, db: sqlite3.Connection = Depends(get_db)):
     if "user" not in request.session:
@@ -654,7 +687,16 @@ def listar_produtos(request: Request, db: sqlite3.Connection = Depends(get_db)):
         return RedirectResponse(url=url, status_code=303)
     cursor = db.cursor()
     usuario_uuid = request.session["user"]["uuid"] 
-    cursor.execute("SELECT * FROM produtos WHERE usuario_uuid = ?", (usuario_uuid,))
+    
+    # Query modificada para incluir JOIN com fornecedores
+    cursor.execute("""
+        SELECT p.*, f.nome as fornecedor_nome 
+        FROM produtos p
+        LEFT JOIN fornecedores f ON p.fornecedor_uuid = f.uuid
+        WHERE p.usuario_uuid = ?
+        ORDER BY p.nome
+    """, (usuario_uuid,))
+    
     produtos = []
     for row in cursor.fetchall():
         produto_dict = dict(row)
@@ -662,22 +704,6 @@ def listar_produtos(request: Request, db: sqlite3.Connection = Depends(get_db)):
             produto_dict["data_validade"] = date.fromisoformat(produto_dict["data_validade"])
         produtos.append(Produto(**produto_dict))
     return produtos
-
-@app.get("/produtos/{nome}", response_model=Produto)
-def obter_produto(request:Request, nome: str, db: sqlite3.Connection = Depends(get_db)):
-    if "user" not in request.session:
-        flash(request, "Você precisa fazer login para acessar esta página.", "error")
-        url = request.url_for("login")
-        return RedirectResponse(url=url, status_code=303)
-    cursor = db.cursor()
-    cursor.execute("SELECT * FROM produtos WHERE nome = ?", (nome,))
-    produto = cursor.fetchone()
-    if not produto:
-        raise HTTPException(status_code=404, detail="Produto não encontrado")
-    produto_dict = dict(produto)
-    if produto_dict["data_validade"]:
-        produto_dict["data_validade"] = date.fromisoformat(produto_dict["data_validade"])
-    return Produto(**produto_dict)
 
 @app.delete("/produtos/{uuid}", response_model=dict)
 def deletar_produto(request:Request, uuid: str, db: sqlite3.Connection = Depends(get_db)):
@@ -701,13 +727,6 @@ def deletar_produto(request:Request, uuid: str, db: sqlite3.Connection = Depends
     registrar_log(db, usuario_uuid, "Produto Deletado", detalhes)
     return {"message": "Produto deletado com sucesso"}
 
-# @app.get("/fornecedores/", response_model=List[Fornecedor])
-# def listar_fornecedores(request:Request, db: sqlite3.Connection = Depends(get_db)):
-#     cursor = db.cursor()
-#     usuario_uuid = request.session["user"]["uuid"] 
-#     cursor.execute("SELECT * FROM fornecedores WHERE usuario_uuid = ?", (usuario_uuid,))
-#     fornecedores = [Fornecedor(**dict(row)) for row in cursor.fetchall()]
-#     return fornecedores
 
 @app.get("/fornecedores/", response_model=List[Fornecedor])
 def listar_fornecedores(request: Request, db: sqlite3.Connection = Depends(get_db)):
@@ -1010,8 +1029,7 @@ def pagina_estoque_critico(request: Request):
         "user": request.session["user"]
     })
 
-
-#ROTAS DOS ADMINISTRADORES 
+# ROTAS DOS ADMINISTRADORES 
 @app.get("/api/admin/usuarios")
 def listar_todos_usuarios(
     request: Request,
@@ -1062,15 +1080,12 @@ def obter_estatisticas_usuarios(
     cursor.execute("SELECT COUNT(*) as total FROM produtos")
     total_produtos = cursor.fetchone()["total"]
     
-    print(f"DEBUG - Estatísticas: usuarios={total_usuarios}, agricultores={total_agricultores}, admins={total_admins}, produtos={total_produtos}")  # Para debug
-    
     return {
         "total_usuarios": total_usuarios,
         "total_agricultores": total_agricultores,
         "total_admins": total_admins,
         "total_produtos": total_produtos
     }
-
 
 @app.post("/api/admin/usuarios")
 def criar_usuario_admin(
@@ -1098,7 +1113,6 @@ def criar_usuario_admin(
     if cursor.fetchone():
         raise HTTPException(status_code=400, detail="CNPJ já cadastrado")
     
-
     usuario.uuid = str(uuid.uuid4())
     cursor.execute(
         "INSERT INTO usuarios VALUES (?, ?, ?, ?, ?, ?)",
@@ -1225,7 +1239,6 @@ def deletar_usuario_admin(
     db.commit()
     
     return {"message": "Usuário excluído com sucesso"}
-
 
 
 @app.get("/logout")
@@ -1846,3 +1859,22 @@ def listar_fornecedores_detalhados_admin(
     
     return [dict(fornecedor) for fornecedor in fornecedores]
 
+@app.get("/api/produtos/dropdown")
+def listar_produtos_dropdown(request: Request, db: sqlite3.Connection = Depends(get_db)):
+    """API específica para dropdown de produtos na movimentação"""
+    if "user" not in request.session:
+        raise HTTPException(status_code=401, detail="Não autorizado")
+    
+    cursor = db.cursor()
+    usuario_uuid = request.session["user"]["uuid"]
+    
+    cursor.execute("""
+        SELECT p.uuid, p.nome, p.quantidade, f.nome as fornecedor_nome
+        FROM produtos p
+        LEFT JOIN fornecedores f ON p.fornecedor_uuid = f.uuid
+        WHERE p.usuario_uuid = ? AND p.status != 'vencido'
+        ORDER BY p.nome
+    """, (usuario_uuid,))
+    
+    produtos = cursor.fetchall()
+    return [dict(produto) for produto in produtos]

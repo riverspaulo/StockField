@@ -1261,9 +1261,6 @@
                     logo.style.objectFit = "cover";
                     logo.style.margin = "0";
                 });
-
-                document.getElementById('searchInput').addEventListener('input', filtrarFornecedores);
-                document.getElementById('fornecedorForm').addEventListener('submit', salvarFornecedor);
             });
 
             function toggleSidebar(sidebar, logo) {
@@ -1297,11 +1294,9 @@
                 }
             }
 
-    
-
             async function carregarProdutos() {
                 try {
-                    const response = await fetch('/produtos/');
+                    const response = await fetch('/api/produtos/dropdown');  // Mudar para nova rota
                     
                     if (!response.ok) {
                         throw new Error('Erro ao carregar produtos');
@@ -1315,6 +1310,7 @@
                         const option = document.createElement('option');
                         option.value = produto.uuid;
                         option.textContent = `${produto.nome} (Estoque: ${produto.quantidade || 0})`;
+                        option.dataset.quantidade = produto.quantidade || 0;
                         select.appendChild(option);
                     });
                     
@@ -1325,41 +1321,67 @@
                 }
             }
 
+
             async function carregarInfoProduto(produtoUuid) {
                 try {
                     const response = await fetch(`/produtos/${produtoUuid}`);
                     const produto = await response.json();
                     const quantidadeInput = document.getElementById('quantidade');
-                    const estoqueInfo = document.getElementById('estoque-info');
                     
-                    if (!estoqueInfo) {
-                        const estoqueDiv = document.createElement('div');
-                        estoqueDiv.id = 'estoque-info';
-                        estoqueDiv.className = 'form-group';
-                        estoqueDiv.innerHTML = `
-                            <label>
-                                <i class="fa-solid fa-boxes-stacked"></i>
-                                Estoque Atual
-                            </label>
-                            <div class="estoque-info" style="padding: 10px; background: #f8f9fa; border-radius: 6px; border: 1px solid #e9ecef;">
-                                <strong>${produto.quantidade}</strong> unidades disponíveis
-                            </div>
-                        `;
-                        quantidadeInput.parentNode.parentNode.appendChild(estoqueDiv);
-                    } else {
-                        estoqueInfo.querySelector('.estoque-info strong').textContent = produto.quantidade;
-                    }
-                    
+                    // Atualizar o placeholder com o estoque atual
                     const tipo = document.getElementById('tipoMovimento').value;
                     if (tipo === 'saida') {
                         quantidadeInput.max = produto.quantidade;
-                        quantidadeInput.placeholder = `Máximo: ${produto.quantidade}`;
+                        quantidadeInput.placeholder = `Máximo: ${produto.quantidade} unidades`;
+                        
+                        // Adicionar ou atualizar mensagem de estoque
+                        let estoqueInfo = document.getElementById('estoque-info');
+                        if (!estoqueInfo) {
+                            estoqueInfo = document.createElement('div');
+                            estoqueInfo.id = 'estoque-info';
+                            estoqueInfo.className = 'form-group';
+                            estoqueInfo.innerHTML = `
+                                <label>
+                                    <i class="fa-solid fa-boxes-stacked"></i>
+                                    Estoque Atual
+                                </label>
+                                <div class="estoque-info" style="padding: 10px; background: #f8f9fa; border-radius: 6px; border: 1px solid #e9ecef;">
+                                    <strong>${produto.quantidade}</strong> unidades disponíveis
+                                </div>
+                            `;
+                            quantidadeInput.parentNode.parentNode.appendChild(estoqueInfo);
+                        } else {
+                            estoqueInfo.querySelector('.estoque-info strong').textContent = produto.quantidade;
+                        }
                     }
                     
                 } catch (error) {
                     console.error('Erro ao carregar informações do produto:', error);
                 }
             }
+
+            // Adicionar evento para validação em tempo real
+            document.getElementById('quantidade').addEventListener('input', function() {
+                const tipo = document.getElementById('tipoMovimento').value;
+                const produtoUuid = document.getElementById('produtoUuid').value;
+                const quantidade = parseInt(this.value) || 0;
+                
+                if (tipo === 'saida' && produtoUuid) {
+                    const produtoSelect = document.getElementById('produtoUuid');
+                    const selectedOption = produtoSelect.options[produtoSelect.selectedIndex];
+                    const estoqueAtual = parseInt(selectedOption.dataset.quantidade) || 0;
+                    
+                    if (quantidade > estoqueAtual) {
+                        this.setCustomValidity(`Estoque insuficiente! Disponível: ${estoqueAtual}`);
+                        this.style.borderColor = '#e74c3c';
+                    } else {
+                        this.setCustomValidity('');
+                        this.style.borderColor = '';
+                    }
+                }
+            });
+
+
 
         document.addEventListener('DOMContentLoaded', function() {
             carregarMovimentos();
