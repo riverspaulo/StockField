@@ -77,6 +77,8 @@ class Movimento(BaseModel):
     data: date
     fornecedor_uuid: str
     usuario_uuid: Optional[str] = None
+    produto_nome: Optional[str] = None
+    fornecedor_nome: Optional[str] = None
 
 
 def get_db():

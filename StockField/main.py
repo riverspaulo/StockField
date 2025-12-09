@@ -351,7 +351,7 @@ def listar_movimentos(request: Request, db: sqlite3.Connection = Depends(get_db)
     for row in movimentos_data:
         movimento_dict = dict(row)
         movimento_dict["data"] = date.fromisoformat(movimento_dict["data"])
-        movimento = Movimento(**{k: v for k, v in movimento_dict.items() if k in Movimento.__fields__})
+        movimento = Movimento(**movimento_dict)
         movimentos.append(movimento)
     
     return movimentos
