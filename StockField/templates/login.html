@@ -6,59 +6,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" href="/static/css/log_cad.css">
     <title>Login - StockField</title>
-    <style>
-        .password-wrapper {
-            position: relative;
-            width: 100%;
-            display: flex;
-            align-items: center;
-        }
-        
-        .password-wrapper input {
-            width: 100%;
-            padding-right: 40px;
-        }
-        
-        .password-wrapper i {
-            position: absolute;
-            right: 12px;
-            cursor: pointer;
-            color: #666;
-            font-size: 16px;
-            background: transparent;
-            z-index: 10;
-        }
-        
-        .btn-entrar {
-            background-color: #96bd3e;
-            color: #fff;
-            font-size: 12px;
-            padding: 10px 30px;
-            border: 1px solid transparent;
-            border-radius: 8px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            margin-top: 10px;
-            cursor: pointer;
-            width: auto;
-            min-width: 120px;
-            text-decoration: none;
-            display: inline-block;
-            text-align: center;
-        }
-        
-        .btn-entrar:hover {
-            background-color: #d6db9f;
-        }
-    </style>
 </head>
 
 <body>
     <div class="container" id="container">
         <div class="form-container sign-in">
             <form action="{{ url_for('login') }}" method="post">
-                <h1 class="title-h1">Login</h1>
+                <h1 class="title-h1" style="width: 30%;">Login</h1>
                 <br>
                 <span style="margin-bottom: 15px;">Insira os dados solicitados</span>
                 
@@ -101,7 +55,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Toggle senha no login
+            
             const toggleSenha = document.getElementById('toggleSenha');
             const senhaInput = document.getElementById('senha');
             
