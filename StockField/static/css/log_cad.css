@@ -144,13 +144,13 @@ body {
 
 .title-h1 {
     text-align: center;
-    width: 6cqi;
+    width: 40%;
 }
 
 .title-h1::after {
     content: "";
     display: block;
-    width: 70%;
+    width: 80%;
     height: 2px;
     background-color: #66802e;
     margin: 5px auto 0;
@@ -160,7 +160,7 @@ body {
 .form-container {
     position: absolute;
     top: 0;
-    height: 70%;
+    height: 100%;
     transition: all 0.6s ease-in-out;
 }
 
@@ -273,4 +273,168 @@ body {
     padding: 5px 10px;
     border-radius: 5px;
     margin: 5px 0;
+}
+
+@media (max-width: 768px) {
+    .container {
+        width: 95%;
+        min-height: 500px;
+        border-radius: 20px;
+    }
+    
+    .container form {
+        padding: 0 30px;
+    }
+    
+    .toggle-panel {
+        padding: 0 20px;
+    }
+    
+    .title-h1 {
+        width: 60%;
+    }
+    
+    .input-grid {
+        gap: 10px 15px;
+    }
+}
+
+@media (max-width: 576px) {
+    body {
+        padding: 15px;
+    }
+    
+    .container {
+        min-height: 480px;
+        border-radius: 15px;
+    }
+    
+    .form-container {
+        width: 100% !important;
+    }
+    
+    .sign-in {
+        width: 100%;
+    }
+    
+    .sign-up {
+        width: 100%;
+    }
+    
+    .toggle-container {
+        display: none; 
+    }
+    
+    .container.active .sign-in,
+    .container.active .sign-up {
+        transform: none;
+    }
+    
+    .container.active .toggle-container {
+        transform: none;
+        display: none;
+    }
+    
+    .container form {
+        padding: 0 25px;
+    }
+    
+    .title-h1 {
+        width: 80%;
+        font-size: 24px;
+    }
+    
+    .input-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .password-senha,
+    .password-confirmar {
+        grid-column: 1 / -1;
+    }
+    
+    .container button {
+        width: 100%;
+        max-width: 200px;
+    }
+    
+    .toggle-panel {
+        display: none;
+    }
+    
+    .container a {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 400px) {
+    .container {
+        min-height: 450px;
+        border-radius: 10px;
+    }
+    
+    .container form {
+        padding: 0 20px;
+    }
+    
+    .container input,
+    .container select {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+    
+    .container button {
+        padding: 8px 20px;
+        font-size: 11px;
+        min-width: 120px;
+    }
+    
+    .title-h1 {
+        font-size: 22px;
+    }
+    
+    .container span {
+        font-size: 11px;
+    }
+    
+    .password-wrapper i {
+        font-size: 14px;
+        right: 10px;
+    }
+}
+
+@media (max-height: 600px) {
+    body {
+        padding: 10px;
+    }
+    
+    .container {
+        min-height: 400px;
+    }
+    
+    .container form {
+        justify-content: flex-start;
+        padding-top: 20px;
+        overflow-y: auto;
+    }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+    .container {
+        min-height: 350px;
+    }
+    
+    .container form {
+        padding-top: 10px;
+    }
+    
+    .container input,
+    .container select {
+        padding: 6px 10px;
+    }
+    
+    .container button {
+        padding: 6px 15px;
+    }
 }
