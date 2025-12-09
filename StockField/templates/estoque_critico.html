@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Estoque Crítico - StockField</title>
+    <title>Estoque Crítico</title>
     <link rel="stylesheet" href="/static/css/profile.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -393,6 +393,7 @@
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
+            
         }
 
         .stat-card {
@@ -828,6 +829,7 @@
             font-weight: bold;
             font-size: 18px;
             margin-bottom: 5px;
+            color: #86a837;
         }
 
         .alerta-detalhes {
@@ -856,7 +858,14 @@
         .alerta-actions {
             display: flex;
             gap: 10px;
+            
         }
+
+        #editar, #entrada {
+            border-bottom: 3px solid #96bd3e;
+        }
+
+
 
         /* Responsividade */
         @media (max-width: 768px) {
@@ -1274,8 +1283,8 @@
             // Adicionar produto mais crítico se existir
             if (resumo.produto_mais_critico) {
                 container.innerHTML += `
-                    <div class="stat-card" style="border-top: 4px solid #9b59b6;">
-                        <div class="stat-number" style="color: #9b59b6;">
+                    <div class="stat-card" >
+                        <div class="stat-number" >
                             ${resumo.produto_mais_critico.necessario}
                         </div>
                         <div class="stat-label">Unidades Necessárias</div>
@@ -1317,10 +1326,10 @@
                         ${alerta.severidade === 'critico' ? 'CRÍTICO' : 'BAIXO'}
                     </div>
                     <div class="alerta-actions">
-                        <button class="btn-action btn-entrada" onclick="registrarEntrada('${alerta.uuid}')">
+                        <button id="entrada" class="btn-action btn-entrada" onclick="registrarEntrada('${alerta.uuid}')">
                             <i class="fa-solid fa-plus"></i> Entrada
                         </button>
-                        <button class="btn-action btn-editar" onclick="editarProduto('${alerta.uuid}')">
+                        <button id="editar"  class="btn-action btn-editar" onclick="editarProduto('${alerta.uuid}')">
                             <i class="fa-solid fa-edit"></i> Editar
                         </button>
                     </div>
